@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+const { Boxes } = require('../boxes/boxes');
+const { FingerJointSettings } = require('../boxes/edges');
+const { LidSettings } = require('../boxes/lids');
+const { edges } = require('../boxes/edges');
+const { _TopEdge } = require('../boxes/lids');
+const { Color } = require('../boxes/Color');
 
 class BottleStack extends Boxes {
     constructor() {

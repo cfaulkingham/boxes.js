@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+const { Boxes } = require('../boxes/boxes');
+const { FingerJointSettings } = require('../boxes/edges');
+const { LidSettings } = require('../boxes/lids');
+const { edges } = require('../boxes/edges');
+const { _TopEdge } = require('../boxes/lids');
+const { Color } = require('../boxes/Color');
 
 class BirdHouse extends Boxes {
     constructor() {
@@ -18,7 +18,7 @@ class BirdHouse extends Boxes {
         let roof = (((2 ** 0.5) * x) / 2);
         let t = this.thickness;
         let lengths = [x, h, t, roof, roof, t, h];
-        edges = /* unknown node ListComp */;
+        //edges = /* unknown node ListComp */;
         edges.append(edges[0]);
         let tw = ((x + edges[1].spacing()) + edges[-2].spacing());
         let th = ((((h + (x / 2)) + t) + edges[0].spacing()) + Math.max(edges[3].spacing(), edges[4].spacing()));
@@ -36,7 +36,7 @@ class BirdHouse extends Boxes {
 
     roof(x, h, overhang, edges, move) {
         let t = this.thickness;
-        edges = /* unknown node ListComp */;
+        //edges = /* unknown node ListComp */;
         let tw = ((((x + (2 * t)) + (2 * overhang)) + edges[1].spacing()) + edges[3].spacing());
         let th = ((((h + (2 * t)) + overhang) + edges[0].spacing()) + edges[2].spacing());
         if (this.move(tw, th, move, true)) {

@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { Lid } = require('../lids');
+const { Boxes } = require('../boxes/boxes');
+const { FingerJointSettings } = require('../boxes/edges');
+const { LidSettings } = require('./boxes/lids');
+const { edges } = require('../boxes/edges');
+const { _TopEdge } = require('../boxes/lids');
+const { Color } = require('../boxes/Color');
+const { Lid } = require('../boxes/lids');
 
 class Cutout extends Boxes {
     cutout(box, x, y, color) {
@@ -71,7 +71,7 @@ class PathCutout extends Cutout {
         box.set_source_color(color);
         ctx.translate(x, y);
         ctx.translate(...this.OFFSET);
-        let CMDS = /* unknown node Dict */;
+        //let CMDS = /* unknown node Dict */;
         for (let [command, params] of this.SEGMENTS) {
             CMDS[command](...params);
         }
@@ -116,7 +116,7 @@ class MultiPathCutout extends PathCutout {
             ctx.translate(x, y);
             ctx.scale(...this.SCALE);
             ctx.translate(...this.OFFSET);
-            let CMDS = /* unknown node Dict */;
+            //let CMDS = /* unknown node Dict */;
             for (let [command, params] of segments) {
                 CMDS[command](...params);
             }
@@ -202,7 +202,7 @@ class HexHolesCutout extends Cutout {
         ctx.translate(...this.OFFSET);
         let draw = box.regularPolygonHole;
         draw(0.0, 0.0, this.IRADIUS);
-        let cxy = /* unknown node ListComp */;
+        //let cxy = /* unknown node ListComp */;
         let r = (2.5 * this.IRADIUS);
         for (let [cx, cy] of cxy) {
             draw((r * cx), (r * cy), this.IRADIUS);
@@ -378,13 +378,13 @@ class BeeQueenTransportBox extends _TopEdge {
         this.argparser.add_argument("--ah", {action: "store", type: argparseSections, default: this.DEFAULT["ah"], help: "air hole sections bottom to top in mm"});
         this.argparser.add_argument("--ax", {action: "store", type: argparseSections, default: this.DEFAULT["ax"], help: "air hole sections left to right in %% of the box width"});
         this.argparser.add_argument("--ay", {action: "store", type: argparseSections, default: this.DEFAULT["ay"], help: "air hole sections back to front in %% of the box depth"});
-        let cutout_choices = /* unknown node ListComp */;
+        //let cutout_choices = /* unknown node ListComp */;
         let cutout_descriptions = unknown.join(/* unknown node GeneratorExp */);
-        let layers = /* unknown node ListComp */;
-        for (let [n, default] of enumerate(layers)) {
-            let layer = ((layers.length - 1) - n);
-            this.argparser.add_argument(/* unknown node JoinedStr */, {action: "store", choices: cutout_choices, default: default, help: /* unknown node JoinedStr */});
-        }
+        //let layers = /* unknown node ListComp */;
+       // for (let [n, default] of enumerate(layers)) {
+        //    let layer = ((layers.length - 1) - n);
+            //this.argparser.add_argument(/* unknown node JoinedStr */, {action: "store", choices: cutout_choices, default: default, help: /* unknown node JoinedStr */});
+        //}
     }
 
     get_cutout(cutout_name) {
@@ -479,10 +479,10 @@ class BeeQueenTransportBox extends _TopEdge {
         this.ctx.restore();
         this.rectangularWall(x, h, [b, "F", t_back, "F"], {ignore_widths: [1, 6], move: "up only"});
         if (b === "eš") {
-            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts()], move: "right", label: /* unknown node JoinedStr */});
+            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts()], move: "right"}); // label: /* unknown node JoinedStr */});
         }
         for (let layer = 1; layer < this.sh.length; layer += 1) {
-            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts(layer)], move: "right", label: /* unknown node JoinedStr */});
+            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts(layer)], move: "right"}); //label: /* unknown node JoinedStr */});
         }
         this.lid(x, y, this.top_edge);
     }
