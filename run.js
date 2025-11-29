@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { ABox } = require('./generators/abox');
+const { ABox } = require('./boxes/generators/abox');
 
 
 try {
