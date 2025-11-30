@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="105.15mm" height="144.75mm" viewBox="-10.00 -9.15 105.15 144.75" xmlns="http://www.w3.org/2000/svg">
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M 0.8500 0.8500 L NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN" stroke="rgb(0,0,0)" stroke-width="0.2" />
+    <path d="M 50.0000 121.8000 L 14.8500 121.8000 C 14.9052 121.8000 14.9500 121.7552 14.9500 121.7000 M 14.9500 121.7000 L 14.9500 125.6000 C 14.9500 125.5448 14.9052 125.5000 14.8500 125.5000 M 14.8500 125.5000 L 85.1500 125.5000 C 85.0948 125.5000 85.0500 125.5448 85.0500 125.6000 M 85.0500 125.6000 L 85.0500 121.7000 C 85.0500 121.7552 85.0948 121.8000 85.1500 121.8000 M 85.1500 121.8000 L 50.0000 121.8000" stroke="rgb(0,0,255)" stroke-width="0.2" />
+    <path d="M 0.0000 101.7000 M 0.0000 101.7000 L NaN NaN C NaN NaN NaN NaN NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN M NaN NaN L NaN NaN C NaN NaN NaN NaN NaN NaN" stroke="rgb(0,0,0)" stroke-width="0.2" />
+  </g>
+</svg>

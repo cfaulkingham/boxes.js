@@ -3,11 +3,14 @@ import { Color  } from './Color.js';
 import { Settings, OutSetEdge, Edge, FingerJointSettings  } from './edges.js';
 import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf  } from './vectors.js';
 import { NutHole, HexSizes  } from './nuthole.js';
+import { ArgParser } from './argparser.js';
+import './globals.js';
 
 class Boxes {
     constructor() {
         this.ctx = new SVGContext();
         this.edges = {};
+        this.argparser = new ArgParser();
         this.thickness = 3.0; // Default
         this.burn = 0.1;
         this.spacing = 0.5; // spacing around parts

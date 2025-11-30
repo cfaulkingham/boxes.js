@@ -27,16 +27,17 @@ class Console extends Boxes {
         let panel = Math.min(((h - hf) / Math.cos(((90 - this.angle) * Math.PI / 180))), (y / Math.cos((this.angle * Math.PI / 180))));
         let top = (y - (panel * Math.cos((this.angle * Math.PI / 180))));
         h = (hf + (panel * Math.sin((this.angle * Math.PI / 180))));
+        let borders;
         if (top > (0.1 * t)) {
-            let borders = [y, 90, hf, (90 - this.angle), panel, this.angle, top, 90, h, 90];
+            borders = [y, 90, hf, (90 - this.angle), panel, this.angle, top, 90, h, 90];
         }
         else {
             borders = [y, 90, hf, (90 - this.angle), panel, (this.angle + 90), h, 90];
         }
         if (hf < (0.01 * t)) {
         }
-        this.polygonWall(borders, {move: "right"});
-        this.polygonWall(borders, {move: "right"});
+        this.polygonWall(borders, "f", {move: "right"});
+        this.polygonWall(borders, "f", {move: "right"});
         this.polygonWalls(borders, x);
     }
 

@@ -1,0 +1,15 @@
+
+import fs from 'fs';
+import { Shoe } from '../boxes/generators/shoe.js';
+
+try {
+    const box = new Shoe();
+    box.parseArgs({});
+    box.open();
+    box.render();
+    const svg = box.close();
+    fs.writeFileSync('test/shoe.svg', svg);
+    console.log('Successfully generated SVG for Shoe!');
+} catch (e) {
+    console.error('Error generating box Shoe:', e);
+}

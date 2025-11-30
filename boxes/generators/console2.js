@@ -28,8 +28,9 @@ class Console2 extends Boxes {
         let panel = Math.min(((h - fh) / Math.cos(((90 - this.angle) * Math.PI / 180))), (y / Math.cos((this.angle * Math.PI / 180))));
         let top = (y - (panel * Math.cos((this.angle * Math.PI / 180))));
         h = (fh + (panel * Math.sin((this.angle * Math.PI / 180))));
+        let borders;
         if (top > (0.1 * t)) {
-            let borders = [y, 90, fh, (90 - this.angle), panel, this.angle, top, 90, h, 90];
+            borders = [y, 90, fh, (90 - this.angle), panel, this.angle, top, 90, h, 90];
         }
         else {
             borders = [y, 90, fh, (90 - this.angle), panel, (this.angle + 90), h, 90];
