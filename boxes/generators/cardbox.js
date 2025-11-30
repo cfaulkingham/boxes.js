@@ -125,12 +125,12 @@ class CardBox extends Boxes {
         let x = this.boxwidth;
         let y = this.boxdepth;
         let sx = this.sx;
-        let s = InsetEdgeSettings();
-        let p = InsetEdge(this, s);
+        let s = new InsetEdgeSettings();
+        let p = new InsetEdge(this, s);
         p.char = "a";
         this.addPart(p);
-        s = FingerHoleEdgeSettings();
-        p = FingerHoleEdge(this, s);
+        s = new FingerHoleEdgeSettings();
+        p = new FingerHoleEdge(this, s);
         p.char = "A";
         this.addPart(p);
         if (this.openingdirection === "right") {
