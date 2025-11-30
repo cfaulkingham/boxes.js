@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { Console2 } = require('./console2');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { Console2  } from './console2.js';
 
 class SideDoorHousing extends Console2 {
     constructor() {
@@ -60,4 +60,4 @@ class SideDoorHousing extends Console2 {
 
 }
 
-module.exports.SideDoorHousing = SideDoorHousing;
+export { SideDoorHousing };

@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('./boxes/lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { Lid } = require('../lids');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { Lid  } from '../lids.js';
 
 class Cutout extends Boxes {
     cutout(box, x, y, color) {
@@ -31,7 +31,7 @@ class Cutout extends Boxes {
 
 }
 
-module.exports.Cutout = Cutout;
+export { Cutout };
 class CircleCutout extends Cutout {
     cutout(box, x, y, color) {;
         this.ctx.save();
@@ -42,7 +42,7 @@ class CircleCutout extends Cutout {
 
 }
 
-module.exports.CircleCutout = CircleCutout;
+export { CircleCutout };
 class PolygonCutout extends Cutout {
     cutout(box, x, y, color) {;
         this.ctx.save();
@@ -64,7 +64,7 @@ class PolygonCutout extends Cutout {
 
 }
 
-module.exports.PolygonCutout = PolygonCutout;
+export { PolygonCutout };
 class PathCutout extends Cutout {
     cutout(box, x, y, color) {
         this.ctx.save();
@@ -81,7 +81,7 @@ class PathCutout extends Cutout {
 
 }
 
-module.exports.PathCutout = PathCutout;
+export { PathCutout };
 class MultiPathCutout extends PathCutout {
     constructor(w, h) {
         super();
@@ -127,31 +127,31 @@ class MultiPathCutout extends PathCutout {
 
 }
 
-module.exports.MultiPathCutout = MultiPathCutout;
+export { MultiPathCutout };
 class NoneCutout extends Cutout {
 }
 
-module.exports.NoneCutout = NoneCutout;
+export { NoneCutout };
 class NicotIncubatorCageCutout extends CircleCutout {
 }
 
-module.exports.NicotIncubatorCageCutout = NicotIncubatorCageCutout;
+export { NicotIncubatorCageCutout };
 class NicotTransportCageCutout extends PathCutout {
 }
 
-module.exports.NicotTransportCageCutout = NicotTransportCageCutout;
+export { NicotTransportCageCutout };
 class PlastmixTransportCageCutout extends PathCutout {
 }
 
-module.exports.PlastmixTransportCageCutout = PlastmixTransportCageCutout;
+export { PlastmixTransportCageCutout };
 class ChinaTransportCageCutout extends PathCutout {
 }
 
-module.exports.ChinaTransportCageCutout = ChinaTransportCageCutout;
+export { ChinaTransportCageCutout };
 class NicotHatchingCageCutout extends PathCutout {
 }
 
-module.exports.NicotHatchingCageCutout = NicotHatchingCageCutout;
+export { NicotHatchingCageCutout };
 class JZsBZsCageCutout extends Cutout {
     cutout(box, x, y, color, color2) {;
         this.ctx.save();
@@ -165,11 +165,11 @@ class JZsBZsCageCutout extends Cutout {
 
 }
 
-module.exports.JZsBZsCageCutout = JZsBZsCageCutout;
+export { JZsBZsCageCutout };
 class QueenIconCutout extends MultiPathCutout {
 }
 
-module.exports.QueenIconCutout = QueenIconCutout;
+export { QueenIconCutout };
 class AirHolesForNicotTransportCageCutout extends Cutout {
     cutout(box, x, y, color) {
         let aw = box.aw;
@@ -189,11 +189,11 @@ class AirHolesForNicotTransportCageCutout extends Cutout {
 
 }
 
-module.exports.AirHolesForNicotTransportCageCutout = AirHolesForNicotTransportCageCutout;
+export { AirHolesForNicotTransportCageCutout };
 class AirHolesForChinaTransportCageCutout extends AirHolesForNicotTransportCageCutout {
 }
 
-module.exports.AirHolesForChinaTransportCageCutout = AirHolesForChinaTransportCageCutout;
+export { AirHolesForChinaTransportCageCutout };
 class HexHolesCutout extends Cutout {
     cutout(box, x, y, color) {
         this.ctx.save();
@@ -226,7 +226,7 @@ class HexHolesCutout extends Cutout {
 
 }
 
-module.exports.HexHolesCutout = HexHolesCutout;
+export { HexHolesCutout };
 class GiantHexHoleCutout extends Cutout {
     constructor(number, w, h) {
         super();
@@ -283,23 +283,23 @@ class GiantHexHoleCutout extends Cutout {
 
 }
 
-module.exports.GiantHexHoleCutout = GiantHexHoleCutout;
+export { GiantHexHoleCutout };
 class AirHolesForNicotIncubatorCageCutout extends HexHolesCutout {
 }
 
-module.exports.AirHolesForNicotIncubatorCageCutout = AirHolesForNicotIncubatorCageCutout;
+export { AirHolesForNicotIncubatorCageCutout };
 class AirHolesCover extends HexHolesCutout {
 }
 
-module.exports.AirHolesCover = AirHolesCover;
+export { AirHolesCover };
 class AirHolesForNicotHatchingCageCutout extends HexHolesCutout {
 }
 
-module.exports.AirHolesForNicotHatchingCageCutout = AirHolesForNicotHatchingCageCutout;
+export { AirHolesForNicotHatchingCageCutout };
 class BeeQueenTransportBoxLidSettings extends LidSettings {
 }
 
-module.exports.BeeQueenTransportBoxLidSettings = BeeQueenTransportBoxLidSettings;
+export { BeeQueenTransportBoxLidSettings };
 class BeeQueenTransportBoxLid extends Lid {
     constructor() {
         super();
@@ -358,7 +358,7 @@ class BeeQueenTransportBoxLid extends Lid {
 
 }
 
-module.exports.BeeQueenTransportBoxLid = BeeQueenTransportBoxLid;
+export { BeeQueenTransportBoxLid };
 class BeeQueenTransportBox extends _TopEdge {
     _buildObjects() {
         super._buildObjects();
@@ -489,4 +489,4 @@ class BeeQueenTransportBox extends _TopEdge {
 
 }
 
-module.exports.BeeQueenTransportBox = BeeQueenTransportBox;
+export { BeeQueenTransportBox };

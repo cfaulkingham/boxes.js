@@ -1,14 +1,14 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class RoundedTriangleSettings extends Boxes {
 }
 
-module.exports.RoundedTriangleSettings = RoundedTriangleSettings;
+export { RoundedTriangleSettings };
 class RoundedTriangle extends Boxes {
     __call__(length) {
         let angle = this.settings.angle;
@@ -36,7 +36,7 @@ class RoundedTriangle extends Boxes {
 
 }
 
-module.exports.RoundedTriangle = RoundedTriangle;
+export { RoundedTriangle };
 class Lamp extends Boxes {
     constructor() {
         super();
@@ -87,4 +87,4 @@ class Lamp extends Boxes {
 
 }
 
-module.exports.Lamp = Lamp;
+export { Lamp };

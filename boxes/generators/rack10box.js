@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { Rack19Box } = require('./rack19box');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { Rack19Box  } from './rack19box.js';
 
 class Rack10Box extends Rack19Box {
     render() {
@@ -13,4 +13,4 @@ class Rack10Box extends Rack19Box {
 
 }
 
-module.exports.Rack10Box = Rack10Box;
+export { Rack10Box };

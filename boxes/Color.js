@@ -15,4 +15,4 @@ class Color {
     static ETCHING_DEEP = Color.CYAN;
 }
 
-module.exports = { Color };
+export { Color  };

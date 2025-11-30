@@ -1,14 +1,14 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class InsetEdgeSettings extends Boxes {
 }
 
-module.exports.InsetEdgeSettings = InsetEdgeSettings;
+export { InsetEdgeSettings };
 class InsetEdge extends Boxes {
     __call__(length) {
         let t = this.settings.thickness;
@@ -23,11 +23,11 @@ class InsetEdge extends Boxes {
 
 }
 
-module.exports.InsetEdge = InsetEdge;
+export { InsetEdge };
 class FingerHoleEdgeSettings extends Boxes {
 }
 
-module.exports.FingerHoleEdgeSettings = FingerHoleEdgeSettings;
+export { FingerHoleEdgeSettings };
 class FingerHoleEdge extends Boxes {
     __call__(length) {
         let depth = (this.settings.fingerholedepth - 10);
@@ -42,7 +42,7 @@ class FingerHoleEdge extends Boxes {
 
 }
 
-module.exports.FingerHoleEdge = FingerHoleEdge;
+export { FingerHoleEdge };
 class CardBox extends Boxes {
     constructor() {
         super();
@@ -211,4 +211,4 @@ class CardBox extends Boxes {
 
 }
 
-module.exports.CardBox = CardBox;
+export { CardBox };

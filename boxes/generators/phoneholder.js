@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class PhoneHolder extends Boxes {
     constructor() {
@@ -82,7 +82,7 @@ class PhoneHolder extends Boxes {
 
 }
 
-module.exports.PhoneHolder = PhoneHolder;
+export { PhoneHolder };
 class BottomEdge extends Boxes {
     constructor(boxes, support_start_height, support_spacing) {
         super();
@@ -101,7 +101,7 @@ class BottomEdge extends Boxes {
 
 }
 
-module.exports.BottomEdge = BottomEdge;
+export { BottomEdge };
 class SideEdge extends Boxes {
     constructor(boxes, tab_start, tab_length, reverse) {
         super();
@@ -129,7 +129,7 @@ class SideEdge extends Boxes {
 
 }
 
-module.exports.SideEdge = SideEdge;
+export { SideEdge };
 class TabbedEdge extends Boxes {
     constructor(boxes, tab_start, tab_length, tab_depth, reverse) {
         super();
@@ -159,4 +159,4 @@ class TabbedEdge extends Boxes {
 
 }
 
-module.exports.TabbedEdge = TabbedEdge;
+export { TabbedEdge };

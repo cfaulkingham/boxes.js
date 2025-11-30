@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class DinRailEdge extends Boxes {
     constructor(boxes, settings, width, offset) {
@@ -28,7 +28,7 @@ class DinRailEdge extends Boxes {
 
 }
 
-module.exports.DinRailEdge = DinRailEdge;
+export { DinRailEdge };
 class DinRailBox extends Boxes {
     latch(l, move) {
         let t = this.thickness;
@@ -102,4 +102,4 @@ class DinRailBox extends Boxes {
 
 }
 
-module.exports.DinRailBox = DinRailBox;
+export { DinRailBox };

@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class LegEdge extends Boxes {
     __call__(l) {
@@ -14,7 +14,7 @@ class LegEdge extends Boxes {
 
 }
 
-module.exports.LegEdge = LegEdge;
+export { LegEdge };
 class OttoLegs extends Boxes {
     constructor() {
         super();
@@ -115,4 +115,4 @@ class OttoLegs extends Boxes {
 
 }
 
-module.exports.OttoLegs = OttoLegs;
+export { OttoLegs };

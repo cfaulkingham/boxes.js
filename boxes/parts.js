@@ -3,4 +3,4 @@ class Parts {
         this.boxes = boxes;
     }
 }
-module.exports = { Parts };
+export { Parts };
