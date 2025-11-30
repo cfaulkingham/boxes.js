@@ -1,5 +1,5 @@
-const fs = require('fs');
-const { ABox } = require('./boxes/generators/abox');
+import fs from 'fs';
+import { ABox } from './boxes/generators/abox.js';
 
 
 try {
