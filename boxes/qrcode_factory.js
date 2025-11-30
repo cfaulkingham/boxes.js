@@ -1,4 +1,4 @@
 class BoxesQrCodeFactory {
     constructor() {}
 }
-module.exports = { BoxesQrCodeFactory };
+export { BoxesQrCodeFactory  };

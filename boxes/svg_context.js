@@ -1,4 +1,4 @@
-const { Matrix } = require('./matrix');
+import { Matrix  } from './matrix.js';
 
 class SVGContext {
     constructor() {
@@ -252,4 +252,4 @@ class SVGContext {
     }
 }
 
-module.exports = { SVGContext };
+export { SVGContext  };

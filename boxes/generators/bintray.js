@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class BinFrontEdge extends Boxes {
     __call__(length) {
@@ -35,11 +35,11 @@ class BinFrontEdge extends Boxes {
 
 }
 
-module.exports.BinFrontEdge = BinFrontEdge;
+export { BinFrontEdge };
 class BinFrontSideEdge extends BinFrontEdge {
 }
 
-module.exports.BinFrontSideEdge = BinFrontSideEdge;
+export { BinFrontSideEdge };
 class BinTray extends Boxes {
     constructor() {
         super();
@@ -156,4 +156,4 @@ class BinTray extends Boxes {
 
 }
 
-module.exports.BinTray = BinTray;
+export { BinTray };

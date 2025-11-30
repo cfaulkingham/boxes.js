@@ -1,14 +1,14 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class FingerHoleEdgeSettings extends Boxes {
 }
 
-module.exports.FingerHoleEdgeSettings = FingerHoleEdgeSettings;
+export { FingerHoleEdgeSettings };
 class FingerHoleEdge extends Boxes {
     __call__(length) {
         let width = Math.min((this.settings.absolute_width + (length * this.settings.relative_width)), length);
@@ -24,7 +24,7 @@ class FingerHoleEdge extends Boxes {
 
 }
 
-module.exports.FingerHoleEdge = FingerHoleEdge;
+export { FingerHoleEdge };
 class TypeTray extends _TopEdge {
     constructor() {
         super();
@@ -274,4 +274,4 @@ class TypeTray extends _TopEdge {
 
 }
 
-module.exports.TypeTray = TypeTray;
+export { TypeTray };

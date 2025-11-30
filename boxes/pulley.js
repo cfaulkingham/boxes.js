@@ -3,4 +3,4 @@ class Pulley {
         this.boxes = boxes;
     }
 }
-module.exports = { Pulley };
+export { Pulley  };

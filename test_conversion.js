@@ -1,4 +1,4 @@
-const { Boxes } = require('./boxes/boxes');
+import { Boxes  } from './boxes/boxes.js';
 
 class TestBox extends Boxes {
     render() {

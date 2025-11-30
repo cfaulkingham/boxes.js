@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { TypeTray } = require('./typetray');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { TypeTray  } from './typetray.js';
 
 class CompartmentBox extends TypeTray {
     constructor() {
@@ -157,4 +157,4 @@ class CompartmentBox extends TypeTray {
 
 }
 
-module.exports.CompartmentBox = CompartmentBox;
+export { CompartmentBox };

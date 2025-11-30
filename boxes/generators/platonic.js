@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { FingerJointEdge } = require('../edges');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { FingerJointEdge  } from '../edges.js';
 
 class UnevenFingerJointEdge extends FingerJointEdge {
     __call__(length, bedBolts, bedBoltSettings) {
@@ -57,11 +57,11 @@ class UnevenFingerJointEdge extends FingerJointEdge {
 
 }
 
-module.exports.UnevenFingerJointEdge = UnevenFingerJointEdge;
+export { UnevenFingerJointEdge };
 class UnevenFingerJointEdgeCounterPart extends UnevenFingerJointEdge {
 }
 
-module.exports.UnevenFingerJointEdgeCounterPart = UnevenFingerJointEdgeCounterPart;
+export { UnevenFingerJointEdgeCounterPart };
 class Platonic extends Boxes {
     constructor() {
         super();
@@ -87,4 +87,4 @@ class Platonic extends Boxes {
 
 }
 
-module.exports.Platonic = Platonic;
+export { Platonic };

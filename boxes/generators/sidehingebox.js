@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class SideHingeBox extends Boxes {
     constructor() {
@@ -115,7 +115,7 @@ class SideHingeBox extends Boxes {
 
 }
 
-module.exports.SideHingeBox = SideHingeBox;
+export { SideHingeBox };
 class Inner2SidesEdge extends Boxes {
     constructor(boxes, length, height, hinge_center, hinge_radius, fingered_h, reverse) {
         super();
@@ -163,7 +163,7 @@ class Inner2SidesEdge extends Boxes {
 
 }
 
-module.exports.Inner2SidesEdge = Inner2SidesEdge;
+export { Inner2SidesEdge };
 class Outer2SidesEdge extends Boxes {
     constructor(boxes, length, height, hinge_center, hinge_radius, fingered_h, reverse) {
         super();
@@ -208,4 +208,4 @@ class Outer2SidesEdge extends Boxes {
 
 }
 
-module.exports.Outer2SidesEdge = Outer2SidesEdge;
+export { Outer2SidesEdge };

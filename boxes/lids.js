@@ -1,7 +1,7 @@
-const { Boxes } = require('./boxes');
-const { FingerJointSettings, Settings } = require('./edges');
-const { edges } = require('./edges');
-const { Color } = require('./Color');
+import { Boxes  } from './boxes_base.js';
+import { FingerJointSettings, Settings  } from './edges.js';
+import { edges  } from './edges.js';
+import { Color  } from './Color.js';
 
 class LidSettings extends Settings {
     static absolute_params = {
@@ -233,4 +233,4 @@ class _TopEdge extends Boxes {
     }
 }
 
-module.exports = { LidSettings, Lid, _TopEdge };
+export { LidSettings, Lid, _TopEdge  };

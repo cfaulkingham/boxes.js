@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class MotorEdge extends Boxes {
     __call__(l) {
@@ -12,7 +12,7 @@ class MotorEdge extends Boxes {
 
 }
 
-module.exports.MotorEdge = MotorEdge;
+export { MotorEdge };
 class OutsetEdge extends Boxes {
     startwidth() {
         return 20.0;
@@ -20,7 +20,7 @@ class OutsetEdge extends Boxes {
 
 }
 
-module.exports.OutsetEdge = OutsetEdge;
+export { OutsetEdge };
 class HangerEdge extends Boxes {
     margin() {
         return 40.0;
@@ -34,7 +34,7 @@ class HangerEdge extends Boxes {
 
 }
 
-module.exports.HangerEdge = HangerEdge;
+export { HangerEdge };
 class RollerEdge extends Boxes {
     margin() {
         return 20.0;
@@ -47,7 +47,7 @@ class RollerEdge extends Boxes {
 
 }
 
-module.exports.RollerEdge = RollerEdge;
+export { RollerEdge };
 class RollerEdge2 extends Boxes {
     margin() {
         return this.thickness;
@@ -63,7 +63,7 @@ class RollerEdge2 extends Boxes {
 
 }
 
-module.exports.RollerEdge2 = RollerEdge2;
+export { RollerEdge2 };
 class Rotary extends Boxes {
     constructor() {
         super();
@@ -244,4 +244,4 @@ class Rotary extends Boxes {
 
 }
 
-module.exports.Rotary = Rotary;
+export { Rotary };

@@ -1,4 +1,4 @@
-const { Color } = require('./Color');
+import { Color  } from './Color.js';
 
 const HexSizes = {
     "M1.6" : [3.2,  1.3,  1.6],
@@ -96,4 +96,4 @@ class NutHole {
     }
 }
 
-module.exports = { NutHole, HexSizes };
+export { NutHole, HexSizes  };

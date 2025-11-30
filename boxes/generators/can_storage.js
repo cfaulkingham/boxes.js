@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class FrontEdge extends Boxes {
     __call__(length) {
@@ -36,7 +36,7 @@ class FrontEdge extends Boxes {
 
 }
 
-module.exports.FrontEdge = FrontEdge;
+export { FrontEdge };
 class TopChuteEdge extends Boxes {
     __call__(length) {
         this.edge(((0.2 * length) - this.thickness));
@@ -52,7 +52,7 @@ class TopChuteEdge extends Boxes {
 
 }
 
-module.exports.TopChuteEdge = TopChuteEdge;
+export { TopChuteEdge };
 class BarrierEdge extends Boxes {
     __call__(length) {
         this.edge((0.2 * length));
@@ -70,7 +70,7 @@ class BarrierEdge extends Boxes {
 
 }
 
-module.exports.BarrierEdge = BarrierEdge;
+export { BarrierEdge };
 class CanStorage extends Boxes {
     constructor() {
         super();
@@ -270,4 +270,4 @@ side stacking foot for lateral stabilization.", 3, 0, {fontsize: 4, color: Color
 
 }
 
-module.exports.CanStorage = CanStorage;
+export { CanStorage };

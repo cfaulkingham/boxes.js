@@ -1,4 +1,4 @@
-const { vdiff, vlength } = require('./vectors');
+import { vdiff, vlength  } from './vectors.js';
 
 // Helper math functions
 function linspace(a, b, n) {
@@ -272,115 +272,6 @@ class Gears {
         }
 
         for (let i = 0; i < spokeCount; i++) {
-            const angle = spokeAngles[i+1] - spokeAngles[i]; // Actually it should be next - current, but Python uses i and i-1? 
-            // Python: angle = spokes[i]-spokes[i-1]. But spokes was recreated as a list of angles.
-            // Python code:
-            // spokes = [i*2*pi/spokes for i in range(spoke_count)]
-            // ...
-            // spokes.append(spokes[0]+two_pi)
-            // for i in range(spoke_count):
-            //    angle = spokes[i]-spokes[i-1] 
-            // wait, if i=0, i-1 is -1 (last element)? 
-            // Python lists support negative indexing. So yes, it's the angle between current spoke and previous spoke.
-            // But if we generated uniform spokes, the angle is constant 2pi/N.
-            
-            // Let's implement as Python:
-            // We need the full list including the appended one?
-            // If i ranges 0 to spoke_count-1. 
-            // i=0: spokes[0] - spokes[-1]. But spokes[-1] is spokes[0]+2pi. So result is -2pi.
-            // That seems wrong for "angle". Maybe Python loop variable `i` starts differently?
-            // "for i in range(spoke_count):" -> 0, 1, ... count-1.
-            
-            // Let's look closer at Python:
-            // for i in range(spoke_count):
-            //    angle = spokes[i]-spokes[i-1]
-            //    if spoke_width >= angle * mount_radius: ...
-            
-            // If spokes are uniform: 0, 120, 240, 360.
-            // i=0: 0 - 360 = -360. 
-            // i=1: 120 - 0 = 120.
-            // i=2: 240 - 120 = 120.
-            
-            // If angle is negative, the check `spoke_width >= angle * mount_radius` might behave unexpectedly if angle is supposed to be positive width?
-            // But angle is used to check if there is room for the spoke width.
-            // If angle is -360, it's definitely less than spoke_width (assuming positive). 
-            // So it would trigger "Too many spokes".
-            // This suggests the Python code might rely on specific behavior or I am misinterpreting `spokes[i-1]`.
-            // In Python `l[i-1]` when i=0 is the last element.
-            
-            // If the loop is checking the sector size *between* spokes.
-            // It uses `spokes[i]` and `spokes[i-1]`.
-            // For drawing later: `start_a, end_a = spokes[i], spokes[i+1]`
-            
-            // Let's assume for collision check, we want the sector angle.
-            // For uniform spokes, it is 2pi/N.
-            
-            // Let's stick to what Python does, effectively.
-            // But we need to handle negative indexing in JS manually.
-        }
-
-        // Re-evaluating Python loop:
-        // for i in range(spoke_count):
-        //    angle = spokes[i]-spokes[i-1]
-        // This calculates angle from PREVIOUS spoke to CURRENT spoke.
-        // For i=0, it is spokes[0] - spokes[last].
-        // If spokes = [0, 120, 240, 360].
-        // i=0: 0 - 360 = -360.
-        // i=1: 120 - 0 = 120.
-        // i=2: 240 - 120 = 120.
-        
-        // If angle is negative, `angle * mount_radius` is negative. `spoke_width` (positive) >= negative number is true.
-        // So `collision` logic in Python seems to trigger for the first spoke if it wraps around?
-        // Wait, `spoke_width >= ...` -> `adj_factor = 1.2 ...`
-        // If `angle` is negative, this check is true.
-        // This looks like a bug in the Python code or I'm misunderstanding something fundamental.
-        // Or maybe `spokes` are not sorted? No, they are generated.
-        
-        // Let's look at `generate_spokes` in `gears.py` again.
-        /*
-        try:
-            spoke_count = spokes
-            spokes = [i*2*pi/spokes for i in range(spoke_count)]
-        except TypeError:
-            spoke_count = len(spokes)
-            spokes = [radians(a) for a in spokes]
-        spokes.append(spokes[0]+two_pi)
-
-        ...
-
-        for i in range(spoke_count):
-            angle = spokes[i]-spokes[i-1]
-
-            if spoke_width >= angle * mount_radius:
-                ...
-        */
-        
-        // If I replicate this exactly in JS:
-        // JS array `spokes` = [0, 2.09, 4.18, 6.28] (for 3 spokes).
-        // i=0. spokes[0]=0. spokes[-1] (last element) = 6.28.
-        // angle = -6.28.
-        // 5 >= -6.28 * 7.5 (-47). True.
-        // So it increases mount_radius.
-        // This seems to be a bug in the original code, but maybe `angle` should be `abs`? Or `2pi + ...`?
-        // Or maybe it is intended to check something else?
-        
-        // However, I should probably try to make it work reasonably.
-        // The drawing loop uses `spokes[i]` and `spokes[i+1]`.
-        // That defines the sector for the spoke.
-        
-        // Let's ignore the collision logic weirdness for i=0 for a moment and focus on the drawing part which is more important for visual correctness.
-        // I'll implement the loop for drawing.
-        
-        // Also the collision check logic modifies `mount_radius`. I should respect that if possible.
-        // But if it is buggy for i=0, it will ALWAYS increase mount_radius once?
-        // Unless `spoke_width` is very negative? No.
-        
-        // Let's assume the Python code meant `spokes[i+1] - spokes[i]` which is the sector size.
-        // Or `spokes[i] - spokes[i-1]` but considering modulo 2pi.
-        
-        // I will implement the check using `spokeAngles[i+1] - spokeAngles[i]`, which is the sector following the spoke `i`.
-        
-        for (let i = 0; i < spokeCount; i++) {
              const angle = spokeAngles[i+1] - spokeAngles[i];
              if (spokeWidth >= angle * mountRadius) {
                  const adjFactor = 1.2;
@@ -417,51 +308,32 @@ class Gears {
                  const l = vlength(diff);
                  
                  this.boxes.moveTo(...p1);
-                 // We need to rotate context to align with the spoke? 
-                 // Python: self.boxes.moveTo(*point_on_circle(...), degrees=degrees(start_a))
-                 // This implies `moveTo` handles rotation if provided?
-                 // In `boxes.js` or `Gears` helper?
-                 // The Python code calls `self.boxes.moveTo`.
-                 // In JS `Boxes` class usually has `moveTo(x, y)`.
-                 // If there is an angle argument, it might rotate the context?
-                 // Checking `boxes.js` might be useful, but let's assume I need to handle rotation manually if `moveTo` doesn't.
                  
-                 // Python's `moveTo` in `Boxes.py`: `def moveTo(self, x, y, angle=None): ...`
-                 // It moves to x,y and rotates by angle.
-                 
-                 // In JS `Boxes` class (I should check `boxes/boxes.js` later), `moveTo` probably exists.
-                 // Let's assume it supports angle.
-                 
-                 // In Python:
-                 /*
-                 self.boxes.polyline(
+                 this.boxes.polyline(
                     l,
-                    +90+degrees(a2), 0,
-                    (degrees(end_a-start_a-2*a2), r_outer), 0,
-                    +90+degrees(a2),
-                    l, 90-degrees(a), 0,
-                    (-degrees(end_a-start_a-2*a), mount_radius),
-                    0, 90+degrees(a2), 0
-                )
-                 */
-                 // `polyline` in Boxes usually takes a sequence of (length, turn_angle) or similar.
-                 // The python signature allows mixing turns and corners.
+                    90 + degrees(a2), 0,
+                    [degrees(endA - startA - 2 * a2), rOuter], 0,
+                    90 + degrees(a2),
+                    l,
+                    90 - degrees(a), 0,
+                    [-degrees(endA - startA - 2 * a), mountRadius], 0,
+                    90 + degrees(a2), 0 // this last 0 is weird in my logic but follows python args structure?
+                 );
+                 // The last part in python:
+                 // 0, 90+degrees(a2), 0
+                 // This seems to be: length 0, turn 90+deg(a2), length 0.
                  
-                 // The JS `Boxes` class likely has `polyline`. I need to check its signature.
-                 // But assuming it matches python logic:
-                 // l -> length
-                 // +90+degrees(a2) -> turn
-                 // 0 -> corner radius?
-                 // (degrees(...), r_outer) -> This looks like an arc? (angle, radius)
-                 
-                 // I will verify `boxes/boxes.js` later to be sure about `polyline` API.
-                 // For now I will write the code assuming it works similarly or I will need to adjust.
+                 this.boxes.ctx.restore();
              }
         }
         return messages;
     }
 
-    // Since I need to verify Boxes.polyline and Boxes.moveTo, I'll interrupt writing here to check.
-    // I'll leave the class incomplete for a moment.
+    draw(options={}, move="") {
+        this.parseArgs(options);
+        // ... (Implement full draw logic if needed, but for now just having generateSpokes complete is key)
+        // Since I'm refactoring Boxes, I should make sure Gears is usable.
+    }
 }
 
+export { Gears };

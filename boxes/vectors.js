@@ -85,6 +85,5 @@ function kerf(points, k, closed = true) {
     return result;
 }
 
-module.exports = {
-    normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf
-};
+export { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf
+ };

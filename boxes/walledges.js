@@ -1,7 +1,7 @@
-const { Boxes } = require('./boxes');
-const { FingerJointSettings, BaseEdge, Settings } = require('./edges');
-const { LidSettings } = require('./lids');
-const { edges } = require('./edges');
+import { Boxes  } from './boxes.js';
+import { FingerJointSettings, BaseEdge, Settings  } from './edges.js';
+import { LidSettings  } from './lids.js';
+import { edges  } from './edges.js';
 
 class _WallMountedBox extends Boxes {
     constructor() {
@@ -52,7 +52,7 @@ class _WallMountedBox extends Boxes {
 
 }
 
-module.exports._WallMountedBox = _WallMountedBox;
+export { _WallMountedBox };
 
 class WallEdge extends BaseEdge {
     lengths(length) {
@@ -86,7 +86,7 @@ class WallEdge extends BaseEdge {
     }
 }
 
-module.exports.WallEdge = WallEdge;
+export { WallEdge };
 
 class WallJoinedEdge extends WallEdge {
     _joint(length) {
@@ -101,7 +101,7 @@ class WallJoinedEdge extends WallEdge {
     }
 }
 
-module.exports.WallJoinedEdge = WallJoinedEdge;
+export { WallJoinedEdge };
 
 class WallBackEdge extends WallEdge {
     _section(nr, length) {
@@ -120,7 +120,7 @@ class WallBackEdge extends WallEdge {
     }
 }
 
-module.exports.WallBackEdge = WallBackEdge;
+export { WallBackEdge };
 
 class WallHoles extends WallEdge {
     _section(nr, length) {
@@ -146,7 +146,7 @@ class WallHoles extends WallEdge {
     }
 }
 
-module.exports.WallHoles = WallHoles;
+export { WallHoles };
 
 class WallHoleEdge extends WallHoles {
     constructor(boxes, wallHoles) {
@@ -174,7 +174,7 @@ class WallHoleEdge extends WallHoles {
     }
 }
 
-module.exports.WallHoleEdge = WallHoleEdge;
+export { WallHoleEdge };
 
 class WallSettings extends Settings {
     edgeObjects(boxes, chars, add) {
@@ -195,7 +195,7 @@ class WallSettings extends Settings {
     }
 }
 
-module.exports.WallSettings = WallSettings;
+export { WallSettings };
 
 class SlatWallEdge extends WallEdge {
     lengths(length) {
@@ -212,43 +212,43 @@ class SlatWallEdge extends WallEdge {
     }
 }
 
-module.exports.SlatWallEdge = SlatWallEdge;
+export { SlatWallEdge };
 
 class SlatWallSettings extends WallSettings {
 }
 SlatWallSettings.prototype.base_class = SlatWallEdge; // Set base class
 
-module.exports.SlatWallSettings = SlatWallSettings;
+export { SlatWallSettings };
 
 class DinRailEdge extends WallEdge {
     // ...
 }
-module.exports.DinRailEdge = DinRailEdge;
+export { DinRailEdge };
 
 class DinRailSettings extends WallSettings {
 }
 DinRailSettings.prototype.base_class = DinRailEdge;
 
-module.exports.DinRailSettings = DinRailSettings;
+export { DinRailSettings };
 
 class FrenchCleatEdge extends WallEdge {
     // ...
 }
-module.exports.FrenchCleatEdge = FrenchCleatEdge;
+export { FrenchCleatEdge };
 
 class FrenchCleatSettings extends WallSettings {
 }
 FrenchCleatSettings.prototype.base_class = FrenchCleatEdge;
 
-module.exports.FrenchCleatSettings = FrenchCleatSettings;
+export { FrenchCleatSettings };
 
 class SkadisEdge extends WallEdge {
     // ...
 }
-module.exports.SkadisEdge = SkadisEdge;
+export { SkadisEdge };
 
 class SkadisSettings extends WallSettings {
 }
 SkadisSettings.prototype.base_class = SkadisEdge;
 
-module.exports.SkadisSettings = SkadisSettings;
+export { SkadisSettings };

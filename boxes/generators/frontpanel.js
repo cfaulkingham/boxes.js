@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 const str_to_bool = (s) => {
     return ["true", "1", "t", "y", "yes", "yeah", "yup", "certainly", "uh-huh"].includes(s.lower());
@@ -124,4 +124,4 @@ nema 20 20 17
 
 }
 
-module.exports.FrontPanel = FrontPanel;
+export { FrontPanel };

@@ -4,4 +4,4 @@ class Formats {
     getSurface(format) { return [null, null]; } // Mock
     convert(data, format) { return data; }
 }
-module.exports = { Formats };
+export { Formats  };

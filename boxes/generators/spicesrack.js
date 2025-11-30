@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class FrontEdge extends Boxes {
     __call__(length) {
@@ -26,7 +26,7 @@ class FrontEdge extends Boxes {
 
 }
 
-module.exports.FrontEdge = FrontEdge;
+export { FrontEdge };
 class SpicesRack extends Boxes {
     constructor() {
         super();
@@ -139,4 +139,4 @@ class SpicesRack extends Boxes {
 
 }
 
-module.exports.SpicesRack = SpicesRack;
+export { SpicesRack };

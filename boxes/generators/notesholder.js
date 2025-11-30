@@ -1,11 +1,11 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { CompoundEdge } = require('../edges');
-const { Edge } = require('../edges');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { CompoundEdge  } from '../edges.js';
+import { Edge  } from '../edges.js';
 
 class USlotEdge extends Edge {
     constructor(boxes, settings, edge) {
@@ -35,7 +35,7 @@ class USlotEdge extends Edge {
 
 }
 
-module.exports.USlotEdge = USlotEdge;
+export { USlotEdge };
 class HalfStackableEdge extends Boxes {
     __call__(length) {
         let s = this.settings;
@@ -57,7 +57,7 @@ class HalfStackableEdge extends Boxes {
 
 }
 
-module.exports.HalfStackableEdge = HalfStackableEdge;
+export { HalfStackableEdge };
 class NotesHolder extends Boxes {
     constructor() {
         super();
@@ -142,4 +142,4 @@ class NotesHolder extends Boxes {
 
 }
 
-module.exports.NotesHolder = NotesHolder;
+export { NotesHolder };

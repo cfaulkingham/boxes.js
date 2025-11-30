@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { _WallMountedBox } = require('../walledges');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { _WallMountedBox  } from '../walledges.js';
 
 class WallTypeTray extends _WallMountedBox {
     constructor() {
@@ -95,4 +95,4 @@ class WallTypeTray extends _WallMountedBox {
 
 }
 
-module.exports.WallTypeTray = WallTypeTray;
+export { WallTypeTray };

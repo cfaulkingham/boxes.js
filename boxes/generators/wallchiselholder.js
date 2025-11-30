@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { _WallMountedBox } = require('../walledges');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { _WallMountedBox  } from '../walledges.js';
 
 class FrontEdge extends Boxes {
     __call__(length) {
@@ -21,7 +21,7 @@ class FrontEdge extends Boxes {
 
 }
 
-module.exports.FrontEdge = FrontEdge;
+export { FrontEdge };
 class WallChiselHolder extends _WallMountedBox {
     constructor() {
         super();
@@ -102,4 +102,4 @@ class WallChiselHolder extends _WallMountedBox {
 
 }
 
-module.exports.WallChiselHolder = WallChiselHolder;
+export { WallChiselHolder };

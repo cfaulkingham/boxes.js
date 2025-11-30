@@ -1,10 +1,10 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { Bolts } = require('../edges');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { Bolts  } from '../edges.js';
 
 class UniversalBox extends _TopEdge {
     constructor() {
@@ -86,4 +86,4 @@ class UniversalBox extends _TopEdge {
 
 }
 
-module.exports.UniversalBox = UniversalBox;
+export { UniversalBox };

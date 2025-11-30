@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class SlotEdge extends Boxes {
     __call__(length) {
@@ -35,7 +35,7 @@ class SlotEdge extends Boxes {
 
 }
 
-module.exports.SlotEdge = SlotEdge;
+export { SlotEdge };
 class RegularStarBox extends Boxes {
     constructor() {
         super();
@@ -85,4 +85,4 @@ class RegularStarBox extends Boxes {
 
 }
 
-module.exports.RegularStarBox = RegularStarBox;
+export { RegularStarBox };

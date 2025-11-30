@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class ShadyEdge extends Boxes {
     __call__(length) {
@@ -27,7 +27,7 @@ class ShadyEdge extends Boxes {
 
 }
 
-module.exports.ShadyEdge = ShadyEdge;
+export { ShadyEdge };
 class TrafficLight extends Boxes {
     constructor() {
         super();
@@ -181,4 +181,4 @@ class TrafficLight extends Boxes {
 
 }
 
-module.exports.TrafficLight = TrafficLight;
+export { TrafficLight };

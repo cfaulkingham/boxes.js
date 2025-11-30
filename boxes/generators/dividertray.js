@@ -1,23 +1,23 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
-const { dict } = require('./dict');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
+import { dict  } from './dict.js';
 
 class NotchSettings extends Boxes {
 }
 
-module.exports.NotchSettings = NotchSettings;
+export { NotchSettings };
 class SlotSettings extends Boxes {
 }
 
-module.exports.SlotSettings = SlotSettings;
+export { SlotSettings };
 class DividerSettings extends Boxes {
 }
 
-module.exports.DividerSettings = DividerSettings;
+export { DividerSettings };
 class DividerTray extends Boxes {
     constructor() {
         super();
@@ -148,7 +148,7 @@ class DividerTray extends Boxes {
 
 }
 
-module.exports.DividerTray = DividerTray;
+export { DividerTray };
 class SlottedEdgeDescriptions extends Boxes {
     constructor() {
         super();
@@ -181,7 +181,7 @@ class SlottedEdgeDescriptions extends Boxes {
 
 }
 
-module.exports.SlottedEdgeDescriptions = SlottedEdgeDescriptions;
+export { SlottedEdgeDescriptions };
 class StraightEdgeDescription extends Boxes {
     constructor(asked_length, round_edge_compensation, outside_ratio, angle_compensation) {
         super();
@@ -205,7 +205,7 @@ class StraightEdgeDescription extends Boxes {
 
 }
 
-module.exports.StraightEdgeDescription = StraightEdgeDescription;
+export { StraightEdgeDescription };
 class Memoizer extends dict {
     constructor(computation) {
         super();
@@ -218,7 +218,7 @@ class Memoizer extends dict {
 
 }
 
-module.exports.Memoizer = Memoizer;
+export { Memoizer };
 class SlotDescription extends Boxes {
     constructor(width, depth, angle, radius, start_radius, end_radius) {
         super();
@@ -274,7 +274,7 @@ class SlotDescription extends Boxes {
 
 }
 
-module.exports.SlotDescription = SlotDescription;
+export { SlotDescription };
 class SlotDescriptionsGenerator extends Boxes {
     generate_all_same_angles(sections, thickness, extra_slack, depth, height, angle, radius) {
         let width = (thickness + extra_slack);
@@ -304,7 +304,7 @@ class SlotDescriptionsGenerator extends Boxes {
 
 }
 
-module.exports.SlotDescriptionsGenerator = SlotDescriptionsGenerator;
+export { SlotDescriptionsGenerator };
 class DividerNotchesEdge extends Boxes {
     constructor(boxes, sx) {
         super();
@@ -337,7 +337,7 @@ class DividerNotchesEdge extends Boxes {
 
 }
 
-module.exports.DividerNotchesEdge = DividerNotchesEdge;
+export { DividerNotchesEdge };
 class DividerSlotsEdge extends Boxes {
     constructor(boxes, descriptions) {
         super();
@@ -373,4 +373,4 @@ class DividerSlotsEdge extends Boxes {
 
 }
 
-module.exports.DividerSlotsEdge = DividerSlotsEdge;
+export { DividerSlotsEdge };

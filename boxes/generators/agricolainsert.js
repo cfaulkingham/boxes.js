@@ -1,9 +1,9 @@
-const { Boxes } = require('../boxes');
-const { FingerJointSettings } = require('../edges');
-const { LidSettings } = require('../lids');
-const { edges } = require('../edges');
-const { _TopEdge } = require('../lids');
-const { Color } = require('../Color');
+import { Boxes  } from '../boxes.js';
+import { FingerJointSettings  } from '../edges.js';
+import { LidSettings  } from '../lids.js';
+import { edges  } from '../edges.js';
+import { _TopEdge  } from '../lids.js';
+import { Color  } from '../Color.js';
 
 class AgricolaInsert extends Boxes {
     constructor() {
@@ -282,7 +282,7 @@ class AgricolaInsert extends Boxes {
 
 }
 
-module.exports.AgricolaInsert = AgricolaInsert;
+export { AgricolaInsert };
 class MoorBoxSideEdge extends Boxes {
     constructor(boxes, corner_length, corner_height, lower_corner) {
         super();
@@ -311,7 +311,7 @@ class MoorBoxSideEdge extends Boxes {
 
 }
 
-module.exports.MoorBoxSideEdge = MoorBoxSideEdge;
+export { MoorBoxSideEdge };
 class MoorBoxHoleEdge extends Boxes {
     constructor(boxes, height, corner_height, lower_corner) {
         super();
@@ -346,7 +346,7 @@ class MoorBoxHoleEdge extends Boxes {
 
 }
 
-module.exports.MoorBoxHoleEdge = MoorBoxHoleEdge;
+export { MoorBoxHoleEdge };
 class BedHeadEdge extends Boxes {
     constructor(boxes, hole_depth) {
         super();
@@ -365,7 +365,7 @@ class BedHeadEdge extends Boxes {
 
 }
 
-module.exports.BedHeadEdge = BedHeadEdge;
+export { BedHeadEdge };
 class Bed2SidesEdge extends Boxes {
     constructor(boxes, bed_length, full_head_length, full_foot_height) {
         super();
@@ -388,4 +388,4 @@ class Bed2SidesEdge extends Boxes {
 
 }
 
-module.exports.Bed2SidesEdge = Bed2SidesEdge;
+export { Bed2SidesEdge };

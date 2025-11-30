@@ -1,8 +1,8 @@
-const { Color } = require('./Color');
-const { SVGContext } = require('./svg_context');
-const { Matrix } = require('./matrix');
-const { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf } = require('./vectors');
-const { Gears } = require('./gears');
+import { Color  } from './Color.js';
+import { SVGContext  } from './svg_context.js';
+import { Matrix  } from './matrix.js';
+import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf  } from './vectors.js';
+import { Gears  } from './gears.js';
 
 function argparseSections(s) {
     const result = [];
@@ -2599,4 +2599,24 @@ const edges = {
 };
 edges.edges = edges;
 
-module.exports = edges;
+export {
+    argparseSections, BoltPolicy, Bolts, Settings, BaseEdge, Edge, OutSetEdge, NoopEdge,
+    MountingSettings, MountingEdge,
+    GroovedSettings, GroovedEdgeBase, GroovedEdge, GroovedEdgeCounterPart,
+    GripSettings, GrippingEdge,
+    CompoundEdge,
+    Slot, SlottedEdge,
+    FingerJointSettings, FingerJointBase, FingerJointEdge, FingerJointEdgeCounterPart, FingerHoles, FingerHoleEdge, CrossingFingerHoleEdge,
+    StackableSettings, StackableBaseEdge, StackableEdge, StackableEdgeTop, StackableFeet, StackableHoleEdgeTop,
+    HingeSettings, Hinge, HingePin,
+    ChestHingeSettings, ChestHinge, ChestHingeTop, ChestHingePin, ChestHingeFront,
+    CabinetHingeSettings, CabinetHingeEdge,
+    SlideOnLidSettings, LidEdge, LidHoleEdge, LidRight, LidLeft, LidSideRight, LidSideLeft,
+    ClickSettings, ClickConnector, ClickEdge,
+    DoveTailSettings, DoveTailJoint, DoveTailJointCounterPart,
+    FlexSettings, FlexEdge,
+    GearSettings, RackEdge,
+    RoundedTriangleEdgeSettings, RoundedTriangleEdge, RoundedTriangleFingerHolesEdge,
+    HandleEdgeSettings, HandleEdge, HandleHoleEdge,
+    edges
+};
