@@ -16,7 +16,7 @@ try {
     const svg = box.close();
 
     // 4. Save
-    fs.writeFileSync('output.svg', svg);
+    fs.writeFileSync('abox.svg', svg);
     console.log('Successfully generated output.svg');
 } catch (e) {
     console.error('Error generating box:', e);
