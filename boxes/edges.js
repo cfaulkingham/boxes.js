@@ -549,12 +549,24 @@ class GrippingEdge extends BaseEdge {
 class CompoundEdge extends BaseEdge {
     constructor(boxes, types, lengths) {
         super(boxes, null);
-        this.types = types.map(edge => {
-            if (typeof edge === 'string') {
-                 return boxes.edges[edge] || edge;
-            }
-            return edge;
-        });
+        
+        // Handle case where types is a string (e.g., "EFE") instead of an array
+        if (typeof types === 'string') {
+            this.types = types.split('').map(edge => {
+                if (typeof edge === 'string') {
+                     return boxes.edges[edge] || edge;
+                }
+                return edge;
+            });
+        } else {
+            this.types = types.map(edge => {
+                if (typeof edge === 'string') {
+                     return boxes.edges[edge] || edge;
+                }
+                return edge;
+            });
+        }
+        
         this.lengths = lengths;
         this.length = lengths.reduce((a, b) => a + b, 0);
     }
