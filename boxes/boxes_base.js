@@ -117,6 +117,7 @@ class Boxes {
         this.h = 100;
         this.outside = true;
         this.bottom_edge = "h";
+        this.angle = 45.0; // Set default angle
 
         // Override with args
         for (const [key, value] of Object.entries(args)) {
@@ -905,13 +906,18 @@ class Boxes {
     }
 
     rectangularTriangle(x, y, edges="eee", r=0.0, num=1, kw={}) {
-         const {
-             bedBolts = null,
-             bedBoltSettings = null,
-             callback = null,
-             move = null,
-             label = ""
-         } = kw;
+        // Extract num from kw if it's passed as an object
+        if (kw.num !== undefined) {
+            num = kw.num;
+        }
+        
+        const {
+            bedBolts = null,
+            bedBoltSettings = null,
+            callback = null,
+            move = null,
+            label = ""
+        } = kw;
 
          let edgeList;
          if (typeof edges === 'string') {
@@ -919,14 +925,14 @@ class Boxes {
          } else {
              edgeList = edges;
          }
-
+ 
          if (edgeList.length === 2) edgeList.push(this.edges['e']);
          if (edgeList.length !== 3) throw new Error("two or three edges required");
-
+ 
          r = Math.min(r, x, y);
          const a = Math.atan2(y-r, x-r);
          const alpha = a * 180 / Math.PI;
-
+ 
          let width;
          if (a > 0) {
              width = x + (edgeList[2].spacing() + this.spacing) / Math.sin(a) + edgeList[1].spacing() + this.spacing;
@@ -934,20 +940,20 @@ class Boxes {
              width = x + (edgeList[2].spacing() + this.spacing) + edgeList[1].spacing() + this.spacing;
          }
          const height = y + edgeList[0].spacing() + edgeList[2].spacing() * Math.cos(a) + 2*this.spacing + this.spacing;
-
+ 
          if (num > 1) {
              width = 2*width - x + r - this.spacing;
          }
          const dx = width - x - edgeList[1].spacing() - this.spacing / 2;
          const dy = edgeList[0].margin() + this.spacing / 2;
-
+ 
          const overallwidth = width * (Math.floor(num/2) + num%2) - this.spacing;
          const overallheight = height - this.spacing;
-
+ 
          if (this.move(overallwidth, overallheight, move, true)) return;
-
+ 
          this.moveTo(dx - this.spacing / 2, dy - this.spacing / 2);
-
+ 
          for (let n = 0; n < num; n++) {
              const lens = [x, y];
              for (let i = 0; i < 2; i++) {
@@ -958,7 +964,7 @@ class Boxes {
                  }
              }
              this.edgeCorner(edgeList[1], 'e', 90);
-
+ 
              this.corner(alpha, r);
              this.cc(callback, 2);
              this.step(edgeList[2].startwidth());
@@ -968,13 +974,13 @@ class Boxes {
              this.edge(edgeList[0].startwidth());
              this.corner(90);
              this.ctx.stroke();
-
+ 
              this.moveTo(width - 2*dx, height - 2*dy, 180);
              if (n % 2 !== 0) {
                  this.moveTo(width);
              }
          }
-
+ 
          this.move(overallwidth, overallheight, move, false, label);
     }
 

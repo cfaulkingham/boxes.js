@@ -12,4 +12,5 @@ try {
     console.log('Successfully generated SVG for AngledCutJig!');
 } catch (e) {
     console.error('Error generating box AngledCutJig:', e);
+    console.error('Stack trace:', e.stack);
 }

@@ -11,6 +11,9 @@ class AngledCutJig extends Boxes {
         this.addSettingsArgs(edges.FingerJointSettings, {surroundingspaces: 1.0});
         // this.buildArgParser();
         this.argparser.add_argument("--angle", {action: "store", type: "float", default: 45.0, help: "Angle of the cut"});
+        
+        // Initialize angle with default value to prevent NaN
+        this.angle = 45.0;
     }
 
     bottomCB() {
@@ -30,11 +33,13 @@ class AngledCutJig extends Boxes {
         let l = (((x ** 2) + (th ** 2)) ** 0.5);
         let th2 = (20 * Math.tan((this.angle * Math.PI / 180)));
         let l2 = (((20 ** 2) + (th2 ** 2)) ** 0.5);
-        this.rectangularWall(((30 + x) + (2 * t)), y, {callback: [this.bottomCB], move: "right"});
-        this.rectangularWall(l, y, {callback: [() => this.fingerHolesAt(0, (4.5 * t), l, 0), null, () => this.fingerHolesAt(0, (4.5 * t), l, 0), null], move: "right"});
-        this.rectangularWall(l2, y, {callback: [() => this.fingerHolesAt(0, (4.5 * t), l2, 0), null, () => this.fingerHolesAt(0, (4.5 * t), l2, 0), null], move: "right"});
-        this.rectangularTriangle(x, th, "fef", {num: 2, move: "up"});
-        this.rectangularTriangle(20, th2, "fef", {num: 2, move: "up"});
+        
+        this.rectangularWall(((30 + x) + (2 * t)), y, "eeee", {callback: [() => this.bottomCB()], move: "right"});
+        this.rectangularWall(l, y, "eeee", {callback: [() => this.fingerHolesAt(0, (4.5 * t), l, 0), null, () => this.fingerHolesAt(0, (4.5 * t), l, 0), null], move: "right"});
+        this.rectangularWall(l2, y, "eeee", {callback: [() => this.fingerHolesAt(0, (4.5 * t), l2, 0), null, () => this.fingerHolesAt(0, (4.5 * t), l2, 0), null], move: "right"});
+        
+        this.rectangularTriangle(x, th, "fef", 0, 2, "up");
+        this.rectangularTriangle(20, th2, "fef", 0, 2, "up");
     }
 
 }
