@@ -1310,6 +1310,10 @@ class Boxes {
     hole(x, y, r=0.0, d=0.0, tabs=0) {
         this.restore(() => {
             this.holeCol(() => {
+                 if (typeof r === 'object' && r !== null) {
+                     d = r.d || d;
+                     r = r.r || 0.0;
+                 }
                  if (!r) r = d / 2.0;
                  if (r < this.burn) r = this.burn + 1E-9;
                  const r_ = r - this.burn;
