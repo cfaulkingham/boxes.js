@@ -91,10 +91,10 @@ class AirPurifier extends Boxes {
             }
             for (let i = 0; i < n_; i += 1) {
                 let posx = (x + (i * w));
-                this.hole(posx, posy, {d: (fan_diameter - 4)});
+                this.hole(posx, posy, 0, (fan_diameter - 4));
                 for (let dx of [-delta, delta]) {
                     for (let dy of [-delta, delta]) {
-                        this.hole((posx + dx), (posy + dy), {d: this.screw_holes});
+                        this.hole((posx + dx), (posy + dy), 0, this.screw_holes);
                     }
                 }
             }
