@@ -79,7 +79,7 @@ class AirPurifier extends Boxes {
             // FIX 9: Use captured fan_diameter and fan_holes instead of this.fan_diameter
             // which may be undefined in the callback context
             let delta = (fan_holes[fan_diameter] / 2);
-
+            
             // FIX 5: `posy` was declared with `let` inside the `if` block, causing a ReferenceError.
             // It is now declared before the conditional logic.
             let posy;
