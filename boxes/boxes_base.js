@@ -241,6 +241,9 @@ class Boxes {
              if (number < callback.length) {
                  callback = callback[number];
                  number = null;
+             } else {
+                 // Index out of bounds - no callback to execute
+                 return;
              }
         }
 
@@ -358,22 +361,41 @@ class Boxes {
     }
 
     corner(degrees, radius=0, tabs=0) {
-        if (radius < this.burn) radius = 0; // simplified
+        // Handle tuple-like input [degrees, radius]
+        if (Array.isArray(degrees)) {
+            [degrees, radius] = degrees;
+        }
 
         const rad = degrees * Math.PI / 180;
 
-        if (degrees > 0) {
-             this.ctx.arc(0, radius + this.burn, radius + this.burn, -0.5 * Math.PI, rad - 0.5 * Math.PI);
-        } else {
-             // not rounded inner corner logic simplified
-             this.ctx.arc_negative(0, this.burn - radius, this.burn - radius, -0.5 * Math.PI, -0.5 * Math.PI + rad);
+        // Break down large angles into smaller steps (like Python implementation)
+        // This is critical for drawing full circles and preventing path issues
+        if ((radius > 0.5 * this.burn && Math.abs(degrees) > 36) ||
+            (Math.abs(degrees) > 100)) {
+            const steps = Math.floor(Math.abs(degrees) / 36) + 1;
+            for (let i = 0; i < steps; i++) {
+                this.corner(degrees / steps, radius);
+            }
+            return;
         }
 
-        this.ctx.translate( ...this.ctx.get_current_point() );
-        this.ctx.rotate(rad);
+        if (degrees > 0) {
+            this.ctx.arc(0, radius + this.burn, radius + this.burn, -0.5 * Math.PI, rad - 0.5 * Math.PI);
+        } else if (radius > this.burn) {
+            this.ctx.arc_negative(0, -(radius - this.burn), radius - this.burn, 0.5 * Math.PI, rad + 0.5 * Math.PI);
+        } else {
+            // Not rounded inner corner
+            this.ctx.arc_negative(0, this.burn - radius, this.burn - radius, -0.5 * Math.PI, -0.5 * Math.PI + rad);
+        }
+
+        this._continueDirection(rad);
     }
 
     edge(length, tabs=0) {
+         if (isNaN(length) || !isFinite(length)) {
+             console.error('edge() called with invalid length:', length);
+             return;
+         }
          this.ctx.move_to(0, 0);
          this.ctx.line_to(length, 0);
          this.ctx.translate(length, 0);
@@ -396,12 +418,13 @@ class Boxes {
         const dx = x3 - x2;
         const dy = y3 - y2;
         const rad = Math.atan2(dy, dx);
-        this._continueDirection(rad * 180 / Math.PI);
+        this._continueDirection(rad);
     }
 
     _continueDirection(angle=0) {
+        // angle is in radians (matches Python implementation)
         this.ctx.translate(...this.ctx.get_current_point());
-        this.ctx.rotate(angle * Math.PI / 180);
+        this.ctx.rotate(angle);
     }
 
     polyline(...args) {

@@ -8,7 +8,9 @@ class SVGContext {
         this.stack = [];
         this.lineWidth = 0.1;
         this.strokeColor = [0, 0, 0];
-        this.currentPoint = { x: 0, y: 0 };
+        // Track both local (_xy) and transformed (_mxy) current points like Python
+        this._xy = { x: 0, y: 0 };
+        this._mxy = { x: 0, y: 0 };
         
         // Add debug logging
         this.debug = true;
@@ -25,21 +27,24 @@ class SVGContext {
 
     save() {
         this._log('save() called', {
-            currentPoint: this.currentPoint,
+            _xy: this._xy,
+            _mxy: this._mxy,
             matrix: this.matrix,
             stackSize: this.stack.length
         });
         
         this.stack.push({
             matrix: new Matrix(this.matrix.a, this.matrix.b, this.matrix.c, this.matrix.d, this.matrix.e, this.matrix.f),
-            currentPoint: { ...this.currentPoint },
+            _xy: { ...this._xy },
+            _mxy: { ...this._mxy },
             lineWidth: this.lineWidth,
             strokeColor: [...this.strokeColor]
         });
-        this.currentPoint = { x: 0, y: 0 };
+        // Reset local position after save
+        this._xy = { x: 0, y: 0 };
         
         this._log('save() completed', {
-            newCurrentPoint: this.currentPoint,
+            new_xy: this._xy,
             stackSize: this.stack.length
         });
     }
@@ -47,38 +52,42 @@ class SVGContext {
     restore() {
         this._log('restore() called', {
             stackSize: this.stack.length,
-            currentPoint: this.currentPoint
+            _xy: this._xy
         });
         
         const state = this.stack.pop();
         if (state) {
             this.matrix = state.matrix;
-            this.currentPoint = state.currentPoint;
+            this._xy = state._xy;
+            this._mxy = state._mxy;
             this.lineWidth = state.lineWidth;
             this.strokeColor = state.strokeColor;
             
             this._log('restore() completed', {
-                restoredPoint: this.currentPoint,
+                restored_xy: this._xy,
+                restored_mxy: this._mxy,
                 matrix: this.matrix
             });
         }
     }
 
     translate(x, y) {
-        this._log('translate() called', { x, y, currentPoint: this.currentPoint });
+        this._log('translate() called', { x, y, _xy: this._xy });
         this.matrix = this.matrix.translate(x, y);
-        this.currentPoint = { x: 0, y: 0 };
-        this._log('translate() completed', { matrix: this.matrix, currentPoint: this.currentPoint });
+        this._xy = { x: 0, y: 0 };
+        // Update _mxy to match the new local origin in global coordinates
+        this._mxy = this._toGlobal(0, 0);
+        this._log('translate() completed', { matrix: this.matrix, _xy: this._xy, _mxy: this._mxy });
     }
 
     rotate(angle) {
-        this._log('rotate() called', { angle, currentPoint: this.currentPoint });
+        this._log('rotate() called', { angle, _xy: this._xy });
         this.matrix = this.matrix.rotate(angle);
         this._log('rotate() completed', { matrix: this.matrix });
     }
 
     scale(sx, sy) {
-        this._log('scale() called', { sx, sy, currentPoint: this.currentPoint });
+        this._log('scale() called', { sx, sy, _xy: this._xy });
         this.matrix = this.matrix.scale(sx, sy);
         this._log('scale() completed', { matrix: this.matrix });
     }
@@ -91,85 +100,112 @@ class SVGContext {
     }
 
     move_to(x, y) {
-        this._log('move_to() called', { x, y, currentPoint: this.currentPoint });
-        this.currentPoint = { x, y };
-        const p = this._toGlobal(x, y);
-        // Only add move command if path is empty or we're moving to a different point
-        if (this.currentPath.length === 0) {
-            this.currentPath.push(`M ${p.x.toFixed(4)} ${p.y.toFixed(4)}`);
-        } else {
-            // Replace the last move command if we're moving to a different point
-            const lastCommand = this.currentPath[this.currentPath.length - 1];
-            if (lastCommand.startsWith('M')) {
-                this.currentPath[this.currentPath.length - 1] = `M ${p.x.toFixed(4)} ${p.y.toFixed(4)}`;
-            } else {
-                this.currentPath.push(`M ${p.x.toFixed(4)} ${p.y.toFixed(4)}`);
-            }
-        }
+        this._log('move_to() called', { x, y, _xy: this._xy });
+        // Update local coordinates
+        this._xy = { x, y };
+        // Update transformed coordinates
+        this._mxy = this._toGlobal(x, y);
         this._log('move_to() completed', {
-            newCurrentPoint: this.currentPoint,
-            globalPoint: p,
-            pathLength: this.currentPath.length
+            new_xy: this._xy,
+            new_mxy: this._mxy
         });
     }
 
-    // Helper method to add move command before drawing (like Python's _add_move)
+    // Helper method to add move command before drawing (like Python's _add_move and Part.move_to)
     _add_move() {
+        const EPS = 1e-4;
+        const mx = this._mxy.x;
+        const my = this._mxy.y;
+        
         if (this.currentPath.length === 0) {
-            const p = this._toGlobal(this.currentPoint.x, this.currentPoint.y);
-            this.currentPath.push(`M ${p.x.toFixed(4)} ${p.y.toFixed(4)}`);
+            // Path is empty, add move command
+            this.currentPath.push(`M ${mx.toFixed(4)} ${my.toFixed(4)}`);
+        } else {
+            const lastCommand = this.currentPath[this.currentPath.length - 1];
+            if (lastCommand.startsWith('M ')) {
+                // Last command is already a move, replace it
+                this.currentPath[this.currentPath.length - 1] = `M ${mx.toFixed(4)} ${my.toFixed(4)}`;
+            } else {
+                // Extract coordinates from last command to check if we need a new move
+                // Parse last coordinates from the last command
+                const parts = lastCommand.trim().split(/\s+/);
+                let lastX, lastY;
+                
+                if (lastCommand.startsWith('L ')) {
+                    lastX = parseFloat(parts[1]);
+                    lastY = parseFloat(parts[2]);
+                } else if (lastCommand.startsWith('C ')) {
+                    // Curve: C x1 y1 x2 y2 x3 y3 - last point is x3, y3
+                    lastX = parseFloat(parts[5]);
+                    lastY = parseFloat(parts[6]);
+                } else {
+                    // For other commands, just add move to be safe
+                    this.currentPath.push(`M ${mx.toFixed(4)} ${my.toFixed(4)}`);
+                    return;
+                }
+                
+                // Only add move if we're moving to a different position
+                if (Math.abs(lastX - mx) > EPS || Math.abs(lastY - my) > EPS) {
+                    this.currentPath.push(`M ${mx.toFixed(4)} ${my.toFixed(4)}`);
+                }
+            }
         }
     }
 
     line_to(x, y) {
-        this._log('line_to() called', { x, y, currentPoint: this.currentPoint });
+        this._log('line_to() called', { x, y, _xy: this._xy });
         
-        // Only add move if path is empty
-        if (this.currentPath.length === 0) {
-            this._add_move();
-        }
+        // Add move command if path is empty (Python's _line_to does this)
+        this._add_move();
         
-        // Skip zero-length lines
-        if (this.currentPoint.x === x && this.currentPoint.y === y) {
+        const x1 = this._mxy.x;
+        const y1 = this._mxy.y;
+        
+        // Update local coordinates
+        this._xy = { x, y };
+        // Update transformed coordinates  
+        this._mxy = this._toGlobal(x, y);
+        
+        const x2 = this._mxy.x;
+        const y2 = this._mxy.y;
+        
+        // Skip zero-length lines (using epsilon comparison like Python)
+        const EPS = 1e-4;
+        if (Math.abs(x1 - x2) < EPS && Math.abs(y1 - y2) < EPS) {
             this._log('line_to() skipping zero-length line');
             return;
         }
         
-        const p = this._toGlobal(x, y);
-        this.currentPath.push(`L ${p.x.toFixed(4)} ${p.y.toFixed(4)}`);
-        this.currentPoint = { x, y };
+        this.currentPath.push(`L ${x2.toFixed(4)} ${y2.toFixed(4)}`);
         this._log('line_to() completed', {
-            newCurrentPoint: this.currentPoint,
-            globalPoint: p,
+            new_xy: this._xy,
+            new_mxy: this._mxy,
             pathLength: this.currentPath.length
         });
     }
 
     curve_to(x1, y1, x2, y2, x3, y3) {
-        // Only add move if path is empty
-        if (this.currentPath.length === 0) {
-            this._add_move();
-        }
+        // Add move command if path is empty
+        this._add_move();
         
-        // Skip degenerate curves where all points are the same
-        if (this.currentPoint.x === x1 && this.currentPoint.y === y1 &&
-            x1 === x2 && y1 === y2 && x2 === x3 && y2 === y3) {
-            this._log('curve_to() skipping degenerate curve');
-            return;
-        }
+        // Transform all control points and destination
+        const mx1 = this._toGlobal(x1, y1);
+        const mx2 = this._toGlobal(x2, y2);
+        const mx3 = this._toGlobal(x3, y3);
         
-        const p1 = this._toGlobal(x1, y1);
-        const p2 = this._toGlobal(x2, y2);
-        const p3 = this._toGlobal(x3, y3);
-        this.currentPath.push(`C ${p1.x.toFixed(4)} ${p1.y.toFixed(4)} ${p2.x.toFixed(4)} ${p2.y.toFixed(4)} ${p3.x.toFixed(4)} ${p3.y.toFixed(4)}`);
-        this.currentPoint = { x: x3, y: y3 };
+        // SVG curve format: C x1 y1, x2 y2, x3 y3 (control1, control2, destination)
+        this.currentPath.push(`C ${mx1.x.toFixed(4)} ${mx1.y.toFixed(4)} ${mx2.x.toFixed(4)} ${mx2.y.toFixed(4)} ${mx3.x.toFixed(4)} ${mx3.y.toFixed(4)}`);
+        
+        // Update current position
+        this._xy = { x: x3, y: y3 };
+        this._mxy = mx3;
     }
 
     stroke() {
         this._log('stroke() called', {
             pathLength: this.currentPath.length,
             currentPath: this.currentPath.join(' '),
-            currentPoint: this.currentPoint
+            _xy: this._xy
         });
         
         if (this.currentPath.length > 0) {
@@ -180,11 +216,12 @@ class SVGContext {
             });
             this.currentPath = [];
         }
-        this.currentPoint = { x: 0, y: 0 };
+        // Reset local position (like Python does)
+        this._xy = { x: 0, y: 0 };
         
         this._log('stroke() completed', {
             pathsCount: this.paths.length,
-            newCurrentPoint: this.currentPoint
+            new_xy: this._xy
         });
     }
 
@@ -197,184 +234,95 @@ class SVGContext {
     }
 
     get_current_point() {
-        return [this.currentPoint.x, this.currentPoint.y];
+        return [this._xy.x, this._xy.y];
     }
 
     arc(xc, yc, radius, angle1, angle2) {
-        this._arc(xc, yc, radius, angle1, angle2, 1);
+        this._arc(xc, yc, radius, angle1, angle2, 1, false);
     }
     
-    // Add direct circle drawing support
+    // Helper method for drawing full circles using multiple arc segments
     circle(xc, yc, radius) {
+        // Position at the start of the circle (rightmost point)
         this.move_to(xc + radius, yc);
-        this._arc(xc, yc, radius, 0, 2 * Math.PI, 1);
-    }
-    
-    // Add arc method for full circles
-    arc_full(xc, yc, radius) {
-        this.move_to(xc + radius, yc);
-        // Use 4 cubic bezier segments for a full circle (like Python's implementation)
+        
+        // Draw circle as 4 arc segments (90 degrees each)
         const segments = 4;
         const angleStep = (2 * Math.PI) / segments;
         
         for (let i = 0; i < segments; i++) {
             const startAngle = i * angleStep;
             const endAngle = (i + 1) * angleStep;
-            
-            // Calculate start and end points for this segment
-            const x1 = radius * Math.cos(startAngle) + xc;
-            const y1 = radius * Math.sin(startAngle) + yc;
-            const x4 = radius * Math.cos(endAngle) + xc;
-            const y4 = radius * Math.sin(endAngle) + yc;
-            
-            // Calculate control points for this segment
-            const ax = x1 - xc;
-            const ay = y1 - yc;
-            const bx = x4 - xc;
-            const by = y4 - yc;
-            const q1 = ax * ax + ay * ay;
-            const q2 = q1 + ax * bx + ay * by;
-            
-            const denominator = (ax * by - ay * bx);
-            const k2 = (4/3) * (Math.sqrt(2 * q1 * q2) - q2) / denominator;
-            
-            const x2 = xc + ax - k2 * ay;
-            const y2 = yc + ay + k2 * ax;
-            const x3 = xc + bx + k2 * by;
-            const y3 = yc + by - k2 * bx;
-            
-            // Transform control points and end point
-            const mp2 = this._toGlobal(x2, y2);
-            const mp3 = this._toGlobal(x3, y3);
-            const mp4 = this._toGlobal(x4, y4);
-
-            this.currentPath.push(`C ${mp2.x.toFixed(4)} ${mp2.y.toFixed(4)} ${mp3.x.toFixed(4)} ${mp3.y.toFixed(4)} ${mp4.x.toFixed(4)} ${mp4.y.toFixed(4)}`);
+            // Skip move command for all but the first segment to create a continuous circle
+            const skipMove = (i > 0);
+            this._arc(xc, yc, radius, startAngle, endAngle, 1, skipMove);
         }
-        
-        this.currentPoint = { x: xc + radius, y: yc };
+    }
+    
+    // Full circle drawing (for compatibility with boxes_base.js)
+    arc_full(xc, yc, radius) {
+        this.circle(xc, yc, radius);
     }
 
     arc_negative(xc, yc, radius, angle1, angle2) {
-        this._arc(xc, yc, radius, angle1, angle2, -1);
+        this._arc(xc, yc, radius, angle1, angle2, -1, false);
     }
 
-    _arc(xc, yc, radius, angle1, angle2, direction) {
-        // Approximate arc with cubic beziers.
+    _arc(xc, yc, radius, angle1, angle2, direction, skipMove = false) {
+        // Approximate arc with cubic bezier (matching Python implementation)
+        const EPS = 1e-4;
+        
         this._log('_arc() called', {
-            xc, yc, radius, angle1, angle2, direction,
-            currentPoint: this.currentPoint
+            xc, yc, radius, angle1, angle2, direction, skipMove,
+            _xy: this._xy
         });
 
-        if (Math.abs(angle1 - angle2) < 1e-4 || Math.abs(radius) < 1e-4) {
+        if (Math.abs(angle1 - angle2) < EPS || radius < EPS) {
             this._log('_arc() early return', { angleDiff: Math.abs(angle1 - angle2), radius });
             return;
         }
 
-        // Handle full circles and near-full circles with multiple curve segments
-        let angleDiff = Math.abs(angle2 - angle1);
-        if (angleDiff > Math.PI * 1.9) {
-            this._log('_arc() using full circle approach with curves', { angleDiff });
-            
-            // For full circles, use 4 cubic bezier segments (like Python's implementation)
-            const segments = 4;
-            const actualAngleDiff = direction * (angle2 - angle1);
-            const angleStep = actualAngleDiff / segments;
-            
-            for (let i = 0; i < segments; i++) {
-                const startAngle = angle1 + i * angleStep;
-                const endAngle = angle1 + (i + 1) * angleStep;
-                
-                // Calculate start and end points for this segment
-                const x1 = radius * Math.cos(startAngle) + xc;
-                const y1 = radius * Math.sin(startAngle) + yc;
-                const x4 = radius * Math.cos(endAngle) + xc;
-                const y4 = radius * Math.sin(endAngle) + yc;
-                
-                // Calculate control points for this segment
-                const ax = x1 - xc;
-                const ay = y1 - yc;
-                const bx = x4 - xc;
-                const by = y4 - yc;
-                const q1 = ax * ax + ay * ay;
-                const q2 = q1 + ax * bx + ay * by;
-                
-                const denominator = (ax * by - ay * bx) * direction;
-                const k2 = (4/3) * (Math.sqrt(2 * q1 * q2) - q2) / denominator;
-                
-                const x2 = xc + ax - k2 * ay;
-                const y2 = yc + ay + k2 * ax;
-                const x3 = xc + bx + k2 * by;
-                const y3 = yc + by - k2 * bx;
-                
-                // Ensure we have a move command for the first segment
-                if (i === 0 && this.currentPath.length === 0) {
-                    this._add_move();
-                }
-                
-                // Transform control points and end point
-                const mp2 = this._toGlobal(x2, y2);
-                const mp3 = this._toGlobal(x3, y3);
-                const mp4 = this._toGlobal(x4, y4);
+        // Calculate start and end points in local coordinates
+        const x1 = radius * Math.cos(angle1) + xc;
+        const y1 = radius * Math.sin(angle1) + yc;
+        const x4 = radius * Math.cos(angle2) + xc;
+        const y4 = radius * Math.sin(angle2) + yc;
 
-                this.currentPath.push(`C ${mp2.x.toFixed(4)} ${mp2.y.toFixed(4)} ${mp3.x.toFixed(4)} ${mp3.y.toFixed(4)} ${mp4.x.toFixed(4)} ${mp4.y.toFixed(4)}`);
-            }
-            
-            this.currentPoint = {
-                x: radius * Math.cos(angle2) + xc,
-                y: radius * Math.sin(angle2) + yc
-            };
-            return;
-        }
+        // Calculate control points (Python algorithm)
+        const ax = x1 - xc;
+        const ay = y1 - yc;
+        const bx = x4 - xc;
+        const by = y4 - yc;
+        const q1 = ax * ax + ay * ay;
+        const q2 = q1 + ax * bx + ay * by;
+        const k2 = 4/3 * (Math.sqrt(2 * q1 * q2) - q2) / (ax * by - ay * bx);
 
-        let x1 = radius * Math.cos(angle1) + xc;
-        let y1 = radius * Math.sin(angle1) + yc;
-        let x4 = radius * Math.cos(angle2) + xc;
-        let y4 = radius * Math.sin(angle2) + yc;
+        const x2 = xc + ax - k2 * ay;
+        const y2 = yc + ay + k2 * ax;
+        const x3 = xc + bx + k2 * by;
+        const y3 = yc + by - k2 * bx;
 
-        let ax = x1 - xc;
-        let ay = y1 - yc;
-        let bx = x4 - xc;
-        let by = y4 - yc;
-        let q1 = ax * ax + ay * ay;
-        let q2 = q1 + ax * bx + ay * by;
-        
-        // Avoid division by zero for regular arcs
-        let denominator = (ax * by - ay * bx) * direction;
-        if (Math.abs(denominator) < 1e-10) {
-            // Fall back to line approximation
-            this._log('_arc() falling back to line approximation', { denominator });
-            if (this.currentPath.length === 0) {
-                this._add_move();
-            }
-            const p4 = this._toGlobal(x4, y4);
-            this.currentPath.push(`L ${p4.x.toFixed(4)} ${p4.y.toFixed(4)}`);
-            this.currentPoint = { x: x4, y: y4 };
-            return;
-        }
-        
-        let k2 = (4/3) * (Math.sqrt(2 * q1 * q2) - q2) / denominator;
+        // Transform to global coordinates
+        const mx1 = this._toGlobal(x1, y1);
+        const mx2 = this._toGlobal(x2, y2);
+        const mx3 = this._toGlobal(x3, y3);
+        const mx4 = this._toGlobal(x4, y4);
 
-        let x2 = xc + ax - k2 * ay;
-        let y2 = yc + ay + k2 * ax;
-        let x3 = xc + bx + k2 * by;
-        let y3 = yc + by - k2 * bx;
-
-        // Ensure we have a move command to the start of the arc
-        if (this.currentPath.length === 0) {
+        // Add move command before drawing (only if not skipped for continuous paths)
+        if (!skipMove) {
             this._add_move();
         }
         
-        // Transform control points and end point
-        const mp2 = this._toGlobal(x2, y2);
-        const mp3 = this._toGlobal(x3, y3);
-        const mp4 = this._toGlobal(x4, y4);
-
-        this.currentPath.push(`C ${mp2.x.toFixed(4)} ${mp2.y.toFixed(4)} ${mp3.x.toFixed(4)} ${mp3.y.toFixed(4)} ${mp4.x.toFixed(4)} ${mp4.y.toFixed(4)}`);
-
-        this.currentPoint = { x: x4, y: y4 };
+        // Add cubic bezier curve
+        this.currentPath.push(`C ${mx2.x.toFixed(4)} ${mx2.y.toFixed(4)} ${mx3.x.toFixed(4)} ${mx3.y.toFixed(4)} ${mx4.x.toFixed(4)} ${mx4.y.toFixed(4)}`);
+        
+        // Update current position to end of arc
+        this._xy = { x: x4, y: y4 };
+        this._mxy = mx4;
         
         this._log('_arc() completed', {
-            newCurrentPoint: this.currentPoint,
+            new_xy: this._xy,
+            new_mxy: this._mxy,
             pathLength: this.currentPath.length
         });
     }
@@ -387,7 +335,8 @@ class SVGContext {
 
     // Helpers for Python compatibility
     rectangle(x, y, w, h) {
-        this.stroke(); // finish previous path
+        // Python's rectangle: stroke any existing path, then draw rectangle
+        this.stroke();
         this.move_to(x, y);
         this.line_to(x + w, y);
         this.line_to(x + w, y + h);
