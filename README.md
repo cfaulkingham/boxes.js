@@ -24,7 +24,6 @@ angledcutjig.js
 arcade.js
 atreus21.js
 beequeentransportbox.js
-bintray.js
 birdhouse.js
 bookholder.js
 bottlestack.js

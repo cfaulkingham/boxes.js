@@ -8,7 +8,7 @@ try {
     box.open();
     box.render();
     const svg = box.close();
-    fs.writeFileSync('test/bintray.svg', svg);
+    fs.writeFileSync('test/bintray_fixed.svg', svg);
     console.log('Successfully generated SVG for BinTray!');
 } catch (e) {
     console.error('Error generating box BinTray:', e);

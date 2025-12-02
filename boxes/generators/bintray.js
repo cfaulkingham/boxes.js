@@ -11,7 +11,7 @@ class BinFrontEdge extends Boxes {
         let a1 = (Math.atan((f / (1 - f))) * 180 / Math.PI);
         let a2 = (45 + a1);
         this.corner(-a1);
-        for (let [i, l] of enumerate(this.settings.sy)) {
+        for (let [i, l] of this.settings.sy.entries()) {
             this.edges["e"]((l * (((f ** 2) + ((1 - f) ** 2)) ** 0.5)));
             this.corner(a2);
             this.edges["f"](((l * f) * (2 ** 0.5)));
@@ -48,6 +48,35 @@ class BinTray extends Boxes {
         this.argparser.add_argument("--front", {action: "store", type: "float", default: 0.4, help: "fraction of bin height covered with slope"});
     }
 
+    parseArgs(args) {
+        // Call parent method to set common defaults
+        super.parseArgs(args);
+        
+        // Initialize sx and sy with default values if not provided
+        if (!this.sx || !Array.isArray(this.sx)) {
+            this.sx = [50, 50]; // Default 2 compartments of 50mm each
+        }
+        
+        if (!this.sy || !Array.isArray(this.sy)) {
+            this.sy = [50, 50]; // Default 2 compartments of 50mm each
+        }
+        
+        // Initialize hole_dD if not provided
+        if (!this.hole_dD) {
+            this.hole_dD = [3.0]; // Default 3mm hole diameter
+        }
+        
+        // Initialize hi (inner height) if not provided
+        if (!this.hi) {
+            this.hi = 30; // Default 30mm inner height
+        }
+        
+        // Override with args
+        for (const [key, value] of Object.entries(args)) {
+            this[key] = value;
+        }
+    }
+
     xSlots() {
         let posx = (-0.5 * this.thickness);
         for (let x of this.sx.slice(0, -1)) {
@@ -65,7 +94,7 @@ class BinTray extends Boxes {
         for (let y of this.sy.slice(0, -1)) {
             posy += (y + this.thickness);
             let posx = 0;
-            for (let x of reversed(this.sx)) {
+            for (let x of [...this.sx].reverse()) {
                 this.fingerHolesAt(posy, posx, x);
                 posx += (x + this.thickness);
             }
@@ -74,9 +103,11 @@ class BinTray extends Boxes {
 
     addMount() {
         let ds = this.hole_dD[0];
+        let dh = 0;
+        let y = 0;
+        
         if (this.hole_dD.length < 2) {
-            let dh = 0;
-            let y = Math.max((this.thickness * 1.25), ((this.thickness * 1.0) + ds));
+            y = Math.max((this.thickness * 1.25), ((this.thickness * 1.0) + ds));
         }
         else {
             dh = this.hole_dD[1];
@@ -111,7 +142,7 @@ class BinTray extends Boxes {
 
     yHoles() {
         let posy = (-0.5 * this.thickness);
-        for (let y of reversed(this.sy.slice(1))) {
+        for (let y of [...this.sy.slice(1)].reverse()) {
             posy += (y + this.thickness);
             this.fingerHolesAt(posy, 0, this.hi);
         }
@@ -128,29 +159,33 @@ class BinTray extends Boxes {
         let h = this.h;
         let t = this.thickness;
         this.front = Math.min(this.front, 0.999);
-        this.addPart(BinFrontEdge(this, this));
-        this.addPart(BinFrontSideEdge(this, this));
+        this.addPart(new BinFrontEdge(this, this));
+        this.addPart(new BinFrontSideEdge(this, this));
         let angledsettings = this.edges["f"].settings;
         angledsettings.setValues(this.thickness, true, {angle: 45});
-        angledsettings.edgeObjects(this, {chars: "gGH"});
-        let e = ["F", "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "G"), "f"];
-        this.rectangularWall(x, h, e, {callback: [this.xHoles], move: "right", label: "bottom"});
-        this.rectangularWall(y, h, "FFbF", {callback: [this.yHoles], move: "up", label: "left"});
-        this.rectangularWall(y, h, "FFbF", {callback: [this.yHoles], label: "right"});
-        this.rectangularWall(x, h, "Ffef", {callback: [this.xHoles], move: "left", label: "top"});
+        const gEdges = angledsettings.edgeObjects(this, {chars: "gGH"});
+        const gEdge = gEdges[2]; // Get "G" edge
+        const gEdgeSmall = gEdges[0]; // Get "g" edge
+        
+        // Now we can use the edges
+        let e = ["F", "f", new edges.SlottedEdge(this, this.sx.slice(0, -1).reverse(), gEdge), "f"];
+        this.rectangularWall(x, h, e, {callback: [this.xHoles.bind(this)], move: "right", label: "bottom"});
+        this.rectangularWall(y, h, "FFbF", {callback: [this.yHoles.bind(this)], move: "up", label: "left"});
+        this.rectangularWall(y, h, "FFbF", {callback: [this.yHoles.bind(this)], label: "right"});
+        this.rectangularWall(x, h, "Ffef", {callback: [this.xHoles.bind(this)], move: "left", label: "top"});
         this.rectangularWall(y, h, "FFBF", {move: "up only"});
-        this.rectangularWall(x, y, "ffff", {callback: [this.xSlots, this.ySlots, this.addMount], move: "right", label: "back"});
+        this.rectangularWall(x, y, "ffff", {callback: [this.xSlots.bind(this), this.ySlots.bind(this), this.addMount.bind(this)], move: "right", label: "back"});
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            e = [edges.SlottedEdge(this, this.sy, "f"), "f", "B", "f"];
-            this.rectangularWall(y, hi, e, {move: "up", label: ("inner vertical " + str((i + 1)))});
+            e = [new edges.SlottedEdge(this, this.sy, "f"), "f", "B", "f"];
+            this.rectangularWall(y, this.hi, e, {move: "up", label: `inner vertical ${i + 1}`});
         }
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            e = [edges.SlottedEdge(this, this.sx, "f"), "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "G"), "f"];
-            this.rectangularWall(x, hi, e, {move: "up", label: ("inner horizontal " + str((i + 1)))});
+            e = [new edges.SlottedEdge(this, this.sx, gEdgeSmall), "F", "e", "F"];
+            this.rectangularWall(x, this.hi, e, {move: "up", label: `inner horizontal ${i + 1}`});
         }
         for (let i = 0; i < this.sy.length; i += 1) {
-            e = [edges.SlottedEdge(this, this.sx, "g"), "F", "e", "F"];
-            this.rectangularWall(x, ((this.sy[i] * this.front) * (2 ** 0.5)), e, {callback: [this.frontHoles(i)], move: "up", label: ("retainer " + str((i + 1)))});
+            e = [new edges.SlottedEdge(this, this.sx, gEdgeSmall), "F", "e", "F"];
+            this.rectangularWall(x, ((this.sy[i] * this.front) * (2 ** 0.5)), e, {callback: [this.frontHoles(i).bind(this)], move: "up", label: `retainer ${i + 1}`});
         }
     }
 
