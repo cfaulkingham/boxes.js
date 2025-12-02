@@ -7,16 +7,19 @@ Boxes.py https://github.com/florianfesti/boxes
 Converted all the geneators but I have not tested them. 
 the ones marked in bold seem to be mostly working.
 
-** abox.js
+# Mostly Working
+abox.js
+airpurifier.js
+basedbox.js
+bayonetbox.js
+
+# Not Working
 agricolainsert.js
-** airpurifier.js
 alledges.js
 angledbox.js
 angledcutjig.js
 arcade.js
 atreus21.js
-** basedbox.js
-** bayonetbox.js
 beequeentransportbox.js
 bintray.js
 birdhouse.js
