@@ -153,6 +153,7 @@ class Arcade extends Boxes {
         this.rectangularWall(width, this.topback, "ffef", {move: "up"});
         this.side({move: "up"});
         this.side({move: "up"});
+
     }
 
 }

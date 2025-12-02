@@ -17,6 +17,24 @@ class BottleTag extends Boxes {
         this.argparser.add_argument("--segment_width", {action: "store", type: "int", default: 3, help: "inner segment width"});
     }
 
+    parseArgs(args) {
+        // Call parent parseArgs first
+        super.parseArgs(args);
+        
+        // Set default values for BottleTag specific properties
+        this.width = this.width || 72;
+        this.height = this.height || 98;
+        this.min_diameter = this.min_diameter || 24;
+        this.max_diameter = this.max_diameter || 50;
+        this.radius = this.radius || 15;
+        this.segment_width = this.segment_width || 3;
+        
+        // Override with args
+        for (const [key, value] of Object.entries(args)) {
+            this[key] = value;
+        }
+    }
+
     render() {
         let width = this.width;
         let height = this.height;
@@ -24,16 +42,16 @@ class BottleTag extends Boxes {
         let r_max = (this.max_diameter / 2);
         let r = this.radius;
         let segment_width = this.segment_width;
-        this.moveTo(r);
+        this.moveTo(r, 0, 0);
         this.edge(((width - r) - r));
         this.corner(90, r);
         this.edge(((height - (width / 2.0)) - r));
         this.corner(180, (width / 2));
         this.edge(((height - (width / 2.0)) - r));
         this.corner(90, r);
-        this.moveTo(((width / 2) - r), (height - (width / 2)));
+        this.moveTo(((width / 2) - r), (height - (width / 2)), 0);
         this.ctx.save();
-        this.moveTo(0, -r_min);
+        this.moveTo(0, -r_min, 0);
         this.corner(360, r_min);
         this.ctx.restore();
         let seg_angle = ((segment_width / r_min) * 180 / Math.PI);
@@ -41,7 +59,7 @@ class BottleTag extends Boxes {
         for (let i = 0; i < num; i += 1) {
             this.ctx.save();
             this.moveTo(0, 0, ((i * 360.0) / num));
-            this.moveTo(r_min);
+            this.moveTo(r_min, 0, 0);
             this.edge((r_max - r_min));
             this.ctx.save();
             this.moveTo(0, 0, 90);
