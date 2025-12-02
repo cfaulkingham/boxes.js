@@ -5,13 +5,16 @@ Boxes.py https://github.com/florianfesti/boxes
 
 # WIP
 Converted all the geneators but I have not tested them. 
-the ones marked in bold seem to be mostly working.
 
 # Mostly Working
 abox.js
+
 airpurifier.js
+
 basedbox.js
+
 bayonetbox.js
+
 
 # Not Working
 agricolainsert.js
