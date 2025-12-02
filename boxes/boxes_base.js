@@ -1340,7 +1340,7 @@ class Boxes {
                  if (r < this.burn) r = this.burn + 1E-9;
                  const r_ = r - this.burn;
                  
-                 // Draw a proper circle using the new arc_full method
+
                  this.ctx.arc_full(x, y, r_);
                  this.ctx.stroke();
             });
