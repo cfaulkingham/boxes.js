@@ -1,4 +1,3 @@
-
 import fs from 'fs';
 import { Arcade } from '../boxes/generators/arcade.js';
 
@@ -12,4 +11,5 @@ try {
     console.log('Successfully generated SVG for Arcade!');
 } catch (e) {
     console.error('Error generating box Arcade:', e);
+    console.error('Stack trace:', e.stack);
 }

@@ -24,10 +24,12 @@ class BayonetBox extends Boxes {
         this.ctx.save();
         for (let i = 0; i < 3; i += 1) {
             if (outer) {
-                this.hole((r - (t / 2)), 0, {d: this.alignment_pins});
+                let x = (r - (t / 2));
+                this.hole(x, 0, {d: this.alignment_pins});
             }
             if (inner) {
-                this.hole(((r - (2 * t)) - p), 0, {d: this.alignment_pins});
+                let x = ((r - (2 * t)) - p);
+                this.hole(x, 0, {d: this.alignment_pins});
             }
             this.moveTo(0, 0, (360 / 3));
         }
@@ -47,7 +49,7 @@ class BayonetBox extends Boxes {
             }
             this.moveTo((d / 2), (d / 2));
         }
-        this.alignmentHoles({inner: true});
+        this.alignmentHoles(true, false);
         this.hole(0, 0, {r: ((d / 2) - (2.5 * t))});
         this.moveTo(((d / 2) - (1.5 * t)), 0, -90);
         for (let i = 0; i < l; i += 1) {
@@ -65,7 +67,7 @@ class BayonetBox extends Boxes {
         let p = (0.05 * t);
         let l = this.lugs;
         let a = (180 / l);
-        this.alignmentHoles({outer: true});
+        this.alignmentHoles(false, true);
         this.ctx.save();
         this.lowerLayer();
         this.ctx.restore();
@@ -84,7 +86,7 @@ class BayonetBox extends Boxes {
         let a = (180 / l);
         this.hole(0, 0, {r: ((d / 2) - (2.5 * t))});
         this.hole(0, 0, {r: ((d / 2) - (1.5 * t))});
-        this.alignmentHoles({inner: true, outer: true});
+        this.alignmentHoles(true, true);
         this.moveTo(((d / 2) - (1.5 * t)), 0, -90);
         for (let i = 0; i < l; i += 1) {
             this.polyline(0, [(-1.3 * a), ((r - (1.5 * t)) + p)], 0, 90, (0.5 * t), -90, 0, [(-0.7 * a), ((r - t) + p)], 0, -90, (0.5 * t), 90);
@@ -95,13 +97,19 @@ class BayonetBox extends Boxes {
         let d = this.diameter;
         let t = this.thickness;
         let p = (0.05 * t);
+        console.log("render called with:", {d, t, p});
         if (!this.outside) {
         }
-        this.parts.disc(d, {callback: () => this.alignmentHoles(), move: "right"});
-        this.parts.disc(d, {callback: () => [this.alignmentHoles(), this.hole(0, 0, ((d / 2) - (1.5 * t)))], move: "right"});
-        this.parts.disc(d, {callback: this.lowerCB, move: "right"});
-        this.parts.disc(d, {callback: this.upperCB, move: "right"});
-        this.parts.disc(d, {callback: () => this.alignmentHoles(), move: "right"});
+        console.log("Calling disc 1");
+        this.parts.disc(d, 0, 1.0, () => this.alignmentHoles(false, false), "right");
+        console.log("Calling disc 2");
+        this.parts.disc(d, 0, 1.0, () => [this.alignmentHoles(), this.hole(0, 0, ((d / 2) - (1.5 * t)))], "right");
+        console.log("Calling disc 3");
+        this.parts.disc(d, 0, 1.0, () => this.lowerLayer(false, null), "right");
+        console.log("Calling disc 4");
+        this.parts.disc(d, 0, 1.0, () => this.upperCB(), "right");
+        console.log("Calling disc 5");
+        this.parts.disc(d, 0, 1.0, () => this.alignmentHoles(), "right");
     }
 
 }

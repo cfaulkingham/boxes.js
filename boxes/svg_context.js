@@ -106,6 +106,32 @@ class SVGContext {
     arc(xc, yc, radius, angle1, angle2) {
         this._arc(xc, yc, radius, angle1, angle2, 1);
     }
+    
+    // Add direct circle drawing support
+    circle(xc, yc, radius) {
+        this.move_to(xc + radius, yc);
+        this._arc(xc, yc, radius, 0, 2 * Math.PI, 1);
+    }
+    
+    // Add arc method for full circles
+    arc_full(xc, yc, radius) {
+        this.move_to(xc + radius, yc);
+        const segments = 20;
+        const angleStep = (2 * Math.PI) / segments;
+        
+        for (let i = 0; i <= segments; i++) {
+            const angle = i * angleStep;
+            const x = xc + radius * Math.cos(angle);
+            const y = yc + radius * Math.sin(angle);
+            
+            if (i === 0) {
+                this.move_to(x, y);
+            } else {
+                this.line_to(x, y);
+            }
+        }
+        this.line_to(xc + radius, yc);
+    }
 
     arc_negative(xc, yc, radius, angle1, angle2) {
         this._arc(xc, yc, radius, angle1, angle2, -1);

@@ -111,7 +111,11 @@ class Boxes {
     }
 
     parseArgs(args) {
-        // Mock: manually set some values for now
+        // Set default values first
+        this.diameter = 50.0;
+        this.lugs = 10;
+        this.alignment_pins = 1.0;
+        this.thickness = 3.0;
         this.x = 100;
         this.y = 100;
         this.h = 100;
@@ -260,6 +264,18 @@ class Boxes {
                     callback(number)
             self.ctx.move_to(0, 0)
             */
+            this.ctx.restore();
+            this.ctx.move_to(0, 0);
+        } else if (Array.isArray(callback)) {
+            // Handle array of functions by executing each one
+            this.ctx.save();
+            this.moveTo(x, y, a);
+            for (const cb of callback) {
+                if (typeof cb === 'function') {
+                    cb();
+                }
+            }
+            this.ctx.move_to(0, 0);
             this.ctx.restore();
             this.ctx.move_to(0, 0);
         }
@@ -1323,8 +1339,10 @@ class Boxes {
                  if (!r) r = d / 2.0;
                  if (r < this.burn) r = this.burn + 1E-9;
                  const r_ = r - this.burn;
-                 this.moveTo(x + r_, y, -90);
-                 this.corner(-360, r_, tabs);
+                 
+                 // Draw a proper circle using the new arc_full method
+                 this.ctx.arc_full(x, y, r_);
+                 this.ctx.stroke();
             });
         });
     }
