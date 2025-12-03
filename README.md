@@ -8,27 +8,26 @@ Converted all the geneators but I have not tested them.
 
 # Mostly Working
 abox.js
-
 airpurifier.js
-
-basedbox.js
-
-bayonetbox.js
-
-
-# Not Working
-agricolainsert.js
-alledges.js
 angledbox.js
+basedbox.js
+bayonetbox.js
+breadbox.js
+bottletag.js
+
+# in progress
 angledcutjig.js
 arcade.js
-atreus21.js
-beequeentransportbox.js
+bottlestack.js
 birdhouse.js
 bookholder.js
-bottlestack.js
-bottletag.js
-breadbox.js
+
+# Not Working not tested
+agricolainsert.js
+alledges.js
+atreus21.js
+beequeentransportbox.js
+
 brick_sorter.js
 burntest.js
 can_storage.js
