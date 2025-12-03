@@ -11,7 +11,7 @@ class BottleStack extends Boxes {
         this.argparser.add_argument("--diameter", {action: "store", type: "float", default: 80, help: "diameter of the bottles in mm"});
         this.argparser.add_argument("--number", {action: "store", type: "int", default: 3, help: "number of bottles to hold in the bottom row"});
         this.argparser.add_argument("--depth", {action: "store", type: "float", default: 80, help: "depth of the stand along the base of the bottles"});
-        this.argparser.add_argument("--double", {action: "store", type: boolarg, default: true, help: "two pieces that can be combined to up to double the width"});
+        this.argparser.add_argument("--double", {action: "store", type: "boolean", default: true, help: "two pieces that can be combined to up to double the width"});
     }
 
     front(h_sides, offset, move) {
@@ -20,8 +20,9 @@ class BottleStack extends Boxes {
         let nr = this.number;
         let r1 = (this.diameter / 2.0);
         let r2 = ((r1 / Math.cos(((90 - a) * Math.PI / 180))) - r1);
+        let r3;
         if (this.double) {
-            let r3 = (1.5 * t);
+            r3 = (1.5 * t);
         }
         else {
             r3 = (0.5 * t);
@@ -37,8 +38,9 @@ class BottleStack extends Boxes {
             return;
         }
         let open_sides = r3 <= (0.5 * t);
+        let slot;
         if (offset === 0) {
-            let slot = [0, 90, h_s, -90, t, -90, h_s, 90];
+            slot = [0, 90, h_s, -90, t, -90, h_s, 90];
             if (open_sides) {
                 this.moveTo(0, h_s);
                 this.polyline((r3 - (0.5 * t)));
@@ -108,7 +110,7 @@ class BottleStack extends Boxes {
 
     side(l, h, short, move) {
         let t = this.thickness;
-        short = bool(short);
+        short = Boolean(short);
         let tw;
         let th;
         [tw, th] = [((l + (2 * t)) - ((4 * t) * short)), h];
@@ -117,15 +119,16 @@ class BottleStack extends Boxes {
         }
         this.moveTo(t, 0);
         this.polyline((l - ((3 * t) * short)));
+        let end;
         if (short) {
-            let end = [90, (h - t), 90, t, -90, t, 90];
+            end = [90, (h - t), 90, t, -90, t, 90];
         }
         else {
             end = [[90, t], (h - (2 * t)), [90, t], 0, 90, t, -90, t, -90, t, 90];
         }
         this.polyline(0, ...end);
         this.polyline(((l - (2 * t)) - ((3 * t) * short)));
-        this.polyline(0, ...reversed(end));
+        this.polyline(0, ...[...end].reverse());
         this.move(tw, th, move);
     }
 
