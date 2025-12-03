@@ -38,14 +38,14 @@ class BreadBox extends Boxes {
     cornerRadius(r, kw = {}) {
         const { two = false, move = null } = kw;
         let s = this.spacing;
-        if (this.move(r, (r + s), move, true)) {
+        if (this.move(two ? (2 * r + s) : r, (r + s), move, true)) {
             return;
         }
         for (let i = 0; i < (two ? 2 : 1); i += 1) {
             this.polyline(r, 90, r, 180, 0, [-90, r], 0, -180);
-            this.moveTo(r, (r + s), 180);
+            this.moveTo(r + s, 0, 0);
         }
-        this.move(r, (r + s), move);
+        this.move(two ? (2 * r + s) : r, (r + s), move);
     }
 
     rails(l, h, r, kw = {}) {
@@ -142,7 +142,7 @@ class BreadBox extends Boxes {
         this.side(x, h, r, {move: "right"});
         this.rectangularWall(y, h, "fFfF", {move: "right"});
         this.ctx.restore();
-        this.side(x, h, r, {move: "up only"});
+        this.moveTo(0, h + 2*t + 10);  // Move down by first row height + 10mm gap
         this.rectangularWall(x, y, "FEFF", {move: "right"});
         this.rectangularWall((x / 2), y, "FeFF", {move: "right"});
         this.door((((((x / 2) + h) - (2 * r)) + ((0.5 * Math.PI) * r)) + (2 * t)), (y - (0.2 * t)), {move: "right"});
@@ -163,7 +163,7 @@ class BreadBox extends Boxes {
             this.rectangularWall(ls, y, "fafA", {move: "right"});
         }
         this.rectangularWall(ls, y, "fbfA", {move: "right"});
-        this.rectangularWall(((x / 2) - r), y, "fefB", {move: "right"});
+        this.rectangularWall(((x / 2) - r), y, "fefB", {move: "up only"});
         this.rails(x, h, r, {move: "right mirror"});
         this.cornerRadius(r, {two: true, move: "right"});
     }
