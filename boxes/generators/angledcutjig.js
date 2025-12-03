@@ -38,8 +38,8 @@ class AngledCutJig extends Boxes {
         this.rectangularWall(l, y, "eeee", {callback: [() => this.fingerHolesAt(0, (4.5 * t), l, 0), null, () => this.fingerHolesAt(0, (4.5 * t), l, 0), null], move: "right"});
         this.rectangularWall(l2, y, "eeee", {callback: [() => this.fingerHolesAt(0, (4.5 * t), l2, 0), null, () => this.fingerHolesAt(0, (4.5 * t), l2, 0), null], move: "right"});
         
-        this.rectangularTriangle(x, th, "fef", 0, 2, "up");
-        this.rectangularTriangle(20, th2, "fef", 0, 2, "up");
+        this.rectangularTriangle(x, th, "fef", 0, 2, {move: "up"});
+        this.rectangularTriangle(20, th2, "fef", 0, 2, {move: "up"});
     }
 
 }

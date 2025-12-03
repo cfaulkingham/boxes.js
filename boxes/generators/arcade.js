@@ -139,6 +139,13 @@ class Arcade extends Boxes {
         this.speaker = 150;
         this.top = 100;
         this.topback = 200;
+        // Calculate y and h from the arcade dimensions (complex geometry calculations)
+        this.y = ((this.topback + this.top + 3*t - 100 + this.monitor_height) / (2**0.5)
+                  + (this.keyboard_depth + 2*t) * Math.cos(15 * Math.PI / 180)
+                  - (this.front + t) * Math.sin(15 * Math.PI / 180));
+        this.h = ((this.monitor_height - this.topback + this.top + 1*t + 100) / (2**0.5)
+                  + (this.keyboard_depth + 2*t) * Math.sin(15 * Math.PI / 180)
+                  + (this.front + t) * Math.cos(15 * Math.PI / 180));
         this.bottom = ((this.y - 40) - (0.5 * t));
         this.backwall = (this.h - 40);
         this.rectangularWall(width, this.bottom, "efff", {move: "up"});
