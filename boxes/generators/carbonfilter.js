@@ -67,9 +67,9 @@ class CarbonFilter extends Boxes {
         }
         this.moveTo(0, t);
         for (let i = 0; i < n; i += 1) {
-            this.edges["f"](20);
+            this.edges["f"].draw(20);
             this.polyline(0, (90 - a), (l - 50), 90, t, -90);
-            this.edges["f"](30);
+            this.edges["f"].draw(30);
             this.polyline(0, (90 + a), (20 - t), (90 - a), ((l - 20) + (t * Math.sin(a_))), (90 + a));
             this.moveTo((20 + this.spacing));
             this.ctx.stroke();
@@ -145,9 +145,9 @@ class CarbonFilter extends Boxes {
             else {
                 this.polyline(((l - dl) - (t * Math.sin(a_))), (2 * a), dll, (180 - (2 * a)), 20);
             }
-            this.edges["f"](30);
+            this.edges["f"].draw(30);
             this.polyline(0, -90, t, 90, (l - 50), a, t, -90);
-            this.edges["f"]((4 * t));
+            this.edges["f"].draw((4 * t));
             this.polyline(0, 90, (1 * t), [90, (2 * t)]);
             this.moveTo((t + 40));
             if ((i + 1) === Math.floor(n / 2)) {
@@ -167,17 +167,17 @@ class CarbonFilter extends Boxes {
         this.w = ((x - (2 * t)) / this.pockets);
         this.a = (Math.atan((((this.w - 100) / 2) / (h - (4 * t)))) * 180 / Math.PI);
         for (let i = 0; i < 2; i += 1) {
-            this.rectangularWall(x, h, {callback: [this.sideCB], move: "up"});
+            this.rectangularWall(x, h, "eeee", {callback: [this.sideCB.bind(this)], move: "up"});
         }
         for (let i = 0; i < 2; i += 1) {
             this.rectangularWall(y, 50, "efef", {label: "Sides", move: "up"});
         }
         for (let i = 0; i < (this.pockets * 4); i += 1) {
-            this.rectangularWall(y, 50, "efef", {callback: [this.topRailCB], label: "Top rails", move: "up"});
+            this.rectangularWall(y, 50, "efef", {callback: [this.topRailCB.bind(this)], label: "Top rails", move: "up"});
         }
         let w = (100 - (2 * t));
         for (let i = 0; i < this.pockets; i += 1) {
-            this.rectangularWall(y, w, "efef", {callback: [this.bottomCB, null, this.bottomCB], label: "bottom plate", move: "up"});
+            this.rectangularWall(y, w, "efef", {callback: [this.bottomCB.bind(this), null, this.bottomCB.bind(this)], label: "bottom plate", move: "up"});
         }
         this.innerRibs(((this.pockets * this.ribs) * 2), {move: "up"});
         this.outerRibs(((this.pockets * this.ribs) * 2), (this.ribs * 2), {move: "up"});
