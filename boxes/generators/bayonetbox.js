@@ -49,7 +49,7 @@ class BayonetBox extends Boxes {
             }
             this.moveTo((d / 2), (d / 2));
         }
-        this.alignmentHoles(true, false);
+        this.alignmentHoles(true, true);
         this.hole(0, 0, {r: ((d / 2) - (2.5 * t))});
         this.moveTo(((d / 2) - (1.5 * t)), 0, -90);
         for (let i = 0; i < l; i += 1) {
@@ -101,15 +101,15 @@ class BayonetBox extends Boxes {
         if (!this.outside) {
         }
         console.log("Calling disc 1");
-        this.parts.disc(d, 0, 1.0, () => this.alignmentHoles(false, false), "right");
+        this.parts.disc(d, 0, 1.0, () => this.alignmentHoles(false, true), "right");
         console.log("Calling disc 2");
-        this.parts.disc(d, 0, 1.0, () => [this.alignmentHoles(), this.hole(0, 0, ((d / 2) - (1.5 * t)))], "right");
+        this.parts.disc(d, 0, 1.0, () => [this.alignmentHoles(false,true), this.hole(0, 0, ((d / 2) - (1.5 * t)))], "right");
         console.log("Calling disc 3");
         this.parts.disc(d, 0, 1.0, () => this.lowerLayer(false, null), "right");
         console.log("Calling disc 4");
         this.parts.disc(d, 0, 1.0, () => this.upperCB(), "right");
         console.log("Calling disc 5");
-        this.parts.disc(d, 0, 1.0, () => this.alignmentHoles(), "right");
+        this.parts.disc(d, 0, 1.0, () => this.alignmentHoles(true,false), "right");
     }
 
 }
