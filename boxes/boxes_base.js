@@ -123,6 +123,17 @@ class Boxes {
         this.bottom_edge = "h";
         this.angle = 45.0; // Set default angle
 
+        // Apply defaults from argparser
+        if (this.argparser && this.argparser.arguments) {
+            for (const arg of this.argparser.arguments) {
+                if (arg.name && arg.default !== undefined) {
+                    // Remove -- prefix from argument name
+                    const paramName = arg.name.replace(/^--/, '');
+                    this[paramName] = arg.default;
+                }
+            }
+        }
+
         // Override with args
         for (const [key, value] of Object.entries(args)) {
             this[key] = value;

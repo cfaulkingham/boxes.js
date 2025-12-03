@@ -43,9 +43,9 @@ class BookHolder extends Boxes {
         }
         this.polyline(((max_height_back - offset_c) - this.radius), 0);
         this.corner([(90 + alpha), this.radius]);
-        this.edges.get(this.book_height);
+        this.edges["F"].draw(this.book_height);
         this.corner(-90);
-        this.edges.get(this.book_depth);
+        this.edges["F"].draw(this.book_depth);
         this.corner([(90 + beta), this.radius]);
         this.polyline(((max_height_front - offset_s) - this.radius), 90);
         this.move(total_width, total_height, move);
@@ -59,13 +59,13 @@ class BookHolder extends Boxes {
         this.moveTo(this.radius, 0);
         let h = (total_height - this.radius);
         let w = (this.width - (2 * this.radius));
-        this.edges.get(w);
+        this.edges["e"].draw(w);
         this.corner([90, this.radius]);
-        this.edges.get(h);
+        this.edges["e"].draw(h);
         this.corner(90);
-        this.edges.get(this.width);
+        this.edges["F"].draw(this.width);
         this.corner(90);
-        this.edges.get(h);
+        this.edges["e"].draw(h);
         this.corner([90, this.radius]);
         this.move(this.width, total_height, move);
     }
