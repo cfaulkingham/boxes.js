@@ -10,13 +10,13 @@ Converted all the geneators but I have not tested them.
 abox.js
 airpurifier.js
 angledbox.js
-angledcutjig.js
 basedbox.js
 bayonetbox.js
 breadbox.js
 bottletag.js
 
 # in progress
+angledcutjig.js
 arcade.js
 bottlestack.js
 birdhouse.js
