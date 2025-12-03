@@ -2311,41 +2311,44 @@ class FlexEdge extends BaseEdge {
             const pos = i * dist + leftover / 2;
 
             if (i % 2 !== 0) {
-                this.boxes.ctx.moveTo(pos, 0);
-                this.boxes.ctx.lineTo(pos, connection + sheight);
+                this.boxes.ctx.move_to(pos, 0);
+                this.boxes.ctx.line_to(pos, connection + sheight);
 
                 for (let j = 0; j < Math.floor((sections - 1) / 2); j++) {
-                    this.boxes.ctx.moveTo(pos, (2 * j + 1) * sheight + (2 * j + 2) * connection);
-                    this.boxes.ctx.lineTo(pos, (2 * j + 3) * (sheight + connection));
+                    this.boxes.ctx.move_to(pos, (2 * j + 1) * sheight + (2 * j + 2) * connection);
+                    this.boxes.ctx.line_to(pos, (2 * j + 3) * (sheight + connection));
                 }
 
                 if (sections % 2 === 0) {
-                    this.boxes.ctx.moveTo(pos, h_adj - sheight - connection);
-                    this.boxes.ctx.lineTo(pos, h_adj);
+                    this.boxes.ctx.move_to(pos, h_adj - sheight - connection);
+                    this.boxes.ctx.line_to(pos, h_adj);
                 }
             } else {
                 if (sections % 2 !== 0) {
-                    this.boxes.ctx.moveTo(pos, h_adj);
-                    this.boxes.ctx.lineTo(pos, h_adj - connection - sheight);
+                    this.boxes.ctx.move_to(pos, h_adj);
+                    this.boxes.ctx.line_to(pos, h_adj - connection - sheight);
 
                     for (let j = 0; j < Math.floor((sections - 1) / 2); j++) {
-                        this.boxes.ctx.moveTo(
+                        this.boxes.ctx.move_to(
                             pos, h_adj - ((2 * j + 1) * sheight + (2 * j + 2) * connection));
-                        this.boxes.ctx.lineTo(
+                        this.boxes.ctx.line_to(
                             pos, h_adj - (2 * j + 3) * (sheight + connection));
                     }
                 } else {
                     for (let j = 0; j < Math.floor(sections / 2); j++) {
-                        this.boxes.ctx.moveTo(pos,
+                        this.boxes.ctx.move_to(pos,
                                          h_adj - connection - 2 * j * (sheight + connection));
-                        this.boxes.ctx.lineTo(pos, h_adj - 2 * (j + 1) * (sheight + connection));
+                        this.boxes.ctx.line_to(pos, h_adj - 2 * (j + 1) * (sheight + connection));
                     }
                 }
             }
         }
 
-        this.boxes.ctx.moveTo(0, 0);
-        this.boxes.ctx.lineTo(x, 0);
+        // Draw the baseline like a normal edge and then advance
+        this.boxes.ctx.move_to(0, 0);
+        this.boxes.ctx.line_to(x, 0);
+        // Match the behavior of Boxes.edge(): move the local origin forward
+        this.boxes.ctx.translate(x, 0);
     }
 }
 

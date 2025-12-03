@@ -6,7 +6,8 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class BreadBox extends Boxes {
-    side(l, h, r, move) {
+    side(l, h, r, kw = {}) {
+        const { move = null } = kw;
         let t = this.thickness;
         if (this.move((l + (2 * t)), (h + (2 * t)), move, true)) {
             return;
@@ -25,15 +26,17 @@ class BreadBox extends Boxes {
         this.moveTo(0, 0, (a / 2));
         this.fingerHolesAt(0, (0.5 * t), ((l / 2) - r), 0);
         this.ctx.restore();
-        this.edges["f"](l);
+        // Use edge objects via their .draw() methods
+        this.edges["f"].draw(l);
         this.polyline(t, 90, (h - r), [90, (r + t)], ((l / 2) - r), 90, t, -90, 0);
-        this.edges["f"]((l / 2));
+        this.edges["f"].draw(l / 2);
         this.polyline(0, 90);
-        this.edges["f"](h);
+        this.edges["f"].draw(h);
         this.move((l + (2 * t)), (h + (2 * t)), move);
     }
 
-    cornerRadius(r, two, move) {
+    cornerRadius(r, kw = {}) {
+        const { two = false, move = null } = kw;
         let s = this.spacing;
         if (this.move(r, (r + s), move, true)) {
             return;
@@ -45,7 +48,8 @@ class BreadBox extends Boxes {
         this.move(r, (r + s), move);
     }
 
-    rails(l, h, r, move) {
+    rails(l, h, r, kw = {}) {
+        const { move = null } = kw;
         let t = this.thickness;
         let s = this.spacing;
         let tw;
@@ -58,31 +62,60 @@ class BreadBox extends Boxes {
         this.polyline(((l / 2) - r), [90, (r + t)], (h - r), 90, t, 90, (h - r), [-90, r], ((l / 2) - r), 90, t, 90);
         this.moveTo((-t - s), (t + s));
         this.polyline(((l / 2) - r), [90, (r + t)], (h - r), 90, t, 90, (h - r), [-90, r], ((l / 2) - r), 90, t, 90);
-        this.moveTo((!t - s), (t + s));
+        // The original Python uses (-t - s); translate that directly
+        this.moveTo((-t - s), (t + s));
         this.polyline(((l / 2) - r), [90, (r - (1.5 * t))], (h - r), 90, t, 90, (h - r), [-90, (r - (2.5 * t))], ((l / 2) - r), 90, t, 90);
         this.moveTo((-t - s), (t + s));
         this.polyline(((l / 2) - r), [90, (r - (1.5 * t))], (h - r), 90, t, 90, (h - r), [-90, (r - (2.5 * t))], ((l / 2) - r), 90, t, 90);
         this.move(tw, th, move);
     }
 
-    door(l, h, move) {
+    door(l, h, kw = {}) {
+        const { move = null } = kw;
         let t = this.thickness;
         if (this.move(l, h, move, true)) {
             return;
         }
         this.fingerHolesAt(t, t, (h - (2 * t)));
         this.edge((2 * t));
-        this.edges["X"]((l - (2 * t)), h);
+        // Flex edge 'X' takes (length, height)
+        if (this.edges["X"] && typeof this.edges["X"].draw === "function") {
+            this.edges["X"].draw((l - (2 * t)), h);
+        } else {
+            // Fallback: just draw a straight edge if flex edge is unavailable
+            this.edge(l - (2 * t));
+        }
         this.polyline(0, 90, h, 90, l, 90, h, 90);
         this.move(l, h, move);
     }
 
     constructor() {
         super();
+        // Finger joints (standard 'f'/'F' edges are created in _buildObjects)
         this.addSettingsArgs(edges.FingerJointSettings, {surroundingspaces: 0.5});
-        this.addSettingsArgs(edges.FlexSettings, {distance: 0.75, connection: 2.0});
+
+        // NOTE: Flex edge 'X' must be created AFTER the base _buildObjects()
+        // runs (which resets this.edges). We therefore register it in
+        // a BreadBox-specific _buildObjects override instead of here.
+
         // this.buildArgParser();
         this.argparser.add_argument("--radius", {action: "store", type: "float", default: 40.0, help: "radius of the corners"});
+    }
+
+    _buildObjects() {
+        // First let the base class create its standard edges and parts
+        super._buildObjects();
+
+        // Flex edge for the sliding door (register as 'X'). We do this
+        // here so that it survives the base _buildObjects() reset, and
+        // so it uses the final thickness from parseArgs().
+        const flexSettings = new edges.FlexSettings(this.thickness, true, {
+            distance: 0.75,
+            connection: 2.0,
+        });
+        const flexEdge = new edges.FlexEdge(this, flexSettings);
+        flexEdge.char = 'X';
+        this.addPart(flexEdge);
     }
 
     render() {
@@ -91,8 +124,18 @@ class BreadBox extends Boxes {
         let h;
         let r;
         [x, y, h, r] = [this.x, this.y, this.h, this.radius];
+
+        // Upstream: self.n = n = 3
+        this.n = 3;
+        const n = this.n;
+
+        // Upstream: default and clamp radius based on h
         if (!r) {
+            r = h / 2;
         }
+        r = Math.min(r, h / 2);
+        this.radius = r;
+
         let t = this.thickness;
         this.ctx.save();
         this.side(x, h, r, {move: "right"});
@@ -103,11 +146,17 @@ class BreadBox extends Boxes {
         this.rectangularWall(x, y, "FEFF", {move: "right"});
         this.rectangularWall((x / 2), y, "FeFF", {move: "right"});
         this.door((((((x / 2) + h) - (2 * r)) + ((0.5 * Math.PI) * r)) + (2 * t)), (y - (0.2 * t)), {move: "right"});
-        this.rectangularWall((2 * t), (y - (2.2 * t)), {edges: "eeef", move: "right"});
-        let a = (90.0 / n);
-        let ls = ((2 * Math.sin(((a / 2) * Math.PI / 180))) * (r - (2.5 * t)));
-        edges.FingerJointSettings.edgeObjects(this, {chars: "aA"});
-        edges.FingerJointSettings.edgeObjects(this, {chars: "bB"});
+        // rectangularWall(x, y, edges, kw)
+        this.rectangularWall((2 * t), (y - (2.2 * t)), "eeef", {move: "right"});
+
+        const a = (90.0 / n);
+        const ls = (2 * Math.sin(((a / 2) * Math.PI / 180))) * (r - (2.5 * t));
+
+        // Upstream:
+        //   edges.FingerJointSettings(t, angle=a).edgeObjects(self, chars="aA")
+        //   edges.FingerJointSettings(t, angle=a/2).edgeObjects(self, chars="bB")
+        new edges.FingerJointSettings(t, true, { angle: a }).edgeObjects(this, "aA");
+        new edges.FingerJointSettings(t, true, { angle: a / 2 }).edgeObjects(this, "bB");
         this.rectangularWall((h - r), y, "fbfe", {move: "right"});
         this.rectangularWall(ls, y, "fafB", {move: "right"});
         for (let i = 0; i < (n - 2); i += 1) {

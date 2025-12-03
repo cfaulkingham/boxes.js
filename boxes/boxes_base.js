@@ -302,6 +302,16 @@ class Boxes {
     }
 
     move(x, y, where, before=false, label="") {
+        // Allow both a plain string (e.g. "right") or an options object
+        // (e.g. { move: "right" }) for backward compatibility with
+        // translated generators.
+        if (where && typeof where === 'object') {
+            if (typeof where.move === 'string') {
+                where = where.move;
+            } else {
+                where = '';
+            }
+        }
         if (!where) where = "";
         const terms = where.split(/\s+/);
         const dontdraw = before && terms.includes("only");
