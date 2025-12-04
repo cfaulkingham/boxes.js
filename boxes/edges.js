@@ -815,7 +815,8 @@ class FingerJointEdge extends FingerJointBase {
 
     startwidth() {
         const widths = this.fingerLength(this.settings.angle);
-        return this.positive ? widths[0] : widths[1]; // Python: widths[self.positive] -> boolean as index? True=1, False=0. widths[0] if False??
+        // Python: return widths[self.positive]
+        // True is 1, False is 0. positive edge (f) returns widths[1], negative edge (F) returns widths[0]
         // Python: startwidth return widths[self.positive]
         // If self.positive is True (1), returns widths[1].
         // If self.positive is False (0), returns widths[0].

@@ -117,6 +117,15 @@ class Boxes {
         if (defaults.h !== undefined) {
             this.argparser.add_argument("--h", {action: "store", type: "float", default: defaults.h, help: "inner height in mm"});
         }
+        if (defaults.sx !== undefined) {
+            this.argparser.add_argument("--sx", {action: "store", type: "str", default: defaults.sx, help: "sections left to right in mm"});
+        }
+        if (defaults.sy !== undefined) {
+            this.argparser.add_argument("--sy", {action: "store", type: "str", default: defaults.sy, help: "sections back to front in mm"});
+        }
+        if (defaults.outside !== undefined) {
+            this.argparser.add_argument("--outside", {action: "store", type: "bool", default: defaults.outside, help: "treat dimensions as outside measurements"});
+        }
     }
 
     parseArgs(args) {
@@ -150,6 +159,29 @@ class Boxes {
             // Check for edge settings
             // e.g. FingerJoint_thickness
             // In python: if key.startswith(setting + '_'): ...
+        }
+        
+        // Parse sx and sy from string format (e.g., "65*4" -> [65, 65, 65, 65])
+        if (typeof this.sx === 'string') {
+            this.sx = this._parseSections(this.sx);
+        }
+        if (typeof this.sy === 'string') {
+            this.sy = this._parseSections(this.sy);
+        }
+    }
+    
+    _parseSections(spec) {
+        // Parse section specification like "65*4" or "10:20:30"
+        // Returns an array of numbers
+        if (spec.includes('*')) {
+            const parts = spec.split('*');
+            const value = parseFloat(parts[0]);
+            const count = parseInt(parts[1]);
+            return Array(count).fill(value);
+        } else if (spec.includes(':')) {
+            return spec.split(':').map(v => parseFloat(v));
+        } else {
+            return [parseFloat(spec)];
         }
     }
 
@@ -364,9 +396,9 @@ class Boxes {
             if (!(term in moves)) throw new Error(`Unknown direction: ${term}`);
             const [mx, my, movebeforeprint] = moves[term];
 
-            if (movebeforeprint === true && before) {
+            if (movebeforeprint && before) {
                 this.moveTo(mx, my);
-            } else if ((movebeforeprint === false && !before) || dontdraw) {
+            } else if ((!movebeforeprint && !before) || dontdraw) {
                 this.moveTo(mx, my);
             }
         }

@@ -1,45 +1,66 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, BaseEdge, Settings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
-class InsetEdgeSettings extends Boxes {
+class InsetEdgeSettings extends Settings {
+    constructor() {
+        super();
+        this.absolute_params = {
+            thickness: 0
+        };
+    }
 }
 
 export { InsetEdgeSettings };
-class InsetEdge extends Boxes {
-    __call__(length) {
-        let t = this.settings.thickness;
-        this.corner(90);
-        this.edge(t, {tabs: 2});
-        this.corner(-90);
-        this.edge(length, {tabs: 2});
-        this.corner(-90);
-        this.edge(t, {tabs: 2});
-        this.corner(90);
+class InsetEdge extends BaseEdge {
+    constructor(boxes, settings) {
+        super(boxes, settings);
+        this.char = 'a';
     }
-
+    
+    draw(length, kw = {}) {
+        let t = this.settings.thickness;
+        this.boxes.corner(90);
+        this.boxes.edge(t, {tabs: 2});
+        this.boxes.corner(-90);
+        this.boxes.edge(length, {tabs: 2});
+        this.boxes.corner(-90);
+        this.boxes.edge(t, {tabs: 2});
+        this.boxes.corner(90);
+    }
 }
 
 export { InsetEdge };
-class FingerHoleEdgeSettings extends Boxes {
+class FingerHoleEdgeSettings extends Settings {
+    constructor() {
+        super();
+        this.absolute_params = {
+            wallheight: 0,
+            fingerholedepth: 0
+        };
+    }
 }
 
 export { FingerHoleEdgeSettings };
-class FingerHoleEdge extends Boxes {
-    __call__(length) {
-        let depth = (this.settings.fingerholedepth - 10);
-        this.edge(((length / 2) - 10), {tabs: 2});
-        this.corner(90);
-        this.edge(depth, {tabs: 2});
-        this.corner(-180, 10);
-        this.edge(depth, {tabs: 2});
-        this.corner(90);
-        this.edge(((length / 2) - 10), {tabs: 2});
+class FingerHoleEdge extends BaseEdge {
+    constructor(boxes, settings) {
+        super(boxes, settings);
+        this.char = 'A';
     }
-
+    
+    draw(length, kw = {}) {
+        let depth = (this.settings.fingerholedepth - 10);
+        this.boxes.edge(((length / 2) - 10), {tabs: 2});
+        this.boxes.corner(90);
+        this.boxes.edge(depth, {tabs: 2});
+        this.boxes.corner(-180, 10);
+        this.boxes.edge(depth, {tabs: 2});
+        this.boxes.corner(90);
+        this.boxes.edge(((length / 2) - 10), {tabs: 2});
+    }
 }
 
 export { FingerHoleEdge };
@@ -47,14 +68,14 @@ class CardBox extends Boxes {
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
-        // this.buildArgParser();
+        this.buildArgParser({y: 68, h: 92, outside: false, sx: "65*4"});
         this.argparser.add_argument("--openingdirection", {action: "store", type: "str", default: "front", choices: ["front", "right"], help: "Direction in which the lid slides open. Lid length > Lid width recommended."});
         this.argparser.add_argument("--fingerhole", {action: "store", type: "str", default: "regular", choices: ["regular", "deep", "custom"], help: "Depth of cutout to grab the cards"});
         this.argparser.add_argument("--fingerhole_depth", {action: "store", type: "float", default: 20, help: "Depth of cutout if fingerhole is set to 'custom'. Disabled otherwise."});
         this.argparser.add_argument("--add_lidtopper", {action: "store", type: BoolArg(), default: false, help: "Add an additional lid topper for optical reasons and customisation"});
     }
 
-    fingerholedepth() {
+    get fingerholedepth() {
         if (this.fingerhole === "custom") {
             return this.fingerhole_depth;
         }
@@ -76,18 +97,18 @@ class CardBox extends Boxes {
         }
     }
 
-    boxhight() {
+    get boxhight() {
         if (this.outside) {
             return (this.h - (3 * this.thickness));
         }
         return this.h;
     }
 
-    boxwidth() {
+    get boxwidth() {
         return (((this.sx.length + 1) * this.thickness) + this.sx.reduce((a, b) => a + b, 0));
     }
 
-    boxdepth() {
+    get boxdepth() {
         if (this.outside) {
             return (this.y - (2 * this.thickness));
         }
@@ -126,24 +147,25 @@ class CardBox extends Boxes {
         let y = this.boxdepth;
         let sx = this.sx;
         let s = new InsetEdgeSettings();
+        s.thickness = t;
         let p = new InsetEdge(this, s);
-        p.char = "a";
         this.addPart(p);
         s = new FingerHoleEdgeSettings();
+        s.wallheight = h;
+        s.fingerholedepth = this.fingerholedepth;
         p = new FingerHoleEdge(this, s);
-        p.char = "A";
         this.addPart(p);
         if (this.openingdirection === "right") {
             this.ctx.save();
             this.rectangularWall(x, (y - (t * 0.2)), "eFee", {move: "right", label: "Lid"});
-            this.rectangularWall(x, y, "ffff", {callback: [this.divider_bottom], move: "right", label: "Bottom"});
+            this.rectangularWall(x, y, "ffff", {callback: [this.divider_bottom.bind(this)], move: "right", label: "Bottom"});
             this.ctx.restore();
             this.rectangularWall(x, y, "eEEE", {move: "up only"});
             this.rectangularWall(x, t, "feee", {move: "up", label: "Lip Front"});
             this.rectangularWall(x, t, "eefe", {move: "up", label: "Lip Back"});
             this.ctx.save();
-            this.rectangularWall(x, (h + t), "FfFf", {callback: [this.divider_back_and_front], move: "right", label: "Back"});
-            this.rectangularWall(x, (h + t), "FfFf", {callback: [this.divider_back_and_front], move: "right", label: "Front"});
+            this.rectangularWall(x, (h + t), "FfFf", {callback: [this.divider_back_and_front.bind(this)], move: "right", label: "Back"});
+            this.rectangularWall(x, (h + t), "FfFf", {callback: [this.divider_back_and_front.bind(this)], move: "right", label: "Front"});
             this.ctx.restore();
             this.rectangularWall(x, (h + t), "EEEE", {move: "up only"});
             this.ctx.save();
@@ -175,13 +197,13 @@ class CardBox extends Boxes {
             if (this.openingdirection === "front") {
                 this.ctx.save();
                 this.rectangularWall((x - (t * 0.2)), y, "eeFe", {move: "right", label: "Lid"});
-                this.rectangularWall(x, y, "ffff", {callback: [this.divider_bottom], move: "right", label: "Bottom"});
+                this.rectangularWall(x, y, "ffff", {callback: [this.divider_bottom.bind(this)], move: "right", label: "Bottom"});
                 this.ctx.restore();
                 this.rectangularWall(x, y, "eEEE", {move: "up only"});
                 this.rectangularWall((x - (t * 0.2)), t, "fEeE", {move: "up", label: "Lid Lip"});
                 this.ctx.save();
-                this.rectangularWall(x, (h + t), "FFEF", {callback: [this.divider_back_and_front], move: "right", label: "Back"});
-                this.rectangularWall(x, (h + t), "FFaF", {callback: [this.divider_back_and_front], move: "right", label: "Front"});
+                this.rectangularWall(x, (h + t), "FFEF", {callback: [this.divider_back_and_front.bind(this)], move: "right", label: "Back"});
+                this.rectangularWall(x, (h + t), "FFaF", {callback: [this.divider_back_and_front.bind(this)], move: "right", label: "Front"});
                 this.ctx.restore();
                 this.rectangularWall(x, (h + t), "EEEE", {move: "up only"});
                 this.ctx.save();
