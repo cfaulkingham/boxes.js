@@ -112,9 +112,10 @@ class Parts {
         }
 
         for (let i = 0; i < n; i++) {
+            const tabs = (i % Math.max(1, Math.floor((n + 1) / 6)) === 0);
             this.boxes.corner(a, r);
             this.boxes.corner(angle);
-            this.boxes.corner(360 / n * rounded, diameter / 2, tabs = (i % Math.max(1, Math.floor((n + 1) / 6)) === 0));
+            this.boxes.corner(360 / n * rounded, diameter / 2, tabs);
             this.boxes.corner(angle);
         }
 

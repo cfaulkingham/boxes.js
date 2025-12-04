@@ -14,29 +14,29 @@ basedbox.js
 bayonetbox.js
 breadbox.js
 bottletag.js
-
-# in progress
 angledcutjig.js
 arcade.js
 bottlestack.js
 birdhouse.js
 bookholder.js
-
-# Not Working not tested
-agricolainsert.js
-alledges.js
-atreus21.js
-beequeentransportbox.js
-
 brick_sorter.js
-burntest.js
-can_storage.js
 carbonfilter.js
 cardbox.js
 cardholder.js
 castle.js
 clock.js
 closedbox.js
+
+# in progress
+
+
+# Not Working not tested
+agricolainsert.js
+alledges.js
+atreus21.js
+beequeentransportbox.js
+burntest.js
+can_storage.js
 coffeecapsulesholder.js
 coinbanksafe.js
 coindisplay.js
