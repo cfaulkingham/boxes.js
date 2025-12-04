@@ -9,7 +9,7 @@ class CarbonFilter extends Boxes {
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
-        // this.buildArgParser();
+        this.buildArgParser({x: 550, y: 550, h: 250});
         this.argparser.add_argument("--pockets", {action: "store", type: "int", default: 3, help: "number of V shaped filter pockets"});
         this.argparser.add_argument("--ribs", {action: "store", type: "int", default: 12, help: "number of ribs to hold the bottom and the mesh"});
     }
@@ -74,7 +74,7 @@ class CarbonFilter extends Boxes {
             this.moveTo((20 + this.spacing));
             this.ctx.stroke();
         }
-        this.move(tw, th, move, {label: "Inner ribs"});
+        this.move(tw, th, move, false, "Inner ribs");
     }
 
     sideHolders(n, move) {
@@ -96,7 +96,7 @@ class CarbonFilter extends Boxes {
             this.ctx.stroke();
             this.moveTo((10 + this.spacing));
         }
-        this.move(tw, th, move, {label: "Inner ribs"});
+        this.move(tw, th, move, false, "Side holders");
     }
 
     topStabilizers(n, move) {
@@ -115,7 +115,7 @@ class CarbonFilter extends Boxes {
             this.ctx.stroke();
             this.moveTo(((6 * t) + this.spacing));
         }
-        this.move(tw, th, move, {label: "Inner ribs"});
+        this.move(tw, th, move, false, "Top stabilizers");
     }
 
     outerRibs(n, n_edge, move) {
@@ -131,7 +131,7 @@ class CarbonFilter extends Boxes {
         let dll = ((20 - t) * (1 / Math.sin((2 * a_))));
         let dl2 = ((20 - t) * (Math.tan(((Math.PI / 2) - a_)) + Math.sin(a_)));
         let dll2 = ((20 - t) * (1 / Math.sin(a_)));
-        let tw = ((Math.floor(n / 2) * (40 + t)) + (l * Math.sin(a_)));
+        let tw = ((Math.floor(n / 2) * (40 + t + this.spacing)) + (l * Math.sin(a_)));
         let th = (h + (5 * t));
         if (this.move(tw, th, move, true)) {
             return;
@@ -149,13 +149,13 @@ class CarbonFilter extends Boxes {
             this.polyline(0, -90, t, 90, (l - 50), a, t, -90);
             this.edges["f"].draw((4 * t));
             this.polyline(0, 90, (1 * t), [90, (2 * t)]);
-            this.moveTo((t + 40));
+            this.moveTo((t + 40 + this.spacing));
             if ((i + 1) === Math.floor(n / 2)) {
                 this.moveTo(((2 * t) + (0.7 * this.spacing)), (h + (5 * t)), 180);
             }
             this.ctx.stroke();
         }
-        this.move(tw, th, move, {label: "Outer ribs"});
+        this.move(tw, th, move, false, "Outer ribs");
     }
 
     render() {
@@ -163,6 +163,7 @@ class CarbonFilter extends Boxes {
         let y;
         let h;
         [x, y, h] = [this.x, this.y, this.h];
+        this.y = y = this.adjustSize(y);
         let t = this.thickness;
         this.w = ((x - (2 * t)) / this.pockets);
         this.a = (Math.atan((((this.w - 100) / 2) / (h - (4 * t)))) * 180 / Math.PI);
@@ -182,7 +183,7 @@ class CarbonFilter extends Boxes {
         this.innerRibs(((this.pockets * this.ribs) * 2), {move: "up"});
         this.outerRibs(((this.pockets * this.ribs) * 2), (this.ribs * 2), {move: "up"});
         this.sideHolders((this.pockets * 8), {move: "up"});
-        this.topStabilizers((Math.min(3, this.ribs) * this.pockets));
+        this.topStabilizers((Math.min(3, this.ribs) * this.pockets), {move: "up"});
     }
 
 }

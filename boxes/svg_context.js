@@ -218,6 +218,8 @@ class SVGContext {
         }
         // Reset local position (like Python does)
         this._xy = { x: 0, y: 0 };
+        // Update _mxy to match the new local origin in global coordinates
+        this._mxy = this._toGlobal(0, 0);
         
         this._log('stroke() completed', {
             pathsCount: this.paths.length,

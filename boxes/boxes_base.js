@@ -106,8 +106,17 @@ class Boxes {
         // `_buildObjects` is called in `open`.
     }
 
-    buildArgParser(...args) {
-        // Mock
+    buildArgParser(defaults = {}) {
+        // Set up default argument values for x, y, h, etc.
+        if (defaults.x !== undefined) {
+            this.argparser.add_argument("--x", {action: "store", type: "float", default: defaults.x, help: "inner width in mm"});
+        }
+        if (defaults.y !== undefined) {
+            this.argparser.add_argument("--y", {action: "store", type: "float", default: defaults.y, help: "inner depth in mm"});
+        }
+        if (defaults.h !== undefined) {
+            this.argparser.add_argument("--h", {action: "store", type: "float", default: defaults.h, help: "inner height in mm"});
+        }
     }
 
     parseArgs(args) {
@@ -307,7 +316,7 @@ class Boxes {
         }
     }
 
-    moveTo(x, y, angle=0) {
+    moveTo(x, y=0, angle=0) {
         this.ctx.translate(x, y);
         this.ctx.rotate(angle * Math.PI / 180.0);
     }
