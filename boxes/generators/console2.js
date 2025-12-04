@@ -39,6 +39,10 @@ class Console2 extends Boxes {
     }
 
     latch(move) {
+        // Handle options object
+        if (move && typeof move === 'object') {
+            move = move.move || "";
+        }
         let t = this.thickness;
         let s = (0.1 * t);
         let tw;
@@ -71,8 +75,8 @@ class Console2 extends Boxes {
         let s = (0.1 * t);
         this.moveTo(posx, (2 * t), 180);
         let path = [(1.5 * t), -90, t, -90, (t - (0.5 * s)), 90];
-        path = ((path + [(2 * t)]) + list(reversed(path)));
-        path = ((path.slice(0, -1) + [(3 * t)]) + list(reversed(path.slice(0, -1))));
+        path = [...path, (2 * t), ...[...path].reverse()];
+        path = [...path.slice(0, -1), (3 * t), ...[...path.slice(0, -1)].reverse()];
         this.polyline(...path);
     }
 
@@ -92,11 +96,12 @@ class Console2 extends Boxes {
         this.rectangularHole((l - (3 * t)), (1.5 * t), (3 * t), (1.05 * t));
         this.rectangularHole((l / 2), (1.5 * t), (2 * t), t);
         if (this.glued_panel) {
-            this.polyline(...([l, 90, t, 90, t, -90, t, -90, t, 90, t, 90] * 2));
+            const pattern = [l, 90, t, 90, t, -90, t, -90, t, 90, t, 90];
+            this.polyline(...pattern, ...pattern);
         }
         else {
             this.polyline(l, 90, (3 * t), 90);
-            this.edges["f"](l);
+            this.edges["f"].draw(l);
             this.polyline(0, 90, (3 * t), 90);
         }
         this.move(tw, th, move);
@@ -113,7 +118,7 @@ class Console2 extends Boxes {
         }
         let end = [((l / 2) - (3 * t)), -90, (1.5 * t), [90, (0.5 * t)], t, [90, (0.5 * t)], t, 90, (0.5 * t), -90, (0.5 * t), -90, 0, [90, (0.5 * t)], 0, 90];
         this.moveTo(((l / 2) - t), (2 * t), -90);
-        this.polyline(...((([t, 90, (2 * t), 90, t, -90] + end) + [l]) + list(reversed(end))));
+        this.polyline(...[t, 90, (2 * t), 90, t, -90, ...end, l, ...[...end].reverse()]);
         this.move(tw, th, move);
     }
 
@@ -126,31 +131,39 @@ class Console2 extends Boxes {
             return;
         }
         this.moveTo(t, 0);
-        this.polyline(...([l, 90, t, -90, t, 90, t, 90, t, -90, t, 90] * 2));
+        const pattern = [l, 90, t, -90, t, 90, t, 90, t, -90, t, 90];
+        this.polyline(...pattern, ...pattern);
         this.move(tw, th, move);
     }
 
     side(borders, bottom, move, label) {
         let t = this.thickness;
-        bottom = this.edges.get(bottom, bottom);
+        // Handle options object
+        if (move && typeof move === 'object') {
+            label = move.label || "";
+            move = move.move || "";
+        }
+        if (typeof bottom === 'string') {
+            bottom = this.edges[bottom] || this.edges['e'];
+        }
         let tw = (borders[0] + (2 * this.edges["f"].spacing()));
-        let th = ((borders[-2] + bottom.spacing()) + this.edges["f"].spacing());
+        let th = ((borders.at(-2) + bottom.spacing()) + this.edges["f"].spacing());
         if (this.move(tw, th, move, true)) {
             return;
         }
         let d1 = (t * Math.cos((this.angle * Math.PI / 180)));
         let d2 = (t * Math.sin((this.angle * Math.PI / 180)));
         this.moveTo(t, 0);
-        bottom(borders[0]);
+        bottom.draw(borders[0]);
         this.corner(90);
-        this.edges["f"](((borders[2] + bottom.endwidth()) - d1));
+        this.edges["f"].draw(((borders[2] + bottom.endwidth()) - d1));
         this.edge(d1);
         this.corner(borders[3]);
         if (this.removable_panel) {
             this.rectangularHole((3 * t), (1.5 * t), (2.5 * t), (1.05 * t));
         }
         if ((!this.removable_panel && !this.glued_panel)) {
-            this.edges["f"](borders[4]);
+            this.edges["f"].draw(borders[4]);
         }
         else {
             this.edge(borders[4]);
@@ -161,19 +174,19 @@ class Console2 extends Boxes {
         if (borders.length === 10) {
             this.corner(borders[5]);
             this.edge(d2);
-            this.edges["f"]((borders[6] - d2));
+            this.edges["f"].draw((borders[6] - d2));
         }
-        this.corner(borders[-3]);
+        this.corner(borders.at(-3));
         if (this.removable_backwall) {
             this.rectangularHole(this.latchpos, (1.55 * t), (1.1 * t), (1.1 * t));
-            this.edge((borders[-2] - t));
-            this.edges["f"]((t + bottom.startwidth()));
+            this.edge((borders.at(-2) - t));
+            this.edges["f"].draw((t + bottom.startwidth()));
         }
         else {
-            this.edges["f"]((borders[-2] + bottom.startwidth()));
+            this.edges["f"].draw((borders.at(-2) + bottom.startwidth()));
         }
-        this.corner(borders[-1]);
-        this.move(tw, th, move, {label: label});
+        this.corner(borders.at(-1));
+        this.move(tw, th, move, false, label);
     }
 
     render() {
@@ -182,7 +195,7 @@ class Console2 extends Boxes {
         let h;
         [x, y, h] = [this.x, this.y, this.h];
         let t = this.thickness;
-        let bottom = this.edges.get(this.bottom_edge);
+        let bottom = this.edges[this.bottom_edge] || this.edges['e'];
         let back_top_edge = "e";
         let top_back_edge = "e";
         if (!this.removable_backwall) {
@@ -193,6 +206,11 @@ class Console2 extends Boxes {
         }
         let d1 = (t * Math.cos((this.angle * Math.PI / 180)));
         let d2 = (t * Math.sin((this.angle * Math.PI / 180)));
+        
+        // Initialize latchpos
+        this.latchpos = 6 * t;
+        const latchpos = this.latchpos;
+        
         let borders = this.borders();
         this.side(borders, bottom, {move: "right", label: "Left Side"});
         this.side(borders, bottom, {move: "right", label: "Right Side"});
@@ -213,13 +231,13 @@ class Console2 extends Boxes {
             this.rectangularWall((borders[6] - d2), x, ["F", "E", "F", top_back_edge], {move: "right", label: "Top"});
         }
         if (this.removable_backwall) {
-            this.rectangularWall((borders[-2] - (1.05 * t)), x, "EeEe", {callback: [() => this.latch_hole(latchpos), () => this.fingerHolesAt((0.5 * t), 0, ((borders[-2] - (4.05 * t)) - latchpos)), () => this.latch_hole(((borders[-2] - (1.2 * t)) - latchpos)), () => this.fingerHolesAt((0.5 * t), ((3.05 * t) + latchpos), ((borders[-2] - (4.05 * t)) - latchpos))], move: "right", label: "Back Wall"});
-            this.rectangularWall((2 * t), ((borders[-2] - (4.05 * t)) - latchpos), "EeEf", {move: "right", label: "Guide"});
-            this.rectangularWall((2 * t), ((borders[-2] - (4.05 * t)) - latchpos), "EeEf", {move: "right", label: "Guide"});
+            this.rectangularWall((borders.at(-2) - (1.05 * t)), x, "EeEe", {callback: [() => this.latch_hole(this.latchpos), () => this.fingerHolesAt((0.5 * t), 0, ((borders.at(-2) - (4.05 * t)) - this.latchpos)), () => this.latch_hole(((borders.at(-2) - (1.2 * t)) - this.latchpos)), () => this.fingerHolesAt((0.5 * t), ((3.05 * t) + this.latchpos), ((borders.at(-2) - (4.05 * t)) - this.latchpos))], move: "right", label: "Back Wall"});
+            this.rectangularWall((2 * t), ((borders.at(-2) - (4.05 * t)) - this.latchpos), "EeEf", {move: "right", label: "Guide"});
+            this.rectangularWall((2 * t), ((borders.at(-2) - (4.05 * t)) - this.latchpos), "EeEf", {move: "right", label: "Guide"});
             this.rectangularWall(t, x, ["F", bottom, "F", "e"], {ignore_widths: [0, 3], move: "right", label: "Bottom Back"});
         }
         else {
-            this.rectangularWall(borders[-2], x, ["F", bottom, "F", back_top_edge], {ignore_widths: [0, 3], move: "right", label: "Back Wall"});
+            this.rectangularWall(borders.at(-2), x, ["F", bottom, "F", back_top_edge], {ignore_widths: [0, 3], move: "right", label: "Back Wall"});
         }
         if (this.removable_panel) {
             if (this.glued_panel) {
