@@ -1395,11 +1395,12 @@ class Boxes {
          this.restore(() => {
             this.holeCol(() => {
                 r = Math.min(r, dx/2., dy/2.);
-                const x_start = center_x ? x : x + dx / 2.0;
-                const y_start = center_y ? y : y - dy / 2.0; // python logic check: y - dy/2 if center_y else y?
+                // Python: x_start = x - dx / 2.0 if center_x else x
                 // Python: y_start = y - dy / 2.0 if center_y else y
+                const x_start = center_x ? x - dx / 2.0 : x;
+                const y_start = center_y ? y - dy / 2.0 : y;
 
-                this.moveTo(x_start, y_start + this.burn, 180);
+                this.moveTo(x_start + dx / 2.0, y_start + this.burn, 180);
                 this.edge(dx / 2.0 - r);
                 for (const d of [dy, dx, dy, dx/2.0 + r]) {
                     this.corner(-90, r);

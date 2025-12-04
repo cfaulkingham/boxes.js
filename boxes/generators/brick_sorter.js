@@ -19,8 +19,13 @@ class BrickSorter extends Boxes {
         
         this.edge_width = 3;
         
+        // Store default dimensions to be applied after parseArgs
+        this._default_x = 256;
+        this._default_y = 256;
+        this._default_h = 120;
+        
         this.addSettingsArgs(edges.FingerJointSettings, {edge_width: this.edge_width});
-        // this.buildArgParser();
+        this.buildArgParser({x: 256, y: 256, h: 120});
         this.level_desc = Object.keys(this.sieve_sizes).concat(["bottom"]);
         this.argparser.add_argument("--level", {action: "store", type: "str", default: "large_sieve", choices: this.level_desc, help: "Level of the nestable sieve"});
         this.argparser.add_argument("--radius", {action: "store", type: "int", default: 3, help: "Radius of the corners of the sieve pattern in mm. Enter 30 for circular holes."});
@@ -32,6 +37,14 @@ class BrickSorter extends Boxes {
         //         action.help = "outer width of the most outer layer";
         //     }
         // }
+    }
+
+    parseArgs(args) {
+        super.parseArgs(args);
+        // Apply BrickSorter-specific defaults if not provided in args
+        if (args.x === undefined) this.x = this._default_x;
+        if (args.y === undefined) this.y = this._default_y;
+        if (args.h === undefined) this.h = this._default_h;
     }
 
     _sieve_grid_thickness() {
@@ -84,13 +97,26 @@ class BrickSorter extends Boxes {
         let y_offset;
         [y_count, y_offset] = this._calc_grid_size_width_offset(y);
         let size = this._level_hole_size();
+        
+        // Position holes from top-right corner, going left and down
+        // Matching Python implementation exactly
         for (let relx = 0; relx < x_count; relx += 1) {
             for (let rely = 0; rely < y_count; rely += 1) {
-                // Calculate center position of each hole
-                let x_pos = ((((x - x_offset) - size / 2) - (relx * (size + this._sieve_grid_thickness()))) - this._sieve_grid_thickness());
-                let y_pos = ((((y - y_offset) - size / 2) - (rely * (size + this._sieve_grid_thickness()))) - this._sieve_grid_thickness());
-                // Use center_x=true, center_y=true to position by center point
-                this.rectangularHole(x_pos, y_pos, size, size, this.radius, true, true);
+                let x_pos = (
+                    x
+                    - x_offset
+                    - size
+                    - relx * (size + this._sieve_grid_thickness())
+                    - this._sieve_grid_thickness()
+                );
+                let y_pos = (
+                    y
+                    - y_offset
+                    - size
+                    - rely * (size + this._sieve_grid_thickness())
+                    - this._sieve_grid_thickness()
+                );
+                this.rectangularHole(x_pos, y_pos, size, size, this.radius, false, false);
             }
         }
     }
