@@ -32,7 +32,7 @@ class Clock extends Boxes {
         this.rectangularHole((Re + (Rm * Math.sin(At))), (Re - (Rm * Math.cos(At))), (t + this.burn), (t - this.burn));
         this.hole(Re, Re, {d: this.NeedlesAxisHoleDiameter});
         this.circle(Re, Re, Re);
-        this.move((Re * 2), (Re * 2), move, {label: label});
+        this.move((Re * 2), (Re * 2), move, false, label);
     }
 
     frontRing(move, label) {
@@ -43,7 +43,7 @@ class Clock extends Boxes {
         }
         this.hole(Re, Re, {r: Ri});
         this.circle(Re, Re, Re);
-        this.move((Re * 2), (Re * 2), move, {label: label});
+        this.move((Re * 2), (Re * 2), move, false, label);
     }
 
     frontLegs(move, label) {
@@ -61,7 +61,7 @@ class Clock extends Boxes {
         }
         this.moveTo(Tf, 0);
         this.polyline((Tf * 2), [(90 - Afd), (Tf / 2)], (Tf + ((Rm * (1 - Math.cos(Af))) / Math.cos(Af))), (-90 + Afd), ((((Rm * 2) * Math.sin(Ab)) - t) - (Tf * 2)), (-90 + Afd), (Tf + ((Rm * (1 - Math.cos(Af))) / Math.cos(Af))), [(90 - Afd), (Tf / 2)], (Tf * 2), [180, (Tf / 2)], Tf, [(-90 + Afd), (Tf / 2)], (Tf + ((Rm * (1 - Math.cos(Af))) / Math.cos(Af))), (90 - Afd), t, -90, (t + (Rm * (Math.cos(Ab) - Math.cos(At)))), 90, (((Rm * 2) * Math.sin(Ab)) - (t * 3)), 90, (t + (Rm * (Math.cos(Ab) - Math.cos(At)))), -90, t, (90 - Afd), (Tf + ((Rm * (1 - Math.cos(Af))) / Math.cos(Af))), [(-90 + Afd), (Tf / 2)], Tf, [180, (Tf / 2)]);
-        this.move(((((Tf * 4) + ((Rm * (1 - Math.cos(Af))) / Math.sin(Af))) + ((Rm * 2) * Math.sin(Ab))) - (t * 3)), ((((Tf * 2) + (Rm * (1 - Math.cos(Af)))) + (t * 2)) + (Rm * (Math.cos(Ab) - Math.cos(At)))), move, {label: label});
+        this.move(((((Tf * 4) + ((Rm * (1 - Math.cos(Af))) / Math.sin(Af))) + ((Rm * 2) * Math.sin(Ab))) - (t * 3)), ((((Tf * 2) + (Rm * (1 - Math.cos(Af)))) + (t * 2)) + (Rm * (Math.cos(Ab) - Math.cos(At)))), move, false, label);
     }
 
     backLeg(move, label) {
@@ -77,7 +77,7 @@ class Clock extends Boxes {
             return;
         }
         this.polyline(t, (90 + (this.burn / 2)), t, -90, (t - this.burn), -90, t, 90, (((Rm * (Math.cos(Ab) - Math.cos(At))) - t) + this.burn), 90, t, -90, (t - this.burn), -90, t, 90, ((((Tf * 2) - t) + (Rm * (1 - Math.cos(Af)))) + (this.burn / 2)), [180, t], (((((t * 2) + (Tf * 2)) - t) + (Rm * (1 - Math.cos(Af)))) + (Rm * (Math.cos(Ab) - Math.cos(At)))), 90, (t * 2), 90);
-        this.move(((((t * 2) + (Tf * 3)) + (Rm * (1 - Math.cos(Af)))) + (Rm * (Math.cos(Ab) - Math.cos(At)))), (t * 2), move, {label: label});
+        this.move(((((t * 2) + (Tf * 3)) + (Rm * (1 - Math.cos(Af)))) + (Rm * (Math.cos(Ab) - Math.cos(At)))), (t * 2), move, false, label);
     }
 
     legsSupport(width, move, label) {
@@ -94,7 +94,7 @@ class Clock extends Boxes {
             return;
         }
         this.polyline(t, 90, t, -90, t, 90, t, -90, (width - (t * 3)), -90, t, 90, t, -90, t, 90, t, 90, ((h + (t * 2)) - Rc), [90, Rc], (((width / 2) + (this.burn / 2)) - Rc), 90, t, -90, (t - this.burn), -90, t, 90, (((width / 2) + (this.burn / 2)) - Rc), [90, Rc], ((h + (t * 2)) - Rc), 90);
-        this.move((width + t), (h + (t * 3)), move, {label: label});
+        this.move((width + t), (h + (t * 3)), move, false, label);
     }
 
     render() {
