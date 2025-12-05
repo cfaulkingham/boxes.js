@@ -330,9 +330,46 @@ class SVGContext {
     }
 
     set_font(style, bold, italic) {} // Stub
-    show_text(text, args) {} // Stub
+    
+    show_text(text, fontsize=10, halign="left", color=[0,0,0], font="Arial") {
+        // Store text elements to render in SVG
+        const pos = this._toGlobal(0, 0);
+        if (!this.textElements) {
+            this.textElements = [];
+        }
+        
+        // Map halign to SVG text-anchor
+        const anchorMap = {
+            "left": "start",
+            "middle": "middle",
+            "center": "middle",
+            "end": "end",
+            "right": "end"
+        };
+        const textAnchor = anchorMap[halign] || "start";
+        
+        this.textElements.push({
+            text: text,
+            x: pos.x,
+            y: pos.y,
+            fontsize: fontsize,
+            color: color,
+            font: font,
+            anchor: textAnchor
+        });
+    }
     new_part() {
         this.stroke();
+    }
+    
+    // Helper to escape XML special characters
+    _escapeXml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
     }
 
     // Helpers for Python compatibility
@@ -401,6 +438,18 @@ class SVGContext {
         for (const p of this.paths) {
              svg += `    <path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" />\n`;
         }
+        
+        // Add text elements
+        if (this.textElements && this.textElements.length > 0) {
+            for (const t of this.textElements) {
+                const r = Math.round(t.color[0] * 255);
+                const g = Math.round(t.color[1] * 255);
+                const b = Math.round(t.color[2] * 255);
+                const fillColor = `rgb(${r},${g},${b})`;
+                svg += `    <text x="${t.x.toFixed(2)}" y="${t.y.toFixed(2)}" font-family="${t.font}" font-size="${t.fontsize}px" fill="${fillColor}" text-anchor="${t.anchor}">${this._escapeXml(t.text)}</text>\n`;
+            }
+        }
+        
         svg += `  </g>\n</svg>`;
         return svg;
     }
