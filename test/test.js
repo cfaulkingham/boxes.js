@@ -133,6 +133,8 @@ async function testGenerator(name, genericOpts = {}, generatorArgs = []) {
             
             // Build properties object from args
             const props = {};
+            const settingsProps = {}; // For settings like lid_* that need special handling
+            
             for (let i = 0; i < generatorArgs.length; i++) {
                 const arg = generatorArgs[i];
                 if (arg.startsWith('--')) {
@@ -140,24 +142,54 @@ async function testGenerator(name, genericOpts = {}, generatorArgs = []) {
                     const value = generatorArgs[i + 1];
                     
                     // Check if next arg is a value or another option
+                    let parsedValue;
                     if (value && !value.startsWith('--')) {
                         // Try to parse as number if it looks like one
                         const numValue = parseFloat(value);
-                        props[key] = isNaN(numValue) ? value : numValue;
+                        parsedValue = isNaN(numValue) ? value : numValue;
                         i++; // Skip the value in next iteration
                     } else {
                         // Boolean flag
-                        props[key] = true;
+                        parsedValue = true;
+                    }
+                    
+                    // Check if this is a settings parameter (e.g., lid_style, lid_height)
+                    if (key.includes('_')) {
+                        const [settingsPrefix, ...settingKeyParts] = key.split('_');
+                        const settingKey = settingKeyParts.join('_');
+                        if (!settingsProps[settingsPrefix]) {
+                            settingsProps[settingsPrefix] = {};
+                        }
+                        settingsProps[settingsPrefix][settingKey] = parsedValue;
+                    } else {
+                        props[key] = parsedValue;
                     }
                 }
             }
             
             if (genericOpts.verbose) {
                 console.log('Applying generator properties:', props);
+                console.log('Applying settings properties:', settingsProps);
             }
             
             // Apply properties directly to box instance
             Object.assign(box, props);
+            
+            // Apply settings properties to appropriate settings objects
+            if (box._buildObjects && typeof box._buildObjects === 'function') {
+                // Call _buildObjects to ensure settings objects are created
+                box._buildObjects();
+                
+                // Apply settings to lidSettings if it exists
+                if (box.lidSettings && settingsProps.lid) {
+                    for (const [key, value] of Object.entries(settingsProps.lid)) {
+                        if (genericOpts.verbose) {
+                            console.log(`Setting lidSettings.${key} = ${value}`);
+                        }
+                        box.lidSettings.values[key] = value;
+                    }
+                }
+            }
         }
         
         // Open the box
