@@ -1,8 +1,4 @@
-# Simplified Generator Testing
-
-This directory contains a unified test runner that can dynamically test any generator without needing separate test files for each one.
-
-## Usage
+# Generator Test Usage
 
 ### Basic Test
 Test a single generator:
