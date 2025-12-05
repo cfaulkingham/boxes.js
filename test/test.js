@@ -175,25 +175,27 @@ async function testGenerator(name, genericOpts = {}, generatorArgs = []) {
             // Apply properties directly to box instance
             Object.assign(box, props);
             
-            // Apply settings properties to appropriate settings objects
-            if (box._buildObjects && typeof box._buildObjects === 'function') {
-                // Call _buildObjects to ensure settings objects are created
-                box._buildObjects();
-                
-                // Apply settings to lidSettings if it exists
-                if (box.lidSettings && settingsProps.lid) {
-                    for (const [key, value] of Object.entries(settingsProps.lid)) {
-                        if (genericOpts.verbose) {
-                            console.log(`Setting lidSettings.${key} = ${value}`);
-                        }
-                        box.lidSettings.values[key] = value;
+            // Store settings props for later application (after open() creates the settings objects)
+            box._pendingSettings = settingsProps;
+        }
+        
+        // Open the box (this calls _buildObjects which creates lidSettings, etc.)
+        box.open();
+        
+        // Apply settings properties to appropriate settings objects AFTER open() is called
+        if (box._pendingSettings) {
+            const settingsProps = box._pendingSettings;
+            
+            // Apply settings to lidSettings if it exists
+            if (box.lidSettings && settingsProps.lid) {
+                for (const [key, value] of Object.entries(settingsProps.lid)) {
+                    if (genericOpts.verbose) {
+                        console.log(`Setting lidSettings.values.${key} = ${value}`);
                     }
+                    box.lidSettings.values[key] = value;
                 }
             }
         }
-        
-        // Open the box
-        box.open();
         
         // Run custom setup if provided by the generator
         if (GeneratorClass.setup && typeof GeneratorClass.setup === 'function') {
