@@ -132,18 +132,20 @@ class OptionsShowcase extends Boxes {
     drawStackableEdges(startX, startY) {
         this.drawSectionTitle("2. STACKABLE EDGES", startX, startY);
         
+        // Stackable edges need minimum ~45mm at 3mm thickness
         const edges = [
             { char: 's', name: 's - Stackable' },
             { char: 'S', name: 'S - Stackable Top' },
         ];
 
         let y = startY + 12;
-        const edgeLength = 35;
+        const edgeLength = 60;
         
         for (const edge of edges) {
             this.drawLabel(edge.name, startX, y);
             this.ctx.save();
-            this.moveTo(startX + 60, y + 3);
+            // Draw below the label
+            this.moveTo(startX, y + 10);
             if (this.edges[edge.char]) {
                 this.edges[edge.char].draw(edgeLength);
             } else {
@@ -151,7 +153,7 @@ class OptionsShowcase extends Boxes {
             }
             this.ctx.stroke();
             this.ctx.restore();
-            y += 12;
+            y += 25;
         }
     }
 
@@ -161,27 +163,21 @@ class OptionsShowcase extends Boxes {
     drawClickEdges(startX, startY) {
         this.drawSectionTitle("3. CLICK/SNAP EDGES", startX, startY);
         
-        const edges = [
-            { char: 'c', name: 'c - Click connector' },
-            { char: 'C', name: 'C - Click edge' },
-        ];
-
+        // Click connector needs minimum ~55mm at 3mm thickness to display properly
         let y = startY + 12;
-        const edgeLength = 35;
+        const edgeLength = 70;
         
-        for (const edge of edges) {
-            this.drawLabel(edge.name, startX, y);
-            this.ctx.save();
-            this.moveTo(startX + 65, y + 3);
-            if (this.edges[edge.char]) {
-                this.edges[edge.char].draw(edgeLength);
-            } else {
-                this.edge(edgeLength);
-            }
-            this.ctx.stroke();
-            this.ctx.restore();
-            y += 12;
+        this.drawLabel("c - Click connector", startX, y);
+        // Draw below the label, not to the right
+        this.ctx.save();
+        this.moveTo(startX, y + 15);
+        if (this.edges['c']) {
+            this.edges['c'].draw(edgeLength);
+        } else {
+            this.edge(edgeLength);
         }
+        this.ctx.stroke();
+        this.ctx.restore();
     }
 
     /**
@@ -616,8 +612,8 @@ class OptionsShowcase extends Boxes {
         // Layout sections in a 3-column grid
         const col1X = 10;
         const col2X = 115;
-        const col3X = 225;
-        const rowHeight = 90;
+        const col3X = 280;
+        const rowHeight = 80;
         let row = 0;
         
         // Column 1
