@@ -6,6 +6,18 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class BottleTag extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            width: 72,
+            height: 98,
+            min_diameter: 24,
+            max_diameter: 50,
+            radius: 15,
+            segment_width: 3
+        };
+    }
+
     constructor() {
         super();
         // this.buildArgParser();

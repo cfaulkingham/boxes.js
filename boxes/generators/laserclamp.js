@@ -6,6 +6,15 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class LaserClamp extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            minheight: 25.0,
+            maxheight: 50.0,
+            extraheight: 0.0
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings, {surroundingspaces: 0});

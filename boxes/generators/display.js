@@ -6,6 +6,16 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class Display extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 100.0,
+            h: 100.0,
+            radius: 5.0,
+            angle: 0.0
+        };
+    }
+
     constructor() {
         super();
         // this.buildArgParser();

@@ -6,6 +6,17 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class CardHolder extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            sx: "65*3",
+            y: 50,
+            h: 50,
+            angle: 7.5,
+            stackable: true
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.StackableSettings);

@@ -120,18 +120,18 @@ class AngledBox extends Boxes {
         for (let j = 0; j < 2; j += 1) {
             cnt += 1;
             if ((j === 0 || (n % 2))) {
-                this.rectangularWall(lx, h, {move: "right", edges: (fingers ? (b + "GfG") : (b + "GeG")), label: /* unknown node JoinedStr */});
+                this.rectangularWall(lx, h, {move: "right", edges: (fingers ? (b + "GfG") : (b + "GeG")), label:""});
             }
             else {
-                this.rectangularWall(lx, h, {move: "right", edges: (fingers ? (b + "gfg") : (b + "geg")), label: /* unknown node JoinedStr */});
+                this.rectangularWall(lx, h, {move: "right", edges: (fingers ? (b + "gfg") : (b + "geg")), label: ""});
             }
             for (let i = 0; i < n; i += 1) {
                 cnt += 1;
                 if (((i + (j * ((n + 1) % 2))) % 2)) {
-                    this.rectangularWall(side, h, {move: "right", edges: (fingers ? (b + "GfG") : (b + "GeG")), label: /* unknown node JoinedStr */});
+                    this.rectangularWall(side, h, {move: "right", edges: (fingers ? (b + "GfG") : (b + "GeG")), label:""});
                 }
                 else {
-                    this.rectangularWall(side, h, {move: "right", edges: (fingers ? (b + "gfg") : (b + "geg")), label: /* unknown node JoinedStr */});
+                    this.rectangularWall(side, h, {move: "right", edges: (fingers ? (b + "gfg") : (b + "geg")), label: ""});
                 }
             }
         }

@@ -65,6 +65,20 @@ class FingerHoleEdge extends BaseEdge {
 
 export { FingerHoleEdge };
 class CardBox extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            sx: "65*4",
+            y: 68,
+            h: 92,
+            outside: false,
+            openingdirection: "front",
+            fingerhole: "regular",
+            fingerhole_depth: 20,
+            add_lidtopper: false
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);

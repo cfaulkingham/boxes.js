@@ -6,6 +6,16 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class BottleStack extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            diameter: 80,
+            number: 3,
+            depth: 80,
+            double: true
+        };
+    }
+
     constructor() {
         super();
         this.argparser.add_argument("--diameter", {action: "store", type: "float", default: 80, help: "diameter of the bottles in mm"});

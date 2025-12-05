@@ -8,11 +8,26 @@ function arcOnCircle(spanningAngle, outgoingAngle, r = 1.0) {
 class Parts {
     constructor(boxes) {
         this.boxes = boxes;
-    }
-
-    // Python __getattr__ delegation pattern
-    __getattr__(name) {
-        return this.boxes[name];
+        
+        // Use a Proxy to delegate attribute access to boxes (like Python's __getattr__)
+        return new Proxy(this, {
+            get(target, prop, receiver) {
+                // First check if the property exists on Parts itself
+                if (prop in target) {
+                    return target[prop];
+                }
+                // Otherwise delegate to boxes
+                if (prop in target.boxes) {
+                    const value = target.boxes[prop];
+                    // If it's a function, bind it to boxes
+                    if (typeof value === 'function') {
+                        return value.bind(target.boxes);
+                    }
+                    return value;
+                }
+                return undefined;
+            }
+        });
     }
 
     disc(diameter, hole = 0, dwidth = 1.0, callback = null, move = "", label = "") {

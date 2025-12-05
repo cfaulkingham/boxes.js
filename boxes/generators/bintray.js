@@ -59,6 +59,19 @@ class BinFrontSideEdge extends BinFrontEdge {
 
 export { BinFrontSideEdge };
 class BinTray extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            sx: [50, 50],
+            sy: [50, 50],
+            h: 100.0,
+            hi: 30,
+            outside: false,
+            hole_dD: [3.0],
+            front: 0.4
+        };
+    }
+
     constructor() {
         super();
         // this.buildArgParser("sx", "sy", "h", "outside", "hole_dD");

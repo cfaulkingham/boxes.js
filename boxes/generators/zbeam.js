@@ -6,6 +6,20 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class ZBeam extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 100.0,
+            y: 100.0,
+            z: 100.0,
+            h: 100.0,
+            outside: false,
+            top_edge: "e",
+            bottom_edge: "e",
+            flanged_ubeam: false
+        };
+    }
+
     constructor() {
         super();
         this.argparser.add_argument("--top_edge", {action: "store", type: ArgparseEdgeType("Ffe"), choices: list("Ffe"), default: "e", help: "edge type for top edge"});

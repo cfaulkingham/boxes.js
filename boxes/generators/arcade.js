@@ -6,6 +6,15 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class Arcade extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            width: 450.0,
+            monitor_height: 350.0,
+            keyboard_depth: 150.0
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
@@ -14,9 +23,9 @@ class Arcade extends Boxes {
         this.argparser.add_argument("--keyboard_depth", {action: "store", type: "float", default: 150.0, help: "inner width of the console"});
         
         // Initialize with default values
-        this.width = 450.0;
-        this.monitor_height = 350.0;
-        this.keyboard_depth = 150.0;
+        // this.width = 450.0;
+        // this.monitor_height = 350.0;
+        // this.keyboard_depth = 150.0;
     }
     // ORGINAL PYTHON CODE START
     // def side(self, move=None):

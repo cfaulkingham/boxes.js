@@ -6,6 +6,20 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class BookHolder extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            book_width: 297.0,
+            book_height: 210.0,
+            book_depth: 40.0,
+            ledge_height: 0.0,
+            angle: 75.0,
+            bottom_support: 20.0,
+            back_support: 50.0,
+            radius: -1.0
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);

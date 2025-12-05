@@ -25,6 +25,20 @@ class CoinHolderSideEdge extends Boxes {
 
 export { CoinHolderSideEdge };
 class CoinDisplay extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 100.0,
+            y: 100.0,
+            h: 100.0,
+            outside: false,
+            coin_d: 20.0,
+            coin_plate: 50.0,
+            coin_showcase_h: 50.0,
+            angle: 30
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);

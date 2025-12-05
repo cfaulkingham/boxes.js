@@ -6,6 +6,16 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class BasedBox extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 100.0,
+            y: 100.0,
+            h: 100.0,
+            outside: false
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);

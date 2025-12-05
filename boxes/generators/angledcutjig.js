@@ -6,6 +6,13 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class AngledCutJig extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            angle: 45.0
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings, {surroundingspaces: 1.0});
@@ -13,7 +20,7 @@ class AngledCutJig extends Boxes {
         this.argparser.add_argument("--angle", {action: "store", type: "float", default: 45.0, help: "Angle of the cut"});
         
         // Initialize angle with default value to prevent NaN
-        this.angle = 45.0;
+        //this.angle = 45.0;
     }
 
     bottomCB() {

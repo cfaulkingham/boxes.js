@@ -6,6 +6,17 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class Console extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 100.0,
+            y: 100.0,
+            h: 100.0,
+            front_height: 30,
+            angle: 50
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings, {surroundingspaces: 0.5});

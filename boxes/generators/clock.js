@@ -6,6 +6,17 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class Clock extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            ClockHandsMaxLength: 70.0,
+            ExternalRadius: 100.0,
+            BackLegDistance: 50.0,
+            Margin: 2.0,
+            NeedlesAxisHoleDiameter: 8.0
+        };
+    }
+
     constructor() {
         super();
         this.argparser.add_argument("--ClockHandsMaxLength", {action: "store", type: "float", default: 70.0, help: "Length of the longest clock hand (from the central axis) in mm"});

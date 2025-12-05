@@ -6,6 +6,18 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class Castle extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            t_x: 70,
+            t_h: 250,
+            w1_x: 300,
+            w1_h: 120,
+            w2_x: 100,
+            w2_h: 120
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);

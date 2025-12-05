@@ -6,6 +6,17 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class CarbonFilter extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 550,
+            y: 550,
+            h: 250,
+            pockets: 3,
+            ribs: 12
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
