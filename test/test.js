@@ -15,63 +15,55 @@ const __dirname = path.dirname(__filename);
  *   
  * Examples:
  *   node test/test.js abox
- *   node test/test.js airpurifier
- *   node test/test.js regularbox --output custom.svg
- *   node test/test.js all  # Test all generators
+ *   node test/test.js airpurifier --fan_diameter 120 --filters 1
+ *   node test/test.js regularbox --output custom.svg --x 100 --y 200
+ *   node test/test.js all  # Test all generators with their defaults
+ * 
+ * Generic options (handled by test runner):
+ *   --output, -o <path>   Output SVG file path
+ *   --verbose, -v         Verbose output
+ *   --debug, -d           Debug mode with method tracing
+ * 
+ * All other options are passed directly to the generator's parseArgs() method.
  */
 
 // Parse command line arguments
 const args = process.argv.slice(2);
 const generatorName = args[0];
-const options = parseOptions(args.slice(1));
 
-// Generator-specific configurations
-// Add any generator that needs special property setup here
-const GENERATOR_CONFIGS = {
-    airpurifier: {
-        properties: {
-            fan_diameter: 140.0,
-            rim: 30.0,
-            filter_height: 46.77,
-            filters: 2,
-            fans_left: -1,
-            fans_right: -1,
-            fans_top: 0,
-            fans_bottom: 0,
-            screw_holes: 5.0,
-            split_frames: true
-        }
-    },
-    abox: {
-        properties: {},
-        setup: (box) => {
-            // Custom setup for abox if needed
-            if (box.lidSettings && box.lidSettings.values) {
-                box.lidSettings.values.style = "overthetop";
-            }
-        }
-    }
-    // Add more generator-specific configs as needed
-};
-
-function parseOptions(args) {
-    const opts = {
+/**
+ * Separate generic test runner options from generator-specific options
+ */
+function parseArguments(args) {
+    const genericOptions = {
         output: null,
         verbose: false,
         debug: false
     };
     
+    const generatorArgs = [];
+    
     for (let i = 0; i < args.length; i++) {
-        if (args[i] === '--output' || args[i] === '-o') {
-            opts.output = args[++i];
-        } else if (args[i] === '--verbose' || args[i] === '-v') {
-            opts.verbose = true;
-        } else if (args[i] === '--debug' || args[i] === '-d') {
-            opts.debug = true;
+        const arg = args[i];
+        
+        // Handle generic options
+        if (arg === '--output' || arg === '-o') {
+            genericOptions.output = args[++i];
+        } else if (arg === '--verbose' || arg === '-v') {
+            genericOptions.verbose = true;
+        } else if (arg === '--debug' || arg === '-d') {
+            genericOptions.debug = true;
+        } else {
+            // Pass all other args to generator
+            generatorArgs.push(arg);
+            // If it's an option with a value, include the next arg too
+            if (arg.startsWith('--') && i + 1 < args.length && !args[i + 1].startsWith('--')) {
+                generatorArgs.push(args[++i]);
+            }
         }
     }
     
-    return opts;
+    return { genericOptions, generatorArgs };
 }
 
 async function loadGenerator(name) {
@@ -109,7 +101,7 @@ async function loadGenerator(name) {
     return GeneratorClass;
 }
 
-async function testGenerator(name, opts = {}) {
+async function testGenerator(name, genericOpts = {}, generatorArgs = []) {
     try {
         console.log(`\n${'='.repeat(60)}`);
         console.log(`Testing: ${name}`);
@@ -121,32 +113,66 @@ async function testGenerator(name, opts = {}) {
         // Create instance
         const box = new GeneratorClass();
         
-        // Apply generator-specific configuration
-        const config = GENERATOR_CONFIGS[name] || {};
+        // Parse args with defaults first
+        box.parseArgs({});
         
-        if (config.properties) {
-            Object.assign(box, config.properties);
-            if (opts.verbose) {
-                console.log('Applied properties:', config.properties);
+        // Apply defaults from generator's static defaultConfig if available
+        if (GeneratorClass.defaultConfig) {
+            const defaults = GeneratorClass.defaultConfig;
+            if (genericOpts.verbose) {
+                console.log('Applying default config:', defaults);
             }
+            Object.assign(box, defaults);
         }
         
-        // Parse arguments
-        box.parseArgs({});
+        // Apply generator-specific arguments directly as properties
+        if (generatorArgs.length > 0) {
+            if (genericOpts.verbose) {
+                console.log('Generator arguments:', generatorArgs);
+            }
+            
+            // Build properties object from args
+            const props = {};
+            for (let i = 0; i < generatorArgs.length; i++) {
+                const arg = generatorArgs[i];
+                if (arg.startsWith('--')) {
+                    const key = arg.slice(2);
+                    const value = generatorArgs[i + 1];
+                    
+                    // Check if next arg is a value or another option
+                    if (value && !value.startsWith('--')) {
+                        // Try to parse as number if it looks like one
+                        const numValue = parseFloat(value);
+                        props[key] = isNaN(numValue) ? value : numValue;
+                        i++; // Skip the value in next iteration
+                    } else {
+                        // Boolean flag
+                        props[key] = true;
+                    }
+                }
+            }
+            
+            if (genericOpts.verbose) {
+                console.log('Applying generator properties:', props);
+            }
+            
+            // Apply properties directly to box instance
+            Object.assign(box, props);
+        }
         
         // Open the box
         box.open();
         
-        // Run custom setup if provided
-        if (config.setup) {
-            config.setup(box);
-            if (opts.verbose) {
+        // Run custom setup if provided by the generator
+        if (GeneratorClass.setup && typeof GeneratorClass.setup === 'function') {
+            GeneratorClass.setup(box);
+            if (genericOpts.verbose) {
                 console.log('Ran custom setup function');
             }
         }
         
         // Debug mode - add method tracing
-        if (opts.debug) {
+        if (genericOpts.debug) {
             console.log('\n--- Debug Mode Enabled ---');
             
             // Wrap common methods for debugging
@@ -165,7 +191,7 @@ async function testGenerator(name, opts = {}) {
         }
         
         // Render the box
-        if (opts.verbose) {
+        if (genericOpts.verbose) {
             console.log('Rendering...');
         }
         box.render();
@@ -174,7 +200,13 @@ async function testGenerator(name, opts = {}) {
         const svg = box.close();
         
         // Determine output path
-        const outputPath = opts.output || path.join(__dirname, `${name}.svg`);
+        const outputPath = genericOpts.output || path.join(__dirname, 'output', `${name}.svg`);
+        
+        // Ensure output directory exists
+        const outputDir = path.dirname(outputPath);
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
         
         // Write to file
         fs.writeFileSync(outputPath, svg);
@@ -186,7 +218,7 @@ async function testGenerator(name, opts = {}) {
         
     } catch (e) {
         console.error(`✗ Error generating ${name}:`, e.message);
-        if (opts.verbose) {
+        if (genericOpts.verbose) {
             console.error(e.stack);
         }
         return { success: false, name, error: e.message };
@@ -204,13 +236,14 @@ async function getAllGenerators() {
         .sort();
 }
 
-async function testAll(opts = {}) {
+async function testAll(genericOpts = {}) {
     const generators = await getAllGenerators();
     console.log(`Found ${generators.length} generators to test\n`);
     
     const results = [];
     for (const name of generators) {
-        const result = await testGenerator(name, opts);
+        // Test each generator with its defaults (no additional args)
+        const result = await testGenerator(name, genericOpts, []);
         results.push(result);
     }
     
@@ -240,32 +273,39 @@ async function listGenerators() {
     console.log('Available generators:');
     generators.forEach(name => console.log(`  - ${name}`));
     console.log(`\nTotal: ${generators.length} generators`);
+    console.log('\nUsage examples:');
+    console.log('  node test/test.js abox');
+    console.log('  node test/test.js airpurifier --fan_diameter 120 --filters 1');
+    console.log('  node test/test.js regularbox --x 100 --y 200 --h 50');
 }
 
 // Main execution
 async function main() {
     if (!generatorName) {
         console.log('Usage: node test/test.js <generator-name> [options]');
-        console.log('\nOptions:');
+        console.log('\nGeneric options (handled by test runner):');
         console.log('  --output, -o <path>   Output SVG file path');
         console.log('  --verbose, -v         Verbose output');
         console.log('  --debug, -d           Debug mode with method tracing');
+        console.log('\nAll other options are passed to the generator.');
         console.log('\nSpecial commands:');
         console.log('  node test/test.js all      Test all generators');
         console.log('  node test/test.js list     List all available generators');
         console.log('\nExamples:');
         console.log('  node test/test.js abox');
-        console.log('  node test/test.js regularbox -o custom.svg');
-        console.log('  node test/test.js airpurifier --verbose');
+        console.log('  node test/test.js airpurifier --fan_diameter 120 --filters 1');
+        console.log('  node test/test.js regularbox --x 100 --y 200 -o custom.svg');
         process.exit(1);
     }
     
+    const { genericOptions, generatorArgs } = parseArguments(args.slice(1));
+    
     if (generatorName === 'all') {
-        await testAll(options);
+        await testAll(genericOptions);
     } else if (generatorName === 'list') {
         await listGenerators();
     } else {
-        await testGenerator(generatorName, options);
+        await testGenerator(generatorName, genericOptions, generatorArgs);
     }
 }
 

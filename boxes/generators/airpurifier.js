@@ -6,29 +6,41 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class AirPurifier extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 498.0,
+            y: 496.0,
+            fan_diameter: 140.0,
+            rim: 30.0,
+            filter_height: 46.77,
+            filters: 2,
+            fans_left: -1,
+            fans_right: -1,
+            fans_top: 0,
+            fans_bottom: 0,
+            screw_holes: 5.0,
+            split_frames: true
+        };
+    }
+
     constructor() {
         super();
 
-        // FIX 1: Define the missing fan_holes object. This object maps fan diameters
-        // to the distance between their screw holes. It's needed for argument parsing
-        // and for rendering the screw holes.
         this.fan_holes = {
+            40: 32.5,
+            60: 50,
             80: 71.5,
+            92: 82.5,
             120: 105.0,
             140: 125.0,
         };
         
-        // FIX 2: Added arguments for box width ('x') and depth ('y').
-        this.argparser.add_argument("--x", {action: "store", type: "float", default: 300.0, help: "width of the purifier (in mm)"});
-        this.argparser.add_argument("--y", {action: "store", type: "float", default: 300.0, help: "depth of the purifier (in mm)"});
-
+        this.argparser.add_argument("--x", {action: "store", type: "float", default: 498.0, help: "width of the purifier (in mm)"});
+        this.argparser.add_argument("--y", {action: "store", type: "float", default: 496.0, help: "depth of the purifier (in mm)"});
         this.addSettingsArgs(edges.FingerJointSettings);
         this.addSettingsArgs(edges.DoveTailSettings, {size: 2.0, depth: 1});
-        // this.buildArgParser();
-        
-        // FIX 3 (Corrected): To create an array of keys from the fan_holes object, we must use
-        // Object.keys(). The .keys() method does not exist on plain objects.
-        this.argparser.add_argument("--fan_diameter", {action: "store", type: "float", default: 140.0, choices: Object.keys(this.fan_holes), help: "diameter of the fans (in mm)"});
+        this.argparser.add_argument("--fan_diameter", {action: "store", type: "float", default: 140.0, choices: Object.keys(this.fan_holes).map(Number), help: "diameter of the fans (in mm)"});
         this.argparser.add_argument("--filter_height", {action: "store", type: "float", default: 46.77, help: "height of the filter along the flow direction (in mm)"});
         this.argparser.add_argument("--rim", {action: "store", type: "float", default: 30.0, help: "rim around the filter holding it in place (in mm)"});
         this.argparser.add_argument("--filters", {action: "store", type: "int", default: 2, choices: [1, 2], help: "Filters on both sides or only one"});
@@ -40,7 +52,7 @@ class AirPurifier extends Boxes {
         this.argparser.add_argument("--screw_holes", {action: "store", type: "float", default: 5.0, help: "diameter of the holes for screwing in the fans (in mm)"});
     }
 
-    fanCB(n, h, l, fingerHoles, split_frames) {
+    fanCB(n, h, l, fingerHoles = true, split_frames = false) {
         let fh = this.filter_height;
         let t = this.thickness;
         let r = this.rim;
@@ -65,24 +77,17 @@ class AirPurifier extends Boxes {
                 }
             }
             let max_n = parseInt(Math.floor((l - 20) / (fan_diameter + 10)));
-            // FIX 4: This logic was buggy. `n_` was declared with `let` inside an `if` block,
-            // making it inaccessible to the `else` block and the subsequent code.
-            // This is corrected to a single, clean declaration.
             let n_ = (n === -1) ? max_n : Math.min(max_n, n);
             
             if (n_ === 0) {
                 return;
             }
+
             let w = ((l - 20) / n_);
             let x = (10 + (w / 2));
-            
-            // FIX 9: Use captured fan_diameter and fan_holes instead of this.fan_diameter
-            // which may be undefined in the callback context
             let delta = (fan_holes[fan_diameter] / 2);
-            
-            // FIX 5: `posy` was declared with `let` inside the `if` block, causing a ReferenceError.
-            // It is now declared before the conditional logic.
             let posy;
+
             if (this.filters === 2) {
                 posy = (h / 2);
             }
@@ -110,35 +115,39 @@ class AirPurifier extends Boxes {
         [x, y, d] = [this.x, this.y, this.fan_diameter];
         let t = this.thickness;
         let r = this.rim;
+        
+        // Shorten by one thickness as we use the wall space
+        y = this.y = y - t;
+        
         let fh = this.filter_height;
         let h = ((d + 2) + (this.filters * (fh + t)));
         this.rectangularWall(x, d, "ffff", {callback: [this.fanCB(this.fans_top, d, x, false)], label: "top", move: "up"});
         this.rectangularWall(x, h, "ffff", {callback: [this.fanCB(this.fans_bottom, h, x)], label: "bottom", move: "up"});
 
-        // FIX 6: `le` and `te` were scoped to the if/else blocks but used outside. They are
-        // now declared before the conditional.
-        let le, te = "f";
+        let be, te;
+        if (this.split_frames) {
+            be = te = new edges.CompoundEdge(this, "fff", [r, y - 2*r, r]);
+        } else {
+            be = te = "f";
+        }
+
+        let le;
         if (this.filters === 2) {
-            // FIX 8: Added the 'new' keyword to correctly instantiate the CompoundEdge class.
             le = new edges.CompoundEdge(this, "EFE", [(fh + t), (d + 2), (fh + t)]);
         }
         else {
-            // FIX 8: Added the 'new' keyword to correctly instantiate the CompoundEdge class.
             le = new edges.CompoundEdge(this, "FE", [(d + 2), (fh + t)]);
         }
         
-        // FIX 7: `be` was not defined. Replaced with "e" for a plain edge.
         for (let fans of [this.fans_left, this.fans_right]) {
-            this.rectangularWall(y, h, ["e", "h", te, le], {callback: [this.fanCB(fans, h, y)], move: "up"});
+            this.rectangularWall(y, h, [be, "h", te, le], {callback: [this.fanCB(fans, h, y, true, this.split_frames)], move: "up"});
         }
         if (this.split_frames) {
-            // FIX 10: Capture all needed properties in closure to avoid undefined values
             const x = this.x;
             const y = this.y;
             const r = this.rim;
             const filters = this.filters;
             
-            // FIX 8: Added the 'new' keyword to correctly instantiate the CompoundEdge class.
             let e = new edges.CompoundEdge(this, "DeD", [r, (x - (2 * r)), r]);
             for (let _ = 0; _ < filters; _ += 1) {
                 this.rectangularWall(x, r, ["E", "h", e, "h"], {move: "up"});
@@ -153,15 +162,14 @@ class AirPurifier extends Boxes {
         }
         else {
             for (let _ = 0; _ < this.filters; _ += 1) {
-                this.rectangularWall(x, y, "Ffff", {callback: [() => this.rectangularHole((x / 2), (y / 2), (x - r), (y - r))], move: "up"});
-                this.rectangularWall(x, y, "Ehhh", {callback: [() => this.rectangularHole((x / 2), (y / 2), (x - r), (y - r))], move: "up"});
+                this.rectangularWall(x, y, "Ffff", {callback: [() => this.rectangularHole((x / 2), (y / 2), (x - r), (y - r), 10)], move: "up"});
+                this.rectangularWall(x, y, "Ehhh", {callback: [() => this.rectangularHole((x / 2), (y / 2), (x - r), (y - r), 10)], move: "up"});
             }
         }
         if (this.filters === 1) {
             this.rectangularWall(x, y, "hhhh", {move: "up"});
         }
     }
-
 }
 
 export { AirPurifier };
