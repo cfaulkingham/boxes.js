@@ -187,7 +187,7 @@ to remove the floor for this compartment.
             end += 1;
             lengths.pop();
             edges.pop();
-            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [boxes.edges.CompoundEdge(this, edges, lengths), (this.vWalls(end, y) ? "f" : "e"), "e", (this.vWalls(start, y) ? "f" : "e")], {move: "right"});
+            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [boxes.new edges.CompoundEdge(this, edges, lengths), (this.vWalls(end, y) ? "f" : "e"), "e", (this.vWalls(start, y) ? "f" : "e")], {move: "right"});
             start = end;
         }
         this.ctx.restore();
@@ -227,7 +227,7 @@ to remove the floor for this compartment.
             edges.pop();
             let upper = /* unknown node ListComp */;
             edges = /* unknown node ListComp */;
-            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [boxes.edges.CompoundEdge(this, edges, lengths), "eFf"[this.hWalls(x, end)], boxes.edges.CompoundEdge(this, upper, list(reversed(lengths))), "eFf"[this.hWalls(x, start)]], {move: "right"});
+            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [boxes.new edges.CompoundEdge(this, edges, lengths), "eFf"[this.hWalls(x, end)], boxes.new edges.CompoundEdge(this, upper, list(reversed(lengths))), "eFf"[this.hWalls(x, start)]], {move: "right"});
             start = end;
         }
         this.ctx.restore();

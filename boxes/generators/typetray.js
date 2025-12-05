@@ -227,8 +227,8 @@ class TypeTray extends _TopEdge {
             this.rectangularWall(x, h, [(this.handle ? "f" : b), "F", tf, "F"], {callback: frontCBs, ignore_widths: (this.handle ? [] : ignore_widths), move: "up", label: "front"});
         }
         let be = (b !== "e" ? "f" : "e");
-        let le = (this.hi <= this.h ? "f" : edges.CompoundEdge(this, "ef", [(this.hi - this.h), this.h]));
-        let re = (this.hi <= this.h ? "f" : edges.CompoundEdge(this, "fe", [this.h, (this.hi - this.h)]));
+        let le = (this.hi <= this.h ? "f" : new edges.CompoundEdge(this, "ef", [(this.hi - this.h), this.h]));
+        let re = (this.hi <= this.h ? "f" : new edges.CompoundEdge(this, "fe", [this.h, (this.hi - this.h)]));
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
             let e = [edges.SlottedEdge(this, this.sx, be), re, edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "A"), le];
             if ((this.closedtop && sameh)) {

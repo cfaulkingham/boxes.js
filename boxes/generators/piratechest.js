@@ -57,8 +57,8 @@ class PirateChest extends Boxes {
         this.ctx.restore();
         this.rectangularWall(x, h, "fFoF", {move: "up only"});
         this.rectangularWall(x, 0, "Peee", {move: "up only"});
-        let e1 = edges.CompoundEdge(this, "Fe", [h, hy]);
-        let e2 = edges.CompoundEdge(this, "eF", [hy, h]);
+        let e1 = new edges.CompoundEdge(this, "Fe", [h, hy]);
+        let e2 = new edges.CompoundEdge(this, "eF", [hy, h]);
         let e_back = ["f", e1, "e", e2];
         this.ctx.save();
         this.rectangularWall(x, (h + hy), e_back, {move: "right", label: "back"});

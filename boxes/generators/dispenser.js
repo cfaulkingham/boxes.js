@@ -56,13 +56,13 @@ class Dispenser extends Boxes {
         this.ctx.restore();
         this.rectangularWall(x, y, "ffff", {move: "up only"});
         if (hb) {
-            let frontedge = edges.CompoundEdge(this, "Ef", [((hb + t) + hs), (h - hs)]);
+            let frontedge = new edges.CompoundEdge(this, "Ef", [((hb + t) + hs), (h - hs)]);
             this.rectangularWall(y, th, ["š", frontedge, "e", "f"], {ignore_widths: [6], callback: [() => this.fingerHolesAt(0, hh, y, 0)], label: "Left wall", move: "right mirror"});
             this.rectangularWall(x, th, ["š", se, "e", se], {ignore_widths: [1, 6], callback: [() => this.fingerHolesAt(0, hh, x, 0)], label: "Back wall", move: "right"});
             this.rectangularWall(y, th, ["š", frontedge, "e", "f"], {ignore_widths: [6], callback: [() => this.fingerHolesAt(0, hh, y, 0)], label: "Right wall", move: "right"});
         }
         else {
-            frontedge = edges.CompoundEdge(this, "Ef", [hs, (h - hs)]);
+            frontedge = new edges.CompoundEdge(this, "Ef", [hs, (h - hs)]);
             this.rectangularWall(y, th, ["h", frontedge, "e", "f"], {label: "Left wall", ignore_widths: [6], move: "right mirror"});
             this.rectangularWall(x, th, ["h", se, "e", se], {ignore_widths: [1, 6], label: "Back wall", move: "right"});
             this.rectangularWall(y, th, ["h", frontedge, "e", "f"], {label: "Right wall", ignore_widths: [6], move: "right"});

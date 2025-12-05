@@ -141,14 +141,14 @@ class SmallPartsTray2 extends _TopEdge {
         this.rectangularWall(x, hi, "ffff", {move: "right only"});
         for (let move of ["up", "up mirror"]) {
             if (bh) {
-                this.trapezoidSideWall(y, (h + bh), (hi - (t * (2 ** 0.5))), [edges.CompoundEdge(this, (("FE" * this.sy.length) + "F"), floors), "h", "e", "h"], {radius: this.radius, callback: [this.yHoles], move: move, label: "side"});
+                this.trapezoidSideWall(y, (h + bh), (hi - (t * (2 ** 0.5))), [new edges.CompoundEdge(this, (("FE" * this.sy.length) + "F"), floors), "h", "e", "h"], {radius: this.radius, callback: [this.yHoles], move: move, label: "side"});
             }
             else {
-                this.rectangularWall(y, h, [edges.CompoundEdge(this, (("FE" * this.sy.length) + "F"), floors), edges.CompoundEdge(this, "fE", [(hi - (t * (2 ** 0.5))), ((h - hi) + (t * (2 ** 0.5)))]), tl, "f"], {callback: [this.yHoles], move: move, label: "side"});
+                this.rectangularWall(y, h, [new edges.CompoundEdge(this, (("FE" * this.sy.length) + "F"), floors), new edges.CompoundEdge(this, "fE", [(hi - (t * (2 ** 0.5))), ((h - hi) + (t * (2 ** 0.5)))]), tl, "f"], {callback: [this.yHoles], move: move, label: "side"});
             }
         }
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            e = [edges.CompoundEdge(this, (("fE" * this.sy.length) + "f"), floors), edges.CompoundEdge(this, "fe", [(hi - (t * (2 ** 0.5))), (t * (2 ** 0.5))]), TopEdge(this, this.sy.slice(0,  /* step -1 ignored */), hi), "f"];
+            e = [new edges.CompoundEdge(this, (("fE" * this.sy.length) + "f"), floors), new edges.CompoundEdge(this, "fe", [(hi - (t * (2 ** 0.5))), (t * (2 ** 0.5))]), TopEdge(this, this.sy.slice(0,  /* step -1 ignored */), hi), "f"];
             this.rectangularWall(y, hi, e, {move: "up", label: /* unknown node JoinedStr */});
         }
     }

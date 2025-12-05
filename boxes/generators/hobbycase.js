@@ -73,7 +73,7 @@ class HobbyCase extends Boxes {
         let hole_edge_length = (this.unit_w[0] / 2);
         let straight_edge_length = ((x - (2 * hole_edge_length)) / 3);
         let lengths = [straight_edge_length, hole_edge_length, straight_edge_length, hole_edge_length, straight_edge_length];
-        let edge_with_cutouts = boxes.edges.CompoundEdge(this, _edges, lengths);
+        let edge_with_cutouts = boxes.new edges.CompoundEdge(this, _edges, lengths);
         this.rectangularWall(x, y, ["e", "e", edge_with_cutouts, "e"], {move: move, label: /* unknown node JoinedStr */});
     }
 

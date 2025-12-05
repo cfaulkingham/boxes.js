@@ -55,12 +55,12 @@ class DiceBox extends Boxes {
         let t = this.thickness;
         let hy = this.edges["O"].startwidth();
         let hy2 = this.edges["P"].startwidth();
-        let e1 = edges.CompoundEdge(this, "eF", [(hy - t), ((h - hy) + t)]);
-        let e2 = edges.CompoundEdge(this, "Fe", [((h - hy) + t), (hy - t)]);
+        let e1 = new edges.CompoundEdge(this, "eF", [(hy - t), ((h - hy) + t)]);
+        let e2 = new edges.CompoundEdge(this, "Fe", [((h - hy) + t), (hy - t)]);
         let e_back = ["F", e1, "F", e2];
         let p = this.edges["o"].settings.pin_height;
-        let e_inner_1 = edges.CompoundEdge(this, "fe", [(y - p), p]);
-        let e_inner_2 = edges.CompoundEdge(this, "ef", [p, (y - p)]);
+        let e_inner_1 = new edges.CompoundEdge(this, "fe", [(y - p), p]);
+        let e_inner_2 = new edges.CompoundEdge(this, "ef", [p, (y - p)]);
         let e_inner_topbot = ["f", e_inner_1, "f", e_inner_2];
         this.ctx.save();
         this.rectangularWall(x, y, e_inner_topbot, {move: "up", callback: [this.diceCB]});

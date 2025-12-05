@@ -66,11 +66,11 @@ class OrganPipe extends Boxes {
         }
         let air_hole_diameter = (2.0 * ((((mouth_width * jet_thickness) * 10.0) ** 0.5) / pi));
         let total_length = (resonator_length + base_length);
-        let e = ["f", "e", edges.CompoundEdge(this, "fef", [((resonator_length - mouth_height) - (10 * t)), (mouth_height + (10 * t)), base_length]), "f"];
+        let e = ["f", "e", new edges.CompoundEdge(this, "fef", [((resonator_length - mouth_height) - (10 * t)), (mouth_height + (10 * t)), base_length]), "f"];
         this.rectangularWall(total_length, pipe_depth, e, {callback: [() => this.fingerHolesAt((base_length - (0.5 * t)), 0, (pipe_depth - jet_thickness))], move: "up"});
         this.rectangularWall(total_length, pipe_depth, e, {callback: [() => this.fingerHolesAt((base_length - (0.5 * t)), 0, (pipe_depth - jet_thickness))], move: "up"});
         this.rectangularWall(total_length, mouth_width, "FeFF", {callback: [() => this.fingerHolesAt((base_length - (0.5 * t)), 0, mouth_width)], move: "up"});
-        e = [edges.CompoundEdge(this, "EF", [(t * 10), ((resonator_length - mouth_height) - (t * 10))]), "e", edges.CompoundEdge(this, "FE", [((resonator_length - mouth_height) - (t * 10)), (t * 10)]), "e"];
+        e = [new edges.CompoundEdge(this, "EF", [(t * 10), ((resonator_length - mouth_height) - (t * 10))]), "e", new edges.CompoundEdge(this, "FE", [((resonator_length - mouth_height) - (t * 10)), (t * 10)]), "e"];
         this.rectangularWall((resonator_length - mouth_height), mouth_width, e, {move: "up"});
         this.rectangularWall(base_length, mouth_width, "FeFF", {move: "right"});
         this.rectangularWall(mouth_width, pipe_depth, "fFfF", {callback: [() => this.hole((mouth_width / 2), (pipe_depth / 2))], move: "right"});

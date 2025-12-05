@@ -28,8 +28,8 @@ class IntegratedHingeBox extends Boxes {
         let t = this.thickness;
         let hy = this.edges["O"].startwidth();
         let hy2 = this.edges["P"].startwidth();
-        let e1 = edges.CompoundEdge(this, "Fe", [(h - hy), hy]);
-        let e2 = edges.CompoundEdge(this, "eF", [hy, (h - hy)]);
+        let e1 = new edges.CompoundEdge(this, "Fe", [(h - hy), hy]);
+        let e2 = new edges.CompoundEdge(this, "eF", [hy, (h - hy)]);
         let e_back = ["F", e1, "e", e2];
         this.rectangularWall(y, (h - hy), "FfOf", {ignore_widths: [2], move: "up"});
         this.rectangularWall(y, (hl - hy2), "pfFf", {ignore_widths: [1], move: "up"});

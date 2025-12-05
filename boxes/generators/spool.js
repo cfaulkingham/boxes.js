@@ -59,7 +59,7 @@ class Spool extends Boxes {
         }
         if (this.reinforcement_height) {
             for (let i = 0; i < (this.reinforcements * 2); i += 1) {
-                let edge = edges.CompoundEdge(this, "fef", [(((this.outer_diameter / 2) - r) - t), ((r - h) + t), (h - (this.axle_diameter / 2))]);
+                let edge = new edges.CompoundEdge(this, "fef", [(((this.outer_diameter / 2) - r) - t), ((r - h) + t), (h - (this.axle_diameter / 2))]);
                 this.trapezoidWall((this.reinforcement_height - t), ((this.outer_diameter - this.axle_diameter) / 2), (((this.inner_diameter - this.axle_diameter) / 2) + t), ["e", "f", "e", edge], {move: "right"});
             }
             for (let i = 0; i < 2; i += 1) {

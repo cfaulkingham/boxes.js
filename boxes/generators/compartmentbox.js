@@ -84,7 +84,7 @@ class CompartmentBox extends TypeTray {
         }
         this.ctx.restore();
         this.rectangularWall(x, h, "ffff", {move: "right only"});
-        let f = edges.CompoundEdge(this, "fE", [(h + this.edges[b].startwidth()), (t + margin_vertical)]);
+        let f = new edges.CompoundEdge(this, "fE", [(h + this.edges[b].startwidth()), (t + margin_vertical)]);
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "up", label: "left side"});
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "mirror up", label: "right side"});
         for (let i = 0; i < (this.sx.length - 1); i += 1) {

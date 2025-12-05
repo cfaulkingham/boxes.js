@@ -117,7 +117,7 @@ class DisplayShelf extends Boxes {
         if (this.front_wall_height) {
             edges_ = "ffee";
             if (this.divider_wall_height > this.front_wall_height) {
-                edges_ = ["f", edges.CompoundEdge(this, "fe", [this.front_wall_height, (this.divider_wall_height - this.front_wall_height)]), "e", "e"];
+                edges_ = ["f", new edges.CompoundEdge(this, "fe", [this.front_wall_height, (this.divider_wall_height - this.front_wall_height)]), "e", "e"];
             }
         }
         for (let i = 0; i < this.num; i += 1) {

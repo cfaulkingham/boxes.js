@@ -152,8 +152,8 @@ class TrafficLight extends Boxes {
         if (this.upright) {
             this.rectangularWall(th, d, "fFsF", {callback: [this.sideCB], move: "up", label: "left"});
             this.rectangularWall(th, d, "fFsF", {callback: [this.sideCB], move: "up", label: "right"});
-            let e = edges.CompoundEdge(this, "fF", [d, s]);
-            let e2 = edges.CompoundEdge(this, "Ff", [s, d]);
+            let e = new edges.CompoundEdge(this, "fF", [d, s]);
+            let e2 = new edges.CompoundEdge(this, "Ff", [s, d]);
             for (let i = 0; i < n; i += 1) {
                 this.rectangularWall(h, (d + s), ["f", e, "e", e2], {move: (i < (n - 1) ? "right" : "right up"), label: ("horizontal Wall " + str((i + 1)))});
             }

@@ -53,8 +53,8 @@ class PizzaShovel extends Boxes {
         [x, y, h] = [this.x, this.y, this.grip_height];
         let grip = this.grip_length;
         let t = this.thickness;
-        let ce = edges.CompoundEdge(this, "fe", [(y / 2), (y / 2)]);
-        let ec = edges.CompoundEdge(this, "ef", [(y / 2), (y / 2)]);
+        let ce = new edges.CompoundEdge(this, "fe", [(y / 2), (y / 2)]);
+        let ec = new edges.CompoundEdge(this, "ef", [(y / 2), (y / 2)]);
         this.rectangularWall(x, y, ["e", ce, "e", ec], {move: "up"});
         this.rectangularWall(x, 40, "efef", {callback: [this.gripCB()], move: "up"});
         this.rectangularWall(x, 80, "efef", {callback: [this.gripCB()], move: "up"});
@@ -67,8 +67,8 @@ class PizzaShovel extends Boxes {
         this.rectangularWall((x - 3), 40, "eeee", {callback: [this.holesCB(this.bottom_holes)], move: "up"});
         this.rectangularWall((x - 3), 40, "yeee", {callback: [this.holesCB(this.top_holes)], move: "up"});
         if (grip) {
-            let ce1 = edges.CompoundEdge(this, "fe", [40, (grip - (h / 2))]);
-            let ce2 = edges.CompoundEdge(this, "ef", [(grip - (h / 2)), 40]);
+            let ce1 = new edges.CompoundEdge(this, "fe", [40, (grip - (h / 2))]);
+            let ce2 = new edges.CompoundEdge(this, "ef", [(grip - (h / 2)), 40]);
             this.flangedWall(((40 + grip) - (h / 2)), h, [ce1, "e", ce2, "e"], {flanges: [0, (h / 2)], r: (h / 2), move: "up"});
             this.flangedWall(((40 + grip) - (h / 2)), h, "eeee", {flanges: [0, (h / 2)], r: (h / 2), move: "up"});
             this.flangedWall(((40 + grip) - (h / 2)), h, [ce1, "e", ce2, "e"], {flanges: [0, (h / 2)], r: (h / 2), move: "up"});

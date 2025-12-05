@@ -51,7 +51,7 @@ class DiceTower extends Boxes {
         this.right_ramp_cutoff = (((0.5 * this.thickness) / Math.tan(a)) * Math.cos(a));
         this.ramp_len = (((this.depth - this.left_ramp_cutoff) - this.right_ramp_cutoff) / Math.cos(a));
         let front_gap = (this.depth * Math.tan(a));
-        let front_edge = edges.CompoundEdge(this, "Ef", [front_gap, (this.height - front_gap)]);
+        let front_edge = new edges.CompoundEdge(this, "Ef", [front_gap, (this.height - front_gap)]);
         let bottom_edge = (this.bottom ? "F" : "e");
         this.rectangularWall(this.depth, this.height, [bottom_edge, front_edge, "e", "f"], {callback: [this.side], move: "mirror right", label: "side"});
         this.rectangularWall(this.width, this.height, [bottom_edge, "F", "e", "F"], {move: "right", label: "back"});

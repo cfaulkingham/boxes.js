@@ -6,9 +6,21 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class SlidingDrawer extends Boxes {
+
+    static get defaultConfig() {
+        return {
+            x: 60.0,
+            y: 100.0,
+            h: 30.0,
+            hi: 0.0,
+            outside: false,
+            bottom_edge: "h"
+        };
+    }
+
     constructor() {
         super();
-        // this.buildArgParser();
+        
         this.addSettingsArgs(edges.FingerJointSettings, {finger: 2.0, space: 2.0});
         this.addSettingsArgs(edges.GroovedSettings, {width: 0.4});
         this.argparser.add_argument("--play", {action: "store", type: "float", default: 0.15, help: "play between the two parts as multiple of the wall thickness"});
@@ -35,8 +47,8 @@ class SlidingDrawer extends Boxes {
         let y2 = (y - ((2 * t) + (2 * p)));
         let h2 = (h - (t + (2 * p)));
         hi = (hi - (t + (2 * p)));
-        let e1 = (hi !== h2 ? edges.CompoundEdge(this, "FE", [hi, (h2 - hi)]) : "F");
-        let e2 = (hi !== h2 ? edges.CompoundEdge(this, "EF", [(h2 - hi), hi]) : "F");
+        let e1 = (hi !== h2 ? new edges.CompoundEdge(this, "FE", [hi, (h2 - hi)]) : "F");
+        let e2 = (hi !== h2 ? new edges.CompoundEdge(this, "EF", [(h2 - hi), hi]) : "F");
         this.rectangularWall(x2, hi, "FFeF", {label: "in box wall", move: "right"});
         this.rectangularWall(y2, hi, "ffef", {label: "in box wall", move: "up"});
         this.rectangularWall(y2, hi, "ffef", {label: "in box wall"});

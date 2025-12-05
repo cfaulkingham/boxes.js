@@ -30,9 +30,9 @@ class SideDoorHousing extends Console2 {
             this.rectangularWall(x, y, "EFFF", {move: "right"});
         }
         for (let move of ["right", "mirror right"]) {
-            let re = edges.CompoundEdge(this, ["f", "e"], [(bottom.endwidth() + t), (h - t)]);
+            let re = new edges.CompoundEdge(this, ["f", "e"], [(bottom.endwidth() + t), (h - t)]);
             if (this.double_door) {
-                let le = edges.CompoundEdge(this, ["e", "f"], [(h - t), (bottom.endwidth() + t)]);
+                let le = new edges.CompoundEdge(this, ["e", "f"], [(h - t), (bottom.endwidth() + t)]);
             }
             else {
                 le = "f";

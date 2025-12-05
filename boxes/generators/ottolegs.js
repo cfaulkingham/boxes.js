@@ -90,8 +90,8 @@ class OttoLegs extends Boxes {
         let lh;
         [lx, ly, lh] = [12.4, 23.5, Math.max(this.length, ((ws + 6) + t))];
         this.ctx.save();
-        let c1 = edges.CompoundEdge(this, "FE", [(ly - 7.0), 7.0]);
-        let c2 = edges.CompoundEdge(this, "EF", [7.0, (lh - 7.0)]);
+        let c1 = new edges.CompoundEdge(this, "FE", [(ly - 7.0), 7.0]);
+        let c2 = new edges.CompoundEdge(this, "EF", [7.0, (lh - 7.0)]);
         let e = [c1, c2, "F", "F"];
         for (let i = 0; i < 2; i += 1) {
             this.rectangularWall(lx, (lh - 7.0), [LegEdge(this, null), "f", "F", "f"], {callback: [null, () => this.fingerHolesAt((ws - 7.0), 0, lx)], move: "right"});

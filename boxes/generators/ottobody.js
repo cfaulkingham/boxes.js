@@ -87,8 +87,8 @@ class OttoBody extends Boxes {
         let t = this.thickness;
         let hx = this.edges["O"].startwidth();
         let hx2 = this.edges["P"].startwidth();
-        let e1 = edges.CompoundEdge(this, "Fe", [(h - hx), hx]);
-        let e2 = edges.CompoundEdge(this, "eF", [hx, (h - hx)]);
+        let e1 = new edges.CompoundEdge(this, "Fe", [(h - hx), hx]);
+        let e2 = new edges.CompoundEdge(this, "eF", [hx, (h - hx)]);
         let e_back = ["F", e1, "e", e2];
         this.moveTo(hx);
         this.rectangularWall(x, (h - hx), "FfOf", {ignore_widths: [2], move: "up", label: _("Left bottom side")});

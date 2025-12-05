@@ -48,7 +48,7 @@ class SlidingLidBox extends Boxes {
         let rail_margin = (this.rail_mm - this.burn);
         let h_plus = (this.h + gap);
         this.ctx.save();
-        let sides_compound_edge = edges.CompoundEdge(this, "fE", [this.h, gap]);
+        let sides_compound_edge = new edges.CompoundEdge(this, "fE", [this.h, gap]);
         this.rectangularWall(this.y, h_plus, [this.bottom_edge, sides_compound_edge, "F", "f"], {callback: [null, this.lowerRailHoles], move: "up mirror", label: "right side"});
         this.rectangularWall(this.y, h_plus, [this.bottom_edge, sides_compound_edge, "F", "f"], {callback: [null, this.lowerRailHoles], move: "up", label: "left side"});
         this.rectangularWall(this.y, this.x, "ffff", {move: "up", label: "bottom"});
@@ -58,7 +58,7 @@ class SlidingLidBox extends Boxes {
         this.rectangularWall(this.y, this.rail_mm, "feef", {move: "up", label: "bottom left rail"});
         let lid_y = (this.x - ((2 * this.margin_s) * this.thickness));
         if (this.lid_type === "lip") {
-            let lip_copound_edge = edges.CompoundEdge(this, "EfE", [rail_margin, (lid_y - (2 * rail_margin)), rail_margin]);
+            let lip_copound_edge = new edges.CompoundEdge(this, "EfE", [rail_margin, (lid_y - (2 * rail_margin)), rail_margin]);
             this.rectangularWall(this.y, lid_y, ["e", lip_copound_edge, "e", "e"], {move: "up", label: "lid"});
             this.rectangularWall((lid_y - (2 * rail_margin)), gap, "Feee", {move: "up", label: "lid lip"});
         }
@@ -72,7 +72,7 @@ class SlidingLidBox extends Boxes {
         }
         this.ctx.restore();
         this.rectangularWall(this.y, h_plus, "ffff", {move: "right only"});
-        let back_compound_edge = edges.CompoundEdge(this, ["E", "f", "E"], [rail_margin, (this.x - (2 * rail_margin)), rail_margin]);
+        let back_compound_edge = new edges.CompoundEdge(this, ["E", "f", "E"], [rail_margin, (this.x - (2 * rail_margin)), rail_margin]);
         this.rectangularWall(this.x, h_plus, [this.bottom_edge, "F", back_compound_edge, "F"], {callback: [this.backHoles], move: "up", label: "back"});
         this.rectangularWall(this.x, this.h, [this.bottom_edge, "F", "e", "F"], {move: "up", label: "front"});
         this.rectangularWall((this.x - (2 * rail_margin)), this.rail_mm, "Feee", {move: "up", label: "back rail"});

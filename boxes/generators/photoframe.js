@@ -247,7 +247,7 @@ class PhotoFrame extends Boxes {
         let d = this.d;
         let edge_types = "DeD";
         let edge_lengths = [d.guide_w, (d.base_x - (2 * d.guide_w)), d.guide_w];
-        let e = edges.CompoundEdge(this, edge_types, edge_lengths);
+        let e = new edges.CompoundEdge(this, edge_types, edge_lengths);
         let move = "up";
         this.rectangularWall(d.base_x, d.guide_h, ["e", "e", e, "e"], {move: move, label: /* unknown node JoinedStr */});
         this.rectangularWall(d.pocket_y, d.guide_w, "edee", {move: move, label: /* unknown node JoinedStr */});
