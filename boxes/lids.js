@@ -121,10 +121,28 @@ class Lid {
             boxes.rectangularWall(y2, height, b + "fFf", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid right"});
             if (style === "ontop") {
+                // Draw 4 corner brim pieces for ontop lid style
                 for (let i = 0; i < 4; i++) {
-                    // polygonWall not implemented in boxes.js provided in context?
-                    // assuming it is or skipping for now as abox uses default?
-                    // ABox doesn't seem to set style "ontop" by default.
+                    // Each piece: vertical edge (2*t), rounded corner, height section, corner, horizontal (4*t), corner, height section, rounded corner
+                    // Python: (2*t, (90, t), t+height, 90, 4*t, 90, t+height, (90, t))
+                    const brimPoly = [
+                        2*t,
+                        [90, t],           // rounded corner radius t
+                        t + height,
+                        90,
+                        4*t,
+                        90,
+                        t + height,
+                        [90, t]            // rounded corner radius t
+                    ];
+                    
+                    if (boxes.polygonWall) {
+                        boxes.polygonWall(brimPoly, "e", {move: "up", label: "lid\\nbrim"});
+                    } else {
+                        // Fallback if polygonWall doesn't exist - draw with polyline
+                        // This needs proper implementation in boxes_base.js
+                        console.warn("polygonWall not implemented, skipping ontop brim pieces");
+                    }
                 }
             }
         } else {
@@ -223,19 +241,23 @@ class Lid {
         // Base polyline for the knob posts
         const poly = [[90, t/2], t/2, 90, t/2, -90, hh - 2*t, [90, 3*t]];
 
-        // Two knob pieces: one with posts on bottom, one with posts on top
-        const bottomPosts = [3*t, 90, 2*t + hh/2, -90, t, -90, hh/2 + 2*t, 90, 3*t];
-        const topPosts = [t];
+        // Two knob pieces with different configurations
+        // First piece: posts at bottom, simple top
+        const bottomPosts1 = [3*t, 90, 2*t + hh/2, -90, t, -90, hh/2 + 2*t, 90, 3*t];
+        const topPosts1 = [t];
+        
+        // Second piece: wide base, posts at top
         const bottomPosts2 = [7*t];
         const topPosts2 = [0, 90, hh/2, -90, t, -90, hh/2, 90, 0];
 
         // First knob piece
         boxes.moveTo(0.5*t);
-        let p = bottomPosts.concat(poly, topPosts, poly.slice().reverse());
+        let p = bottomPosts1.concat(poly, topPosts1, poly.slice().reverse());
         boxes.polyline(...p);
         boxes.moveTo(tw/2 + spacing);
 
-        // Second knob piece
+        // Second knob piece  
+        boxes.moveTo(0.5*t);  // Reset position for second piece
         p = bottomPosts2.concat(poly, topPosts2, poly.slice().reverse());
         boxes.polyline(...p);
 
@@ -252,6 +274,16 @@ class Lid {
     chestSide(x, angle=0, move="", label="") {
         const t = this.boxes.thickness;
         const boxes = this.boxes;
+        
+        // Register special finger joint edges for chest if not already present
+        if (!boxes.edges || !(boxes.edges.get ? boxes.edges.get("a") : boxes.edges["a"])) {
+            // Create FingerJointSettings with finger=1.0, space=1.0 for chest
+            const s = new FingerJointSettings(t, true, {finger: 1.0, space: 1.0});
+            if (s.edgeObjects) {
+                s.edgeObjects(boxes, "aA.");
+            }
+        }
+        
         const r = this.getChestR(x, angle);
         
         // Calculate bounding box for the chest side piece
@@ -332,6 +364,16 @@ class Lid {
     chestTop(x, y, angle=0, callback=null, move=null, label="") {
         const t = this.boxes.thickness;
         const boxes = this.boxes;
+        
+        // Register special finger joint edges for chest if not already present
+        if (!boxes.edges || !(boxes.edges.get ? boxes.edges.get("a") : boxes.edges["a"])) {
+            // Create FingerJointSettings with finger=1.0, space=1.0 for chest
+            const s = new FingerJointSettings(t, true, {finger: 1.0, space: 1.0});
+            if (s.edgeObjects) {
+                s.edgeObjects(boxes, "aA.");
+            }
+        }
+        
         const r = this.getChestR(x, angle);
         
         // Arc length: radians(180-2*angle) * r
@@ -503,18 +545,73 @@ class _TopEdge extends Boxes {
         // ... omitted
     }
 
-    // Simplified placeholder for topEdges
+    // Return top edges belonging to given main edge type
+    // as a list containing edge for left, back, right, front.
     topEdges(top_edge) {
-        let tl = "e";
-        let tr = "e";
-        let tb = "e";
-        let tf = "e";
+        const edge = this.edges.get ? this.edges.get(top_edge) : this.edges[top_edge];
+        let tl = edge || this.edges.get ? this.edges.get("e") : this.edges["e"];
+        let tb = tl;
+        let tr = tl;
+        let tf = tl;
+
+        const char = edge ? (edge.char || top_edge) : top_edge;
+
+        if (char === "i") {
+            tl = tr = "e";
+            tb = "j";
+        } else if (char === "k") {
+            tl = tr = "e";
+        } else if (char === "L") {
+            tl = "M";
+            tf = "e";
+            tr = "N";
+        } else if (char === "v") {
+            tl = tr = tf = "e";
+        } else if (char === "t") {
+            tf = tb = "e";
+        } else if (char === "G") {
+            tl = tb = tr = tf = "e";
+            const gEdge = this.edges.get ? this.edges.get("G") : this.edges["G"];
+            if (gEdge && gEdge.settings) {
+                const side = gEdge.settings.side;
+                // Assuming MountingSettings constants
+                if (side === "left") {
+                    tl = "G";
+                } else if (side === "right") {
+                    tr = "G";
+                } else if (side === "front") {
+                    tf = "G";
+                } else { // back
+                    tb = "G";
+                }
+            }
+        } else if (char === "y") {
+            tl = tb = tr = tf = "e";
+            const yEdge = this.edges.get ? this.edges.get("y") : this.edges["y"];
+            if (yEdge && yEdge.settings) {
+                if (yEdge.settings.on_sides === true) {
+                    tl = tr = "y";
+                } else {
+                    tb = tf = "y";
+                }
+            }
+        } else if (char === "Y") {
+            tl = tb = tr = tf = "h";
+            const YEdge = this.edges.get ? this.edges.get("Y") : this.edges["Y"];
+            if (YEdge && YEdge.settings) {
+                if (YEdge.settings.on_sides === true) {
+                    tl = tr = "Y";
+                } else {
+                    tb = tf = "Y";
+                }
+            }
+        }
+        
         return [tl, tb, tr, tf];
     }
 
     drawLid(x, y, top_edge, bedBolts) {
-        let d2;
-        let d3;
+        let d2, d3;
         // bedBolts might be undefined
         if (bedBolts) [d2, d3] = bedBolts;
 
@@ -524,9 +621,42 @@ class _TopEdge extends Boxes {
             this.rectangularWall(x, y, "FFFF", {move: "up", label: "top"});
         } else if ("FhŠY".includes(top_edge)) {
             this.rectangularWall(x, y, "ffff", {move: "up", label: "top"});
+        } else if (top_edge === "L") {
+            this.rectangularWall(x, y, "Enlm", {move: "up", label: "lid top"});
+        } else if (top_edge === "i") {
+            this.rectangularWall(x, y, "JeIE", {move: "up", label: "lid top"});
+        } else if (top_edge === "k") {
+            const kEdge = this.edges.get ? this.edges.get("k") : this.edges["k"];
+            const outset = kEdge && kEdge.settings ? kEdge.settings.outset : false;
+            
+            if (kEdge && kEdge.settings) {
+                kEdge.settings.setValues(this.thickness, {outset: true});
+            }
+            
+            const lx = x / 2.0 - 0.1 * this.thickness;
+            
+            if (kEdge && kEdge.settings) {
+                kEdge.settings.setValues(this.thickness, {grip_length: 5});
+            }
+            
+            this.rectangularWall(lx, y, "IeJe", {move: "right", label: "lid top left"});
+            this.rectangularWall(lx, y, "IeJe", {move: "mirror up", label: "lid top right"});
+            this.rectangularWall(lx, y, "IeJe", {move: "left only", label: "invisible"});
+            
+            if (kEdge && kEdge.settings) {
+                kEdge.settings.setValues(this.thickness, {outset: outset});
+            }
+        } else if (top_edge === "v") {
+            this.rectangularWall(x, y, "VEEE", {move: "up", label: "lid top"});
+            const vEdge = this.edges.get ? this.edges.get("v") : this.edges["v"];
+            if (vEdge && vEdge.parts) {
+                vEdge.parts({move: "up"});
+            }
         } else if (top_edge === "E") {
             this.rectangularWall(x, y, "EEEE", {move: "up", label: "lid top"});
             this.rectangularWall(x, y, "eeee", {move: "up", label: "lid top"});
+        } else {
+            return false;
         }
         return true;
     }

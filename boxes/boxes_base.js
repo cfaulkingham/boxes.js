@@ -1247,8 +1247,38 @@ class Boxes {
              maxx = Math.max(maxx, posx);
              maxy = Math.max(maxy, posy);
              
-             // Turn by angle
-             if (typeof next_angle === 'number') {
+             // Turn by angle (handle both simple angles and curve tuples)
+             if (Array.isArray(next_angle)) {
+                 // Curve: [angle, radius]
+                 const [curve_angle, radius] = next_angle;
+                 
+                 // For a curved corner, we need to account for the arc's extent
+                 // Calculate positions along the arc to get accurate bounds
+                 const start_angle = angle;
+                 const num_samples = Math.max(3, Math.ceil(Math.abs(curve_angle) / 30)); // Sample every 30° or so
+                 
+                 for (let j = 0; j <= num_samples; j++) {
+                     const t_param = j / num_samples;
+                     const current_angle = start_angle + curve_angle * t_param;
+                     
+                     // Position along the arc from the center
+                     const arc_x = posx + radius * Math.sin((start_angle + curve_angle * t_param) * Math.PI / 180) 
+                                        - radius * Math.sin(start_angle * Math.PI / 180);
+                     const arc_y = posy - radius * Math.cos((start_angle + curve_angle * t_param) * Math.PI / 180)
+                                        + radius * Math.cos(start_angle * Math.PI / 180);
+                     
+                     minx = Math.min(minx, arc_x);
+                     miny = Math.min(miny, arc_y);
+                     maxx = Math.max(maxx, arc_x);
+                     maxy = Math.max(maxy, arc_y);
+                 }
+                 
+                 // Update position after the curve
+                 posx += radius * Math.sin((angle + curve_angle) * Math.PI / 180) - radius * Math.sin(angle * Math.PI / 180);
+                 posy += -radius * Math.cos((angle + curve_angle) * Math.PI / 180) + radius * Math.cos(angle * Math.PI / 180);
+                 
+                 angle += curve_angle;
+             } else if (typeof next_angle === 'number') {
                  angle += next_angle;
              }
          }
