@@ -22,11 +22,6 @@ node test/test.js airpurifier
 node test/test.js list
 ```
 
-### Test All Generators
-```bash
-node test/test.js all
-```
-
 ### Options
 
 #### Custom Output Path
@@ -50,57 +45,6 @@ node test/test.js regularbox --debug
 node test/test.js regularbox -d
 ```
 
-## Generator-Specific Configurations
-
-Some generators need special property setup. These are configured in the `GENERATOR_CONFIGS` object in `test.js`:
-
-```javascript
-const GENERATOR_CONFIGS = {
-    airpurifier: {
-        properties: {
-            fan_diameter: 140.0,
-            rim: 30.0,
-            filter_height: 46.77,
-            filters: 2,
-            // ... more properties
-        }
-    },
-    abox: {
-        properties: {},
-        setup: (box) => {
-            // Custom initialization logic
-            if (box.lidSettings && box.lidSettings.values) {
-                box.lidSettings.values.style = "overthetop";
-            }
-        }
-    }
-};
-```
-
-### Adding Configuration for a New Generator
-
-If a generator needs specific properties or setup:
-
-1. Open `test/test.js`
-2. Find the `GENERATOR_CONFIGS` object
-3. Add an entry for your generator:
-
-```javascript
-const GENERATOR_CONFIGS = {
-    // ... existing configs
-    mygenerator: {
-        properties: {
-            // Properties to set before parseArgs()
-            width: 100,
-            height: 50
-        },
-        setup: (box) => {
-            // Optional: custom setup after open()
-            box.someSpecialProperty = "value";
-        }
-    }
-};
-```
 
 ## How It Works
 

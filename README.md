@@ -5,6 +5,6 @@ Port of Boxes.py to JavaScript WIP.
 # Examples 
 node test/test.js airpurifier --fan_diameter 120 --filters 1
 node test/test.js abox
+```
 
-
-Boxes.py https://github.com/florianfesti/boxes
+based on Boxes.py https://github.com/florianfesti/boxes
