@@ -15,7 +15,7 @@ try {
     
     // Set lid style to something other than "none" to generate a lid
     // The values are stored in the values object, not directly as properties
-    box.lidSettings.values.style = "chest";
+    box.lidSettings.values.style = "overthetop";
     console.log("After setting style to 'chest':");
     console.log("lidSettings.values.style:", box.lidSettings.values.style);
     console.log("lidSettings.get('style'):", box.lidSettings.get('style'));

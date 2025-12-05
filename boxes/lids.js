@@ -103,21 +103,22 @@ class Lid {
             const b = b_map[edge] || "e";
 
             if (style === "overthetop") {
-                x2 += 2*t + this.play;
-                y2 += 2*t + this.play;
+                const play = this.settings.get('play');
+                x2 += 2*t + play;
+                y2 += 2*t + play;
             }
             boxes.rectangularWall(x2, y2, "ffff", {
                                  callback: [this.handleCB(x2, y2)],
                                  move: "up", label: "lid top"});
             // front/back top pieces
-            boxes.rectangularWall(x2, this.height, b +"FFF", {
+            boxes.rectangularWall(x2, height, b +"FFF", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid front"});
-            boxes.rectangularWall(x2, this.height, b + "FFF", {
+            boxes.rectangularWall(x2, height, b + "FFF", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid back"});
             // left/right sides
-            boxes.rectangularWall(y2, this.height, b + "fFf", {
+            boxes.rectangularWall(y2, height, b + "fFf", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid left"});
-            boxes.rectangularWall(y2, this.height, b + "fFf", {
+            boxes.rectangularWall(y2, height, b + "fFf", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid right"});
             if (style === "ontop") {
                 for (let i = 0; i < 4; i++) {
