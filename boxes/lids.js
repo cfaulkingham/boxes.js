@@ -66,12 +66,15 @@ class Lid {
         const t = this.thickness;
         const style = this.settings.get('style');
         const height = this.height; // via proxy/getattr -> settings or boxes
+        
+        // Use the boxes instance for method calls
+        const boxes = this.boxes;
 
         if (style === "flat") {
-            this.rectangularWall(x, y, "eeee", {
+            boxes.rectangularWall(x, y, "eeee", {
                                  callback: [this.handleCB(x, y)],
                                  move: "up", label: "lid bottom"});
-            this.rectangularWall(x, y, "EEEE", {
+            boxes.rectangularWall(x, y, "EEEE", {
                                  callback: [this.handleCB(x, y)],
                                  move: "up", label: "lid top"});
         } else if (style === "chest") {
@@ -92,18 +95,18 @@ class Lid {
                 x2 += 2*t + this.play;
                 y2 += 2*t + this.play;
             }
-            this.rectangularWall(x2, y2, "ffff", {
+            boxes.rectangularWall(x2, y2, "ffff", {
                                  callback: [this.handleCB(x2, y2)],
                                  move: "up", label: "lid top"});
             // front/back top pieces
-            this.rectangularWall(x2, this.height, b +"FFF", {
+            boxes.rectangularWall(x2, this.height, b +"FFF", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid front"});
-            this.rectangularWall(x2, this.height, b + "FFF", {
+            boxes.rectangularWall(x2, this.height, b + "FFF", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid back"});
             // left/right sides
-            this.rectangularWall(y2, this.height, b + "fFf", {
+            boxes.rectangularWall(y2, this.height, b + "fFf", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid left"});
-            this.rectangularWall(y2, this.height, b + "fFf", {
+            boxes.rectangularWall(y2, this.height, b + "fFf", {
                                  ignore_widths: [1, 2, 5, 6], move: "up", label: "lid right"});
             if (style === "ontop") {
                 for (let i = 0; i < 4; i++) {
@@ -122,20 +125,21 @@ class Lid {
 
     handleCB(x, y) {
         const t = this.thickness;
+        const boxes = this.boxes;
         return () => {
              if (this.handle && this.handle.startsWith("long")) {
-                 this.rectangularHole(x/2, y/2, x/2, t);
+                 boxes.rectangularHole(x/2, y/2, x/2, t);
              } else if (this.handle && this.handle.startsWith("knob")) {
                  // Simplified knob drawing
                  const h = 3*t;
                  const v = 3*t;
-                 this.moveTo((x - t) / 2 + this.burn, (y - t) / 2 + this.burn, 180);
-                 this.ctx.stroke();
-                 this.ctx.save();
-                 this.set_source_color(Color.INNER_CUT);
-                 this.polyline(h, -90, t, -90, h, 90, v, 90, t, 90, v, -90); // approximate loop
-                 this.ctx.restore();
-                 this.ctx.stroke();
+                 boxes.moveTo((x - t) / 2 + this.burn, (y - t) / 2 + this.burn, 180);
+                 boxes.ctx.stroke();
+                 boxes.ctx.save();
+                 boxes.set_source_color(Color.INNER_CUT);
+                 boxes.polyline(h, -90, t, -90, h, 90, v, 90, t, 90, v, -90); // approximate loop
+                 boxes.ctx.restore();
+                 boxes.ctx.stroke();
              }
         };
     }
@@ -154,10 +158,11 @@ class Lid {
         const hh = this.handle_height;
         const tw = x/2 + 2*t;
         const th = hh + 2*t;
+        const boxes = this.boxes;
 
         if (this.move(tw, th, move, true)) return;
         // Drawing logic...
-        this.rectangularWall(tw, th, "e", {move:false}); // Stub
+        boxes.rectangularWall(tw, th, "e", {move:false}); // Stub
         this.move(tw, th, move);
     }
 
@@ -167,15 +172,17 @@ class Lid {
         const hh = this.handle_height;
         const tw = 2 * 7 * t + this.spacing;
         const th = hh + 2*t;
+        const boxes = this.boxes;
 
         if (this.move(tw, th, move, true)) return;
         // Drawing logic...
-        this.rectangularWall(tw, th, "e", {move:false}); // Stub
+        boxes.rectangularWall(tw, th, "e", {move:false}); // Stub
         this.move(tw, th, move);
     }
 
     chestSide(x, angle=0, move="", label="") {
         const t = this.thickness;
+        const boxes = this.boxes;
         // getChestR logic
         const d = x - 2 * Math.sin(angle * Math.PI / 180) * (3*t);
         const r = d / 2.0 / Math.cos(angle * Math.PI / 180);
@@ -183,7 +190,7 @@ class Lid {
         if (this.move(x+2*t, 0.5*x+3*t, move, true, label)) return;
 
         // Simplified drawing
-        this.rectangularWall(x+2*t, 0.5*x+3*t, "e", {move:false});
+        boxes.rectangularWall(x+2*t, 0.5*x+3*t, "e", {move:false});
 
         this.move(x+2*t, 0.5*x+3*t, move, false, label);
     }
@@ -191,8 +198,9 @@ class Lid {
     chestTop(x, y, angle=0, callback=null, move=null, label="") {
          // Stub
          const t = this.thickness;
+         const boxes = this.boxes;
          if (this.move(x, y, move, true, label)) return;
-         this.rectangularWall(x, y, "e", {move:false});
+         boxes.rectangularWall(x, y, "e", {move:false});
          this.move(x, y, move, false, label);
     }
 }
