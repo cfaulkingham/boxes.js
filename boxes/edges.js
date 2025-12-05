@@ -756,11 +756,55 @@ class FingerJointEdge extends FingerJointBase {
         const t = this.settings.thickness;
 
         if (positive) {
-            if (style === "rectangular" || true) { // simplified: only rectangular for now or add others if needed
-                 this.boxes.polyline(0, -90, h, 90, f, 90, h, -90);
+            if (style === "springs") {
+                // Springs style: creates spring-like flexible joints
+                this.boxes.polyline(
+                    0, -90, 0.8 * h, [90, 0.2 * h],
+                    0.1 * h, 90, 0.9 * h, -180, 0.9 * h, 90,
+                    f - 0.6 * h,
+                    90, 0.9 * h, -180, 0.9 * h, 90, 0.1 * h,
+                    [90, 0.2 * h], 0.8 * h, -90
+                );
+            } else if (style === "barbs") {
+                // Barbs style: creates angled barb features
+                const n = Math.floor((h - 0.1 * t) / (0.3 * t));
+                const a = Math.atan(0.5) * 180 / Math.PI;
+                const l = Math.sqrt(5) * 0.1 * t;
+                
+                // Build the barb pattern
+                let poly = [h - n * 0.3 * t];
+                for (let i = 0; i < n; i++) {
+                    poly.push(-45, 0.1 * Math.sqrt(2) * t, 45 + a, l, -a, 0);
+                }
+                
+                // Draw: 0, -90, *poly, 90, f, 90, *reversed(poly), -90
+                this.boxes.polyline(0, -90, ...poly, 90, f, 90, ...poly.slice().reverse(), -90);
+            } else if (style === "snap" && f > 1.9 * t) {
+                // Snap style: creates triangular snap-fit features
+                const a12 = Math.atan(0.5) * 180 / Math.PI;
+                const l12 = t / Math.cos(a12 * Math.PI / 180);
+                const d = 4 * t;
+                const d2 = d + 1 * t;
+                const a = Math.atan((0.5 * t) / (h + d2)) * 180 / Math.PI;
+                const l = (h + d2) / Math.cos(a * Math.PI / 180);
+                
+                let poly = [
+                    0, 90, d, -180, d + h, -90, 0.5 * t, 90 + a12, l12, 90 - a12,
+                    0.5 * t, 90 - a, l, a, 0, [-180, 0.1 * t], h + d2, 90, f - 1.7 * t, 
+                    90 - a12, l12, a12, h, -90, 0
+                ];
+                
+                if (firsthalf) {
+                    poly = poly.slice().reverse();
+                }
+                this.boxes.polyline(...poly);
+            } else {
+                // Default rectangular style
+                this.boxes.polyline(0, -90, h, 90, f, 90, h, -90);
             }
         } else {
-             this.boxes.polyline(0, 90, h, -90, f, -90, h, 90);
+            // Negative (counterpart) finger - always rectangular
+            this.boxes.polyline(0, 90, h, -90, f, -90, h, 90);
         }
     }
 
@@ -808,7 +852,22 @@ class FingerJointEdge extends FingerJointBase {
     margin() {
         const widths = this.fingerLength(this.settings.angle);
         if (this.positive) {
-            return widths[0] - widths[1];
+            let baseMargin = widths[0] - widths[1];
+            const style = this.settings.get('style');
+            
+            // Springs style protrudes further - the spring loops extend 0.9 * h sideways
+            if (style === "springs") {
+                const h = widths[0] - widths[1]; // finger height
+                baseMargin += 0.9 * h; // extra protrusion from spring loops
+            }
+            // Snap style also has extra protrusion from the triangular snap features
+            else if (style === "snap") {
+                const t = this.settings.thickness;
+                const d = 4 * t; // snap feature depth
+                baseMargin += d;
+            }
+            
+            return baseMargin;
         }
         return 0.0;
     }
