@@ -1221,12 +1221,52 @@ class Boxes {
 
          const t = this.thickness;
 
-         // borders = this._closePolygon(borders);
-         // const [minx, miny, maxx, maxy] = this._polygonWallExtend(borders, edges);
-         // const tw = maxx - minx;
-         // const th = maxy - miny;
+         // Calculate bounding box by tracing the polygon
+         let posx = 0, posy = 0;
+         let minx = 0, miny = 0, maxx = 0, maxy = 0;
+         let angle = 0;
+         let temp_length_correction = 0.0;
+         
+         for (let i = 0; i < borders.length; i += 2) {
+             let l = borders[i] - temp_length_correction;
+             const next_angle = borders[i + 1];
+             
+             if (correct_corners && typeof next_angle === 'number' && next_angle < 0) {
+                 temp_length_correction = t * Math.tan((-next_angle / 2) * Math.PI / 180);
+             } else {
+                 temp_length_correction = 0.0;
+             }
+             l -= temp_length_correction;
+             
+             // Move along edge
+             posx += l * Math.cos(angle * Math.PI / 180);
+             posy += l * Math.sin(angle * Math.PI / 180);
+             
+             minx = Math.min(minx, posx);
+             miny = Math.min(miny, posy);
+             maxx = Math.max(maxx, posx);
+             maxy = Math.max(maxy, posy);
+             
+             // Turn by angle
+             if (typeof next_angle === 'number') {
+                 angle += next_angle;
+             }
+         }
+         
+         // Add edge margins to the bounding box on all sides
+         const margin = edges[0].margin() || 0;
+         const tw = maxx - minx + 2 * margin;
+         const th = maxy - miny + 2 * margin;
+         
+         // Adjust minx/miny to account for margin offset
+         minx -= margin;
+         miny -= margin;
 
-         // Simplified implementation assuming starting at 0,0 and no move for now
+         // Check if we should skip drawing (move only)
+         if (this.move(tw, th, move, true)) return;
+
+         // Offset to account for bounding box (polygon may have negative coords)
+         this.moveTo(-minx, -miny);
 
          let length_correction = 0.0;
 
@@ -1252,10 +1292,74 @@ class Boxes {
                  this.corner(next_angle, 0, 1);
              }
          }
+         
+         // Apply move after drawing
+         this.move(tw, th, move);
     }
 
     polygonWalls(borders, h, bottom="F", top="F", symmetrical=true) {
-        // ... simplified
+        if (!borders || borders.length === 0) return;
+
+        // Close polygon if needed
+        borders = this._closePolygon(borders);
+
+        const bottomEdge = this.edges[bottom] || this.edges['e'];
+        const topEdge = this.edges[top] || this.edges['e'];
+        const t = this.thickness;
+
+        // Get finger joint edges for left and right sides
+        const leftEdge = this.edges['f'] || this.edges['e'];
+        const rightEdge = this.edges['f'] || this.edges['e'];
+
+        let length_correction = 0.0;
+        let angle = borders[borders.length - 1]; // last angle
+        let i = 0;
+
+        // Add initial spacing before first wall
+        this.moveTo(leftEdge.spacing() + this.spacing, bottomEdge.margin());
+
+        while (i < borders.length) {
+            let l = borders[i] - length_correction;
+            const next_angle = borders[i + 1];
+
+            // Calculate length correction for next segment
+            if (typeof next_angle === 'number' && next_angle < 0) {
+                length_correction = t * Math.tan((-next_angle / 2) * Math.PI / 180);
+            } else {
+                length_correction = 0.0;
+            }
+            l -= length_correction;
+
+            // Draw rectangular wall for this segment
+            // Width = l (segment length), Height = h
+            this.ctx.save();
+            
+            // Bottom edge
+            bottomEdge.draw(l);
+            
+            // Right corner and edge
+            this.edgeCorner(bottomEdge, rightEdge, 90);
+            rightEdge.draw(h);
+            
+            // Top corner and edge
+            this.edgeCorner(rightEdge, topEdge, 90);
+            topEdge.draw(l);
+            
+            // Left corner and edge
+            this.edgeCorner(topEdge, leftEdge, 90);
+            leftEdge.draw(h);
+            
+            // Close the wall
+            this.edgeCorner(leftEdge, bottomEdge, 90);
+            
+            this.ctx.stroke();
+            this.ctx.restore();
+
+            // Move to next wall position
+            this.moveTo(l + rightEdge.spacing() + leftEdge.spacing() + this.spacing, 0);
+
+            i += 2;
+        }
     }
 
     flex2D(x, y, width=1) {

@@ -36,8 +36,8 @@ class Console extends Boxes {
         }
         if (hf < (0.01 * t)) {
         }
-        this.polygonWall(borders, {move: "right"});
-        this.polygonWall(borders, {move: "right"});
+        this.polygonWall(borders, "f", {move: "right"});
+        this.polygonWall(borders, "f", {move: "right"});
         this.polygonWalls(borders, x);
     }
 
