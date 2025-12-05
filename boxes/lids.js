@@ -63,14 +63,24 @@ class Lid {
     }
 
     __call__(x, y, edge) {
-        const t = this.thickness;
+        console.log("\n=== Lid.__call__ Debug ===");
+        console.log("x:", x, "y:", y, "edge:", edge);
+        
+        const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
         const style = this.settings.get('style');
-        const height = this.height; // via proxy/getattr -> settings or boxes
+        const height = this.settings.get('height'); // Fixed: get height from settings
+        
+        console.log("thickness:", t);
+        console.log("style from settings.get('style'):", style);
+        console.log("this.settings.values.style:", this.settings.values.style);
+        console.log("height:", height);
         
         // Use the boxes instance for method calls
         const boxes = this.boxes;
+        console.log("boxes instance:", typeof boxes);
 
         if (style === "flat") {
+            console.log("Rendering flat lid style");
             boxes.rectangularWall(x, y, "eeee", {
                                  callback: [this.handleCB(x, y)],
                                  move: "up", label: "lid bottom"});
@@ -78,6 +88,7 @@ class Lid {
                                  callback: [this.handleCB(x, y)],
                                  move: "up", label: "lid top"});
         } else if (style === "chest") {
+            console.log("Rendering chest lid style");
             this.chestSide(x, 0, "right", "lid right"); // angle=0
             this.chestSide(x, 0, "up", "lid left");
             this.chestSide(x, 0, "left only", "invisible");
@@ -124,7 +135,7 @@ class Lid {
     }
 
     handleCB(x, y) {
-        const t = this.thickness;
+        const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
         const boxes = this.boxes;
         return () => {
              if (this.handle && this.handle.startsWith("long")) {
@@ -154,54 +165,283 @@ class Lid {
 
     longHandle(x, y, style="long_rounded", move=null) {
         // Implementation omitted/simplified
-        const t = this.thickness;
-        const hh = this.handle_height;
+        const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
+        const hh = this.settings.get('handle_height'); // Fixed: get from settings
         const tw = x/2 + 2*t;
         const th = hh + 2*t;
         const boxes = this.boxes;
 
-        if (this.move(tw, th, move, true)) return;
+        if (this.boxes.move(tw, th, move, true)) return;
         // Drawing logic...
-        boxes.rectangularWall(tw, th, "e", {move:false}); // Stub
-        this.move(tw, th, move);
+        boxes.rectangularWall(tw, th, "eeee", {move:false}); // Stub
+        this.boxes.move(tw, th, move);
     }
 
     knobHandle(x, y, style, move=null) {
         // Implementation omitted/simplified
-        const t = this.thickness;
-        const hh = this.handle_height;
+        const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
+        const hh = this.settings.get('handle_height'); // Fixed: get from settings
         const tw = 2 * 7 * t + this.spacing;
         const th = hh + 2*t;
         const boxes = this.boxes;
 
-        if (this.move(tw, th, move, true)) return;
+        if (this.boxes.move(tw, th, move, true)) return;
         // Drawing logic...
-        boxes.rectangularWall(tw, th, "e", {move:false}); // Stub
-        this.move(tw, th, move);
+        boxes.rectangularWall(tw, th, "eeee", {move:false}); // Stub
+        this.boxes.move(tw, th, move);
+    }
+
+    getChestR(x, angle=0) {
+        const t = this.boxes.thickness;
+        const d = x - 2 * Math.sin(angle * Math.PI / 180) * (3 * t);
+        const r = d / 2.0 / Math.cos(angle * Math.PI / 180);
+        return r;
     }
 
     chestSide(x, angle=0, move="", label="") {
-        const t = this.thickness;
+        const t = this.boxes.thickness;
         const boxes = this.boxes;
-        // getChestR logic
-        const d = x - 2 * Math.sin(angle * Math.PI / 180) * (3*t);
-        const r = d / 2.0 / Math.cos(angle * Math.PI / 180);
+        const r = this.getChestR(x, angle);
+        
+        // Calculate bounding box for the chest side piece
+        // Width is x + 2*t for finger joint clearance
+        // Height is approximately half the width (semicircle radius) plus finger joints
+        const tw = x + 2*t;
+        const th = 0.5*x + 3*t;
+        
+        if (boxes.move(tw, th, move, true, label)) {
+            return;
+        }
 
-        if (this.move(x+2*t, 0.5*x+3*t, move, true, label)) return;
+        // Draw the D-shaped chest side piece
+        // Start at bottom left corner, offset by t
+        boxes.moveTo(t, 0);
+        
+        // Bottom edge - PLAIN edge (no finger joints here!)
+        // Python: self.edge(x)
+        boxes.edge(x);
+        
+        // First corner (turn upward)
+        boxes.corner(90 + angle);
+        
+        // First finger joint section for connecting to lid top
+        // Python: self.edges["a"](3*t) - finger joint with tabs
+        this._fingerJointEdge(3*t);
+        
+        // Semicircular arc at the top
+        boxes.corner(180 - 2*angle, r);
+        
+        // Second finger joint section
+        this._fingerJointEdge(3*t);
+        
+        // Final corner to return to start direction
+        boxes.corner(90 + angle);
 
-        // Simplified drawing
-        boxes.rectangularWall(x+2*t, 0.5*x+3*t, "e", {move:false});
+        boxes.move(tw, th, move, false, label);
+    }
 
-        this.move(x+2*t, 0.5*x+3*t, move, false, label);
+    _fingerJointEdge(length) {
+        // Draw a finger joint edge with tabs (like Python "a" edge)
+        // Uses finger=1.0*t, space=1.0*t as in Python FingerJointSettings for chest
+        const boxes = this.boxes;
+        const t = boxes.thickness;
+        const finger = 1.0 * t;  // finger width (from Python: finger=1.0)
+        const space = 1.0 * t;   // space between fingers (from Python: space=1.0)
+        const unit = finger + space;
+        
+        // Calculate number of complete units
+        const numUnits = Math.floor(length / unit);
+        const leftover = length - numUnits * unit;
+        
+        // Start with half leftover
+        if (leftover > 0) {
+            boxes.edge(leftover / 2);
+        }
+        
+        // Draw finger joints
+        for (let i = 0; i < numUnits; i++) {
+            // Tab (finger) - goes outward
+            boxes.corner(-90);
+            boxes.edge(t);
+            boxes.corner(90);
+            boxes.edge(finger);
+            boxes.corner(90);
+            boxes.edge(t);
+            boxes.corner(-90);
+            // Space
+            boxes.edge(space);
+        }
+        
+        // End with half leftover
+        if (leftover > 0) {
+            boxes.edge(leftover / 2);
+        }
     }
 
     chestTop(x, y, angle=0, callback=null, move=null, label="") {
-         // Stub
-         const t = this.thickness;
-         const boxes = this.boxes;
-         if (this.move(x, y, move, true, label)) return;
-         boxes.rectangularWall(x, y, "e", {move:false});
-         this.move(x, y, move, false, label);
+        const t = this.boxes.thickness;
+        const boxes = this.boxes;
+        const r = this.getChestR(x, angle);
+        
+        // Arc length: radians(180-2*angle) * r
+        const arcAngle = (180 - 2*angle) * Math.PI / 180;
+        const l = arcAngle * r;
+        
+        // Total width is arc length plus finger joints on both sides
+        const tw = l + 6*t;
+        // Total height is y (depth) plus thickness on both sides
+        const th = y + 2*t;
+        
+        if (boxes.move(tw, th, move, true, label)) {
+            return;
+        }
+
+        // Call callback at position 0 if provided
+        if (callback && callback[0]) {
+            boxes.cc(callback, 0);
+        }
+        
+        // Top edge of chest lid (this is where the flex hinge goes)
+        // Python: self.edges["A"](3*t) - finger joint counterpart (slots)
+        this._fingerJointCounterpart(3*t);
+        
+        // Python: self.edges["X"](l, y+2*t) - FlexEdge with living hinge pattern
+        if (boxes.edges && boxes.edges['X']) {
+            boxes.edges['X'].draw(l, y + 2*t);
+        } else {
+            // Fallback: just draw the edge and manually add flex lines
+            boxes.edge(l);
+            this._drawFlexLines(l, y + 2*t);
+        }
+        
+        // Second finger joint counterpart section
+        this._fingerJointCounterpart(3*t);
+        boxes.corner(90);
+        
+        // Call callback at position 1 if provided  
+        if (callback && callback[1]) {
+            boxes.cc(callback, 1);
+        }
+        // Right side edge (plain)
+        // Python: self.edge(y+2*t)
+        boxes.edge(y + 2*t);
+        boxes.corner(90);
+        
+        // Call callback at position 2 if provided
+        if (callback && callback[2]) {
+            boxes.cc(callback, 2);
+        }
+        
+        // Bottom edge - finger joint counterparts + PLAIN middle + finger joint counterparts
+        // Python: self.edges["A"](3*t), self.edge(l), self.edges["A"](3*t)
+        this._fingerJointCounterpart(3*t);
+        boxes.edge(l);  // Plain edge in the middle (no flex on bottom!)
+        this._fingerJointCounterpart(3*t);
+        boxes.corner(90);
+        
+        // Call callback at position 3 if provided
+        if (callback && callback[3]) {
+            boxes.cc(callback, 3);
+        }
+        // Left side edge (plain)
+        boxes.edge(y + 2*t);
+        boxes.corner(90);
+
+        boxes.move(tw, th, move, false, label);
+    }
+
+    _fingerJointCounterpart(length) {
+        // Draw finger joint counterpart (slots/holes) that mate with tabs
+        // Like Python "A" edge - uses finger=1.0*t, space=1.0*t
+        const boxes = this.boxes;
+        const t = boxes.thickness;
+        const finger = 1.0 * t;  // slot width (matches finger width from "a" edge)
+        const space = 1.0 * t;   // space between slots
+        const unit = finger + space;
+        
+        // Calculate number of complete units
+        const numUnits = Math.floor(length / unit);
+        const leftover = length - numUnits * unit;
+        
+        // Start with half leftover
+        if (leftover > 0) {
+            boxes.edge(leftover / 2);
+        }
+        
+        // Draw slots (inverse of tabs)
+        for (let i = 0; i < numUnits; i++) {
+            // Slot - goes inward (opposite of tab)
+            boxes.corner(90);
+            boxes.edge(t);
+            boxes.corner(-90);
+            boxes.edge(finger);
+            boxes.corner(-90);
+            boxes.edge(t);
+            boxes.corner(90);
+            // Space
+            boxes.edge(space);
+        }
+        
+        // End with half leftover
+        if (leftover > 0) {
+            boxes.edge(leftover / 2);
+        }
+    }
+
+    _drawFlexLines(width, height) {
+        // Draw living hinge lines as a fallback when FlexEdge is not available
+        // This creates the pattern of cuts that allows the material to flex
+        const boxes = this.boxes;
+        const dist = 2.0;  // distance between flex lines
+        const connection = 1.0;  // solid part at top/bottom of each line
+        
+        // Save current position
+        boxes.ctx.save();
+        
+        // Move back to start of flex area
+        boxes.ctx.translate(-width, 0);
+        
+        const lines = Math.floor(width / dist);
+        const leftover = width - lines * dist;
+        const sections = Math.max(Math.floor((height - connection) / 3), 1);
+        const sheight = ((height - connection) / sections) - connection;
+        
+        for (let i = 1; i < lines; i++) {
+            const pos = i * dist + leftover / 2;
+            
+            if (i % 2 !== 0) {
+                boxes.ctx.move_to(pos, 0);
+                boxes.ctx.line_to(pos, connection + sheight);
+                
+                for (let j = 0; j < Math.floor((sections - 1) / 2); j++) {
+                    boxes.ctx.move_to(pos, (2 * j + 1) * sheight + (2 * j + 2) * connection);
+                    boxes.ctx.line_to(pos, (2 * j + 3) * (sheight + connection));
+                }
+                
+                if (sections % 2 === 0) {
+                    boxes.ctx.move_to(pos, height - sheight - connection);
+                    boxes.ctx.line_to(pos, height);
+                }
+            } else {
+                if (sections % 2 !== 0) {
+                    boxes.ctx.move_to(pos, height);
+                    boxes.ctx.line_to(pos, height - connection - sheight);
+                    
+                    for (let j = 0; j < Math.floor((sections - 1) / 2); j++) {
+                        boxes.ctx.move_to(pos, height - ((2 * j + 1) * sheight + (2 * j + 2) * connection));
+                        boxes.ctx.line_to(pos, height - (2 * j + 3) * (sheight + connection));
+                    }
+                } else {
+                    for (let j = 0; j < Math.floor(sections / 2); j++) {
+                        boxes.ctx.move_to(pos, height - connection - 2 * j * (sheight + connection));
+                        boxes.ctx.line_to(pos, height - 2 * (j + 1) * (sheight + connection));
+                    }
+                }
+            }
+        }
+        
+        boxes.ctx.stroke();
+        boxes.ctx.restore();
     }
 }
 
