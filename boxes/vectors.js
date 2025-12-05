@@ -85,5 +85,32 @@ function kerf(points, k, closed = true) {
     return result;
 }
 
-export { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf
+function rotm(angle) {
+    /** Rotation matrix */
+    return [[Math.cos(angle), -Math.sin(angle), 0],
+            [Math.sin(angle), Math.cos(angle), 0]];
+}
+
+function vtransl(v, m) {
+    /** Transform vector v by matrix m */
+    const m0 = m[0];
+    const m1 = m[1];
+    return [m0[0] * v[0] + m0[1] * v[1] + m0[2],
+            m1[0] * v[0] + m1[1] * v[1] + m1[2]];
+}
+
+function mmul(m0, m1) {
+    /** Matrix multiplication */
+    const result = [[0, 0, 0], [0, 0, 0]];
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+            for (let k = 0; k < 3; k++) {
+                result[j][i] += m0[k][i] * m1[j][k];
+            }
+        }
+    }
+    return result;
+}
+
+export { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf, rotm, vtransl, mmul
  };
