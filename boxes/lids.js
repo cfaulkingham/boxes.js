@@ -138,18 +138,29 @@ class Lid {
     handleCB(x, y) {
         const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
         const boxes = this.boxes;
+        const handle = this.settings.get('handle'); // Fixed: get handle from settings
+        const burn = this.boxes.burn || 0;
         return () => {
-             if (this.handle && this.handle.startsWith("long")) {
+             if (handle && handle.startsWith("long")) {
+                 // Create a rectangular slot in the center of the lid for finger grip
                  boxes.rectangularHole(x/2, y/2, x/2, t);
-             } else if (this.handle && this.handle.startsWith("knob")) {
-                 // Simplified knob drawing
-                 const h = 3*t;
-                 const v = 3*t;
-                 boxes.moveTo((x - t) / 2 + this.burn, (y - t) / 2 + this.burn, 180);
+             } else if (handle && handle.startsWith("knob")) {
+                 // Draw 4 L-shaped cutouts for the knob mounting posts
+                 // These form a cross pattern in the center of the lid
+                 const h = 3 * t;
+                 const v = 3 * t;
+                 
+                 // Move to center of the lid, offset for the cutout pattern
+                 boxes.moveTo((x - t) / 2 + burn, (y - t) / 2 + burn, 180);
                  boxes.ctx.stroke();
                  boxes.ctx.save();
-                 boxes.set_source_color(Color.INNER_CUT);
-                 boxes.polyline(h, -90, t, -90, h, 90, v, 90, t, 90, v, -90); // approximate loop
+                 
+                 // Draw 4 L-shaped cutouts (one for each corner of the knob mounting)
+                 // Each L-shape: line of length h, turn, slot width t, turn, line h, then turn 90 to next
+                 for (const l of [h, v, h, v]) {
+                     boxes.polyline(l, -90, t, -90, l, 90);
+                 }
+                 
                  boxes.ctx.restore();
                  boxes.ctx.stroke();
              }
@@ -157,39 +168,78 @@ class Lid {
     }
 
     handleParts(x, y) {
-        if (this.handle && this.handle.startsWith("long")) {
-            this.longHandle(x, y, this.handle, "up");
-        } else if (this.handle && this.handle.startsWith("knob")) {
-            this.knobHandle(x, y, this.handle, "up");
+        const handle = this.settings.get('handle'); // Fixed: get handle from settings
+        if (handle && handle.startsWith("long")) {
+            this.longHandle(x, y, handle, "up");
+        } else if (handle && handle.startsWith("knob")) {
+            this.knobHandle(x, y, handle, "up");
         }
     }
 
     longHandle(x, y, style="long_rounded", move=null) {
-        // Implementation omitted/simplified
-        const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
-        const hh = this.settings.get('handle_height'); // Fixed: get from settings
+        const t = this.boxes.thickness;
+        const hh = this.settings.get('handle_height');
         const tw = x/2 + 2*t;
         const th = hh + 2*t;
         const boxes = this.boxes;
 
-        if (this.boxes.move(tw, th, move, true)) return;
-        // Drawing logic...
-        boxes.rectangularWall(tw, th, "eeee", {move:false}); // Stub
-        this.boxes.move(tw, th, move);
+        if (boxes.move(tw, th, move, true)) return;
+
+        boxes.moveTo(0.5*t);
+
+        // Base poly for all long handle styles: corner and stem
+        let poly = [[90, t/2], t/2, 90, t, -90];
+
+        let l;  // length of the top straight section
+        if (style === "long_rounded") {
+            const r = Math.min(hh/2, x/4);
+            poly = poly.concat([t + hh - r, [90, r]]);
+            l = x/2 - 2*r;
+        } else if (style === "long_trapezoid") {
+            poly = poly.concat([t, [45, t], (hh - t) * Math.sqrt(2), [45, t]]);
+            l = x/2 - 2 * hh;
+        } else if (style === "long_doublerounded") {
+            poly = poly.concat([t, 90, 0, [-90, hh/2], 0, [90, hh/2]]);
+            l = x/2 - 2*hh;
+        }
+
+        // Build complete polyline: start + first half + top + mirrored second half
+        const fullPoly = [x/2 + t].concat(poly, [l], poly.slice().reverse());
+        boxes.polyline(...fullPoly);
+
+        boxes.move(tw, th, move);
     }
 
     knobHandle(x, y, style, move=null) {
-        // Implementation omitted/simplified
-        const t = this.boxes.thickness; // Fixed: get thickness from boxes instance
-        const hh = this.settings.get('handle_height'); // Fixed: get from settings
-        const tw = 2 * 7 * t + this.spacing;
+        const t = this.boxes.thickness;
+        const hh = this.settings.get('handle_height');
+        const spacing = this.boxes.spacing || 0;
+        const tw = 2 * 7 * t + spacing;
         const th = hh + 2*t;
         const boxes = this.boxes;
 
-        if (this.boxes.move(tw, th, move, true)) return;
-        // Drawing logic...
-        boxes.rectangularWall(tw, th, "eeee", {move:false}); // Stub
-        this.boxes.move(tw, th, move);
+        if (boxes.move(tw, th, move, true)) return;
+
+        // Base polyline for the knob posts
+        const poly = [[90, t/2], t/2, 90, t/2, -90, hh - 2*t, [90, 3*t]];
+
+        // Two knob pieces: one with posts on bottom, one with posts on top
+        const bottomPosts = [3*t, 90, 2*t + hh/2, -90, t, -90, hh/2 + 2*t, 90, 3*t];
+        const topPosts = [t];
+        const bottomPosts2 = [7*t];
+        const topPosts2 = [0, 90, hh/2, -90, t, -90, hh/2, 90, 0];
+
+        // First knob piece
+        boxes.moveTo(0.5*t);
+        let p = bottomPosts.concat(poly, topPosts, poly.slice().reverse());
+        boxes.polyline(...p);
+        boxes.moveTo(tw/2 + spacing);
+
+        // Second knob piece
+        p = bottomPosts2.concat(poly, topPosts2, poly.slice().reverse());
+        boxes.polyline(...p);
+
+        boxes.move(tw, th, move);
     }
 
     getChestR(x, angle=0) {
