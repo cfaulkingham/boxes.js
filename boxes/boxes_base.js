@@ -13,11 +13,12 @@ class Boxes {
         this.argparser = new ArgParser();
         this.thickness = 3.0; // Default
         this.burn = 0.1;
-        this.spacing = 0.5; // spacing around parts
+        this.spacing = [0.5, 0]; // spacing around parts [multiplier of thickness, extra mm]
         this.format = 'svg';
         this.debug = false;
         this.labels = true;
         this.reference = 100.0;
+        this.inner_corners = "loop"; // style for inner corners: "loop", "corner", "backarc"
 
         this.tx_sizes = {
             1 : 0.61,
@@ -128,6 +129,13 @@ class Boxes {
         }
         // Add labels argument
         this.argparser.add_argument("--labels", {action: "store", type: "bool", default: true, help: "add labels to parts"});
+        
+        // Default settings arguments (matching Python's defaultgroup)
+        this.argparser.add_argument("--thickness", {action: "store", type: "float", default: 3.0, help: "thickness of the material (in mm)"});
+        this.argparser.add_argument("--burn", {action: "store", type: "float", default: 0.1, help: "burn correction (in mm)(bigger values for tighter fit)"});
+        this.argparser.add_argument("--spacing", {action: "store", type: "str", default: "0.5", help: "spacing around parts (multiples of thickness [: extra space in mm])"});
+        this.argparser.add_argument("--reference", {action: "store", type: "float", default: 100.0, help: "print reference rectangle with given length (in mm)(zero to disable)"});
+        this.argparser.add_argument("--inner_corners", {action: "store", type: "str", default: "loop", choices: ["loop", "corner", "backarc"], help: "style for inner corners"});
     }
 
     parseArgs(args) {
@@ -170,6 +178,11 @@ class Boxes {
         if (typeof this.sy === 'string') {
             this.sy = this._parseSections(this.sy);
         }
+        
+        // Parse spacing from string format (e.g., "0.5" -> [0.5, 0] or "0.5:2" -> [0.5, 2])
+        if (typeof this.spacing === 'string') {
+            this.spacing = this._parseSpacing(this.spacing);
+        }
     }
     
     _parseSections(spec) {
@@ -186,6 +199,21 @@ class Boxes {
             return [parseFloat(spec)];
         }
     }
+    
+    _parseSpacing(spec) {
+        // Parse spacing specification like "0.5" or "0.5:2"
+        // Returns [multiplier, extra_mm]
+        // In Python: spacing_type returns tuple(float(v.strip()) for v in x.split(":"))
+        if (typeof spec === 'number') {
+            return [spec, 0];
+        }
+        if (spec.includes(':')) {
+            const parts = spec.split(':').map(v => parseFloat(v.trim()));
+            return [parts[0], parts[1] || 0];
+        } else {
+            return [parseFloat(spec), 0];
+        }
+    }
 
     open() {
         if (this.ctx.paths.length > 0) return; // already opened?
@@ -196,10 +224,27 @@ class Boxes {
         this.ctx.set_line_width(Math.max(2 * this.burn, 0.05));
         this.ctx.set_source_rgb(0, 0, 0);
 
-        // Spacing calculation
-        // this.spacing = 2 * this.burn + this.spacing[0] * this.thickness + this.spacing[1];
-        // Simplified:
-        this.spacing = 2 * this.burn + 0.5 * this.thickness;
+        // Spacing calculation (matching Python)
+        // spacing = 2 * burn + spacing[0] * thickness + spacing[1]
+        const spacingParsed = Array.isArray(this.spacing) ? this.spacing : [this.spacing, 0];
+        this.spacing = 2 * this.burn + spacingParsed[0] * this.thickness + spacingParsed[1];
+        
+        // Reference rectangle
+        if (this.reference && this.format !== 'svg_Ponoko') {
+            const refText = `${this.reference.toFixed(1)}mm, burn:${this.burn.toFixed(2)}mm`;
+            // Make box wide enough for text (min 150mm) but use reference value if larger
+            const boxWidth = Math.max(this.reference, 150);
+            const boxHeight = 10;
+            this.move(boxWidth, boxHeight, "up", true);
+            this.ctx.rectangle(0, 0, boxWidth, boxHeight);
+            // Center text in the box
+            // y should be at vertical center, but text "middle" alignment will offset by -0.5*height
+            // So we need to compensate: center of box (5mm) + 0.5*fontsize to counter the offset
+            const fontSize = 6;
+            this.text(refText, boxWidth / 2.0, boxHeight / 2.0 + fontSize / 2.0, 0, "center middle", fontSize, Color.ANNOTATIONS);
+            this.move(boxWidth, boxHeight, "up");
+            this.ctx.stroke();
+        }
     }
 
     close() {
