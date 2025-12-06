@@ -2712,27 +2712,63 @@ class RackEdge extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = "R";
-        this.gear = new Gears(boxes);
     }
 
     draw(length, kw = {}) {
-        const params = { ...this.settings.values };
-        params["draw_rack"] = true;
-        params["rack_base_height"] = -1E-36;
-        params["rack_teeth_length"] = Math.floor(length / (params["dimension"] * Math.PI));
-        params["rack_base_tab"] = (length - (params["rack_teeth_length"]) * params["dimension"] * Math.PI) / 2.0;
-
-        const s_tmp = this.boxes.spacing;
-        this.boxes.spacing = 0;
-
-        this.boxes.moveTo(length, 0, 180);
-
-        if (this.gear.draw) {
-            this.gear.draw(params, "");
+        const dimension = this.settings.get('dimension');
+        const angle = this.settings.get('angle') || 20.0;
+        
+        // Calculate rack parameters
+        const pitch = Math.PI * dimension;  // circular pitch for metric
+        const addendum = dimension;  // tooth height above pitch line
+        const teethCount = Math.floor(length / pitch);
+        const leftover = length - teethCount * pitch;
+        
+        // Pressure angle affects tooth shape
+        const pressureAngleRad = angle * Math.PI / 180;
+        const tanPA = Math.tan(pressureAngleRad);
+        
+        // Draw the rack teeth
+        // Start with leftover/2 flat section
+        if (leftover > 0) {
+            this.boxes.edge(leftover / 2);
         }
-
-        this.boxes.moveTo(0, 0, 180);
-        this.boxes.spacing = s_tmp;
+        
+        for (let i = 0; i < teethCount; i++) {
+            // Each tooth: go up, across top, down, across bottom
+            const toothWidth = pitch / 2;
+            const slopeWidth = addendum * tanPA;
+            const topWidth = toothWidth - 2 * slopeWidth;
+            const bottomWidth = toothWidth - 2 * slopeWidth;
+            
+            // Up slope
+            const slopeAngle = Math.atan2(addendum, slopeWidth) * 180 / Math.PI;
+            const slopeLength = Math.sqrt(addendum * addendum + slopeWidth * slopeWidth);
+            
+            this.boxes.corner(-slopeAngle);
+            this.boxes.edge(slopeLength);
+            this.boxes.corner(slopeAngle);
+            
+            // Top of tooth
+            if (topWidth > 0) {
+                this.boxes.edge(topWidth);
+            }
+            
+            // Down slope
+            this.boxes.corner(slopeAngle);
+            this.boxes.edge(slopeLength);
+            this.boxes.corner(-slopeAngle);
+            
+            // Bottom of tooth (valley)
+            if (bottomWidth > 0 && i < teethCount - 1) {
+                this.boxes.edge(bottomWidth);
+            }
+        }
+        
+        // End with leftover/2 flat section
+        if (leftover > 0) {
+            this.boxes.edge(leftover / 2);
+        }
     }
 
     margin() {
