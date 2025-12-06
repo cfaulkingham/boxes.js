@@ -1,5 +1,5 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, StackableSettings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
@@ -8,7 +8,7 @@ import { Color  } from '../Color.js';
 class HobbyCase extends Boxes {
     constructor() {
         super();
-        this.addSettingsArgs(boxes.edges.FingerJointSettings);
+        this.addSettingsArgs(FingerJointSettings);
         this.argparser.add_argument("--unit_d", {action: "store", type: "float", default: 128, help: "Depth of single unit"});
         this.argparser.add_argument("--unit_h", {action: "store", type: "float", default: 50, help: "Height of single unit"});
         this.argparser.add_argument("--unit_w", {action: "store", type: argparseSections, default: "215*3", help: "Widths of unit columns, eg. 215*3 or 150:215:150"});
@@ -17,7 +17,7 @@ class HobbyCase extends Boxes {
         this.argparser.add_argument("--add_rails", {action: "store", type: boolarg, default: true, help: "Should rails be generated for slots unpopulated by shelves?"});
         this.argparser.add_argument("--add_cover", {action: "store", type: boolarg, default: true, help: "Should cover for the case be generated?"});
         this.argparser.add_argument("--inset_shelves", {action: "store", type: boolarg, default: true, help: "Should the inner dividers and shelves be inset from the front edge?"});
-        this.addSettingsArgs(boxes.edges.StackableSettings, {angle: 90, width: 0.0, height: 2.0});
+        this.addSettingsArgs(StackableSettings, {angle: 90, width: 0.0, height: 2.0});
     }
 
     prepare() {

@@ -1,9 +1,12 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, FingerHoleEdge, FingerJointEdge  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import '../globals.js';
+
+const { isinstance } = global;
 
 class DrillStand extends Boxes {
     constructor() {
@@ -140,7 +143,7 @@ class DrillStand extends Boxes {
         }
         this.moveTo(edges[3].spacing(), (eh + edges[0].margin()), -a);
         this.edge((t * Math.tan((a * Math.PI / 180))));
-        if (isinstance(edges[0], boxes.edges.FingerHoleEdge)) {
+        if (isinstance(edges[0], FingerHoleEdge)) {
             this.ctx.save();
             this.moveTo(0, 0, a);
             this.fingerHolesAt(0, (1.5 * t), ((x * fa) - (t * Math.tan((a * Math.PI / 180)))), -a);
@@ -148,7 +151,7 @@ class DrillStand extends Boxes {
             this.edge(((x * fa) - (t * Math.tan((a * Math.PI / 180)))));
         }
         else {
-            if (isinstance(edges[0], boxes.edges.FingerJointEdge)) {
+            if (isinstance(edges[0], FingerJointEdge)) {
                 edges[0](((x * fa) - (t * Math.tan((a * Math.PI / 180)))));
             }
             else {
@@ -204,6 +207,8 @@ class DrillStand extends Boxes {
         let sy;
         let sh;
         [sx, sy, sh] = [this.sx, this.sy, this.sh];
+        let x = this.x;
+        let y = this.y;
         let bottom_angle = Math.atan((this.extra_height / x));
         this.xOutsideWall(sh[0], "hFeF", {move: "up"});
         for (let i = 1; i < sy.length; i += 1) {

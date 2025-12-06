@@ -1,6 +1,6 @@
 import { Boxes } from '../boxes.js';
 
-class CoffeeCapsuleHolder extends Boxes {
+class CoffeeCapsulesHolder extends Boxes {
     constructor() {
         super();
         this.argparser.add_argument("--columns", {type: "int", default: 4, help: "Number of columns of capsules."});
@@ -104,4 +104,4 @@ class CoffeeCapsuleHolder extends Boxes {
 
 }
 
-export { CoffeeCapsuleHolder };
+export { CoffeeCapsulesHolder };

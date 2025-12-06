@@ -17,7 +17,7 @@ class FanHole extends Boxes {
     }
 
     arc(d, a) {
-        let r = abs((((1 / Math.cos(((90 - (a / 2)) * Math.PI / 180))) * d) / 2));
+        let r = Math.abs((((1 / Math.cos(((90 - (a / 2)) * Math.PI / 180))) * d) / 2));
         this.corner((-a / 2));
         this.corner(a, r);
         this.corner((-a / 2));

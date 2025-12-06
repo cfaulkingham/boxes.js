@@ -7,7 +7,7 @@ import { Color  } from '../Color.js';
 
 class SlantedEdge extends Boxes {
     __call__(length) {
-        let angle = abs(this.settings);
+        let angle = Math.Math.Math.Math.abs(this.settings);
         if (angle === 0) {
             let poly = [length];
         }

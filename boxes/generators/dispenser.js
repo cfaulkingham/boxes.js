@@ -4,6 +4,9 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import '../globals.js';
+
+const { boolarg, ArgparseEdgeType, list } = global;
 
 class FrontEdge extends Boxes {
     __call__(length) {
@@ -45,7 +48,7 @@ class Dispenser extends Boxes {
         let hb = this.bottomheight;
         let t = this.thickness;
         let se = this.sideedges;
-        let fe = FrontEdge(this, this);
+        let fe = new FrontEdge(this, this);
         hb = Math.max(0, (hb - this.edges["š"].spacing()));
         let th = (h + (hb ? (hb + t) : 0.0));
         let hh = (hb + (0.5 * t));

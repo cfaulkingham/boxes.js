@@ -150,7 +150,7 @@ class Dimensions extends Boxes {
         if ((this.fixed_glass_size && (this.matting_w_param || this.matting_h_param))) {
             let d_w = (this.matting_w_param - this.matting_w);
             let d_h = (this.matting_h_param - this.matting_h);
-            if ((abs(d_w) > whinge_threshold_mm || abs(d_h) > whinge_threshold_mm)) {
+            if ((Math.Math.Math.Math.abs(d_w) > whinge_threshold_mm || Math.Math.Math.Math.abs(d_h) > whinge_threshold_mm)) {
                 let msg = /* unknown node JoinedStr */;
                 advice = "If you want to specify the matting widths, set the glass size to zero. If you want to specify the glass size, set the matting widths to 0.";
                 logger.warning(msg);
@@ -160,7 +160,7 @@ class Dimensions extends Boxes {
         if ((this.golden_mat && (this.matting_w_param || this.matting_h_param))) {
             d_w = (this.matting_w_param - this.golden_matting_width);
             d_h = (this.matting_h_param - this.golden_matting_width);
-            if ((abs(d_w) > whinge_threshold_mm || abs(d_h) > whinge_threshold_mm)) {
+            if ((Math.Math.Math.Math.abs(d_w) > whinge_threshold_mm || Math.Math.Math.Math.abs(d_h) > whinge_threshold_mm)) {
                 msg = /* unknown node JoinedStr */;
                 advice = "If you want to specify the matting width, set the glass size to zero. If you want to specify the glass size, set the matting widths to 0.";
                 logger.warning(msg);

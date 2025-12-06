@@ -4,6 +4,7 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import '../globals.js';
 
 class DiceBox extends Boxes {
     constructor() {

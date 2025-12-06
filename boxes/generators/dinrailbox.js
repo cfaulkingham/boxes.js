@@ -66,7 +66,7 @@ class DinRailBox extends Boxes {
             return;
         }
         this.moveTo(1, t);
-        this.edges["f"](l);
+        this.edges.get("f").call(this, l);
         let poly = [0, 90, 6, -60, 0, [120, (2 * (3 ** -0.5))], 0, 30, 2, 90, 5, [-180, 0.5], 5, 90];
         this.polyline(...((poly + [(l - (2 * 3))]) + list(reversed(poly))));
         this.move(tw, th, move);

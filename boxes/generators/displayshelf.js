@@ -4,6 +4,9 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import '../globals.js';
+
+const { boolarg } = global;
 
 class DisplayShelf extends Boxes {
     constructor() {
@@ -31,12 +34,12 @@ class DisplayShelf extends Boxes {
         if ((this.slope_top && this.include_bottom)) {
             this.moveTo(0, this.edges["h"].startwidth());
         }
-        if (((h - abs(hs)) - ((3 * t) * (this.num - 1))) < 0) {
+        if (((h - Math.abs(hs)) - ((3 * t) * (this.num - 1))) < 0) {
             ValueError("Need more height to fit shelves")
         }
         for (let i = 0; i < this.num; i += 1) {
-            let pos_x = abs(((0.5 * t) * Math.sin(a)));
-            let pos_y = (((hs - ((Math.cos(a) * 0.5) * t)) + ((i * (h - abs(hs))) / (this.num - 0.5))) + b_offs);
+            let pos_x = Math.abs(((0.5 * t) * Math.sin(a)));
+            let pos_y = (((hs - ((Math.cos(a) * 0.5) * t)) + ((i * (h - Math.abs(hs))) / (this.num - 0.5))) + b_offs);
             if (a < 0) {
                 pos_y += (-Math.sin(a) * this.sl);
             }

@@ -130,7 +130,7 @@ class Planetary2 extends Boxes {
             this.ctx.restore();
             this.gears({teeth: this.planetteeth, dimension: this.modulus, angle: pressure_angle, profile_shift: profile_shift, move: "up only"});
         }
-        this.text(("1:%.1f" % abs(ratio)));
+        this.text(("1:%.1f" % Math.Math.Math.Math.abs(ratio)));
     }
 
 }

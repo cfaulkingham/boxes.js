@@ -5,6 +5,9 @@ import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 import { TypeTray  } from './typetray.js';
+import '../globals.js';  // for boolarg, argparseSections, etc.
+
+const { boolarg, argparseSections } = global;
 
 class CompartmentBox extends TypeTray {
     constructor() {

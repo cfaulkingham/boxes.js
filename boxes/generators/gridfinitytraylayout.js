@@ -9,7 +9,7 @@ import { TrayLayout  } from './traylayout.js';
 class GridfinityTrayLayout extends TrayLayout {
     constructor() {
         super();
-        this.addSettingsArgs(boxes.edges.FingerJointSettings);
+        this.addSettingsArgs(FingerJointSettings);
         this.addSettingsArgs(lids.LidSettings);
         this.outside = true;
         this.pitch = 42.0;

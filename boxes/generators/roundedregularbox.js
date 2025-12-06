@@ -1,5 +1,5 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, DoveTailSettings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
@@ -8,9 +8,9 @@ import { Color  } from '../Color.js';
 class RoundedRegularBox extends Boxes {
     constructor() {
         super();
-        this.addSettingsArgs(boxes.edges.FingerJointSettings);
-        this.addSettingsArgs(boxes.edges.DoveTailSettings);
-        this.addSettingsArgs(boxes.edges.FlexSettings);
+        this.addSettingsArgs(FingerJointSettings);
+        this.addSettingsArgs(DoveTailSettings);
+        this.addSettingsArgs(FlexSettings);
         // this.buildArgParser();
         this.argparser.add_argument("--sides", {action: "store", type: "int", default: 5, help: "number of sides"});
         this.argparser.add_argument("--inner_size", {action: "store", type: "float", default: 150, help: "diameter of the inner circle in mm"});

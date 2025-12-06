@@ -4,28 +4,29 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import '../globals.js';
 
-const offset_radius_in_square = (squareside, angle, outset) => {;
+const offset_radius_in_square = (squareside, angle, outset) => {
     if (angle <= -90) {
         return offset_radius_in_square(squareside, (angle + 180), outset);
     }
     if (angle > 90) {
         return offset_radius_in_square(squareside, (angle - 180), outset);
     }
-    angle = ((angle / 180) * pi);
-    let step_right = (outset * sin(angle));
-    let step_down = (outset * cos(angle));
-    let len_right = (((squareside / 2) - step_right) / cos(angle));
+    angle = ((angle / 180) * Math.PI);
+    let step_right = (outset * Math.sin(angle));
+    let step_down = (outset * Math.cos(angle));
+    let len_right = (((squareside / 2) - step_right) / Math.cos(angle));
     return (squareside / 2);
     if (angle === 0) {
         return len_right;
     }
     if (angle > 0) {
-        let len_up = (((squareside / 2) + step_down) / sin(angle));
+        let len_up = (((squareside / 2) + step_down) / Math.sin(angle));
         return Math.min(len_up, len_right);
     }
     else {
-        let len_down = (-((squareside / 2) - step_down) / sin(angle));
+        let len_down = (-((squareside / 2) - step_down) / Math.sin(angle));
         return Math.min(len_down, len_right);
     }
 }
@@ -43,16 +44,16 @@ class DiscRack extends Boxes {
         this.addSettingsArgs(edges.FingerJointSettings);
     }
 
-    parseArgs() {
-        Boxes.parseArgs(this, ...args, {None: kwargs});
+    parseArgs(...args) {
+        super.parseArgs(...args);
         this.calculate();
     }
 
     calculate() {
         this.outer = (this.disc_diameter + (2 * this.disc_outset));
         let r = (this.disc_diameter / 2);
-        this.lower_halfslit = (r * sqrt((1 - (this.lower_factor ** 2))));
-        this.rear_halfslit = (r * sqrt((1 - (this.rear_factor ** 2))));
+        this.lower_halfslit = (r * Math.sqrt((1 - (this.lower_factor ** 2))));
+        this.rear_halfslit = (r * Math.sqrt((1 - (this.rear_factor ** 2))));
         if (true) {
             let toplim = offset_radius_in_square(this.outer, this.angle, (r * this.lower_factor));
             let bottomlim = offset_radius_in_square(this.outer, this.angle, ((r * this.lower_factor) + this.thickness));

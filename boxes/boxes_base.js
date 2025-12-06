@@ -2049,6 +2049,31 @@ class Boxes {
     }
 
     /**
+     * Fill an area with holes (stub implementation).
+     * TODO: Implement full fillHoles functionality from Python version.
+     * @param {Object} options - Options including pattern, border, max_radius, etc.
+     */
+    fillHoles(options = {}) {
+        // Stub implementation - does nothing for now
+        // The Python version implements multiple fill patterns (hex, square, random, hbar, vbar)
+        // and various hole styles (round, triangle, square, hexagon, octagon)
+        const {
+            pattern = "no fill",
+            border = [],
+            max_radius = 3.0,
+            hspace = 3,
+            bspace = 0,
+            min_radius = 0.5,
+            style = "round",
+            bar_length = 50,
+            max_random = 1000
+        } = options;
+        
+        // Currently a no-op stub
+        // Full implementation would draw holes in the specified pattern within the border
+    }
+
+    /**
      * Draw a D-shaped hole.
      * @param {number} x - Center X.
      * @param {number} y - Center Y.
@@ -2257,4 +2282,21 @@ class Boxes {
     }
 }
 
-export { Boxes };
+/**
+ * Settings for hole filling patterns
+ * Corresponds to Python fillHolesSettings class
+ */
+class fillHolesSettings extends Settings {
+    static absolute_params = {
+        fill_pattern: ["no fill", "hex", "square", "random", "hbar", "vbar"],
+        hole_style: ["round", "triangle", "square", "hexagon", "octagon"],
+        max_random: 1000,
+        bar_length: 50,
+        hole_max_radius: 3.0,
+        hole_min_radius: 0.5,
+        space_between_holes: 4.0,
+        space_to_border: 4.0,
+    };
+}
+
+export { Boxes, fillHolesSettings };

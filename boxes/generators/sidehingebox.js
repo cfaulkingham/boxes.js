@@ -36,7 +36,7 @@ class SideHingeBox extends Boxes {
         let yo = (yi + (2 * (t + p)));
         let ho = (hi + t);
         let fingered_hi = ((2 * hinge_center) - t);
-        let gap = (Math.sqrt(abs((pow((hinge_center * Math.sqrt(2)), 2) - pow((hinge_center - t), 2)))) - hinge_center);
+        let gap = (Math.sqrt(Math.abs((Math.pow((hinge_center * Math.sqrt(2)), 2) - Math.pow((hinge_center - t), 2)))) - hinge_center);
         let fingered_ho = ((ho - gap) - (2 * hinge_center));
         this.ctx.save();
         this.inner_side(x, hi, hinge_center, hinge_radius, fingered_hi, latches, {reverse: true});

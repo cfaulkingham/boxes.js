@@ -24,8 +24,8 @@ class DisplayCase extends Boxes {
             h = this.adjustSize(h);
         }
         let t = this.thickness;
-        let d2 = edges.Bolts(2);
-        let d3 = edges.Bolts(3);
+        let d2 = new edges.Bolts(2);
+        let d3 = new edges.Bolts(3);
         this.rectangularWall(x, h, "ffff", {bedBolts: ([d2] * 4), move: "right", label: "Wall 1"});
         this.rectangularWall(y, h, "fFfF", {bedBolts: [d3, d2, d3, d2], move: "up", label: "Wall 2"});
         this.rectangularWall(y, h, "fFfF", {bedBolts: [d3, d2, d3, d2], label: "Wall 4"});

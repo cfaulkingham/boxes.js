@@ -66,9 +66,10 @@ class FingerHoleEdge extends BaseEdge {
 export { FingerHoleEdge };
 class CardBox extends Boxes {
     // Default configuration for test runner and standalone usage
+    // Note: sx is omitted here because it's set in buildArgParser and needs to be
+    // parsed from string "65*4" to array [65,65,65,65] by parseArgs()
     static get defaultConfig() {
         return {
-            sx: "65*4",
             y: 68,
             h: 92,
             outside: false,

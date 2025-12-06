@@ -172,3 +172,17 @@ global.len = function (iterable) {
     if (iterable instanceof Set || iterable instanceof Map) return iterable.size;
     return Object.keys(iterable).length;
 };
+
+/**
+ * Check if an object is an instance of a class or constructor function.
+ * Mimics Python's isinstance().
+ * @param {*} obj - Object to check.
+ * @param {Function|Function[]} classOrTuple - Class constructor or array of constructors.
+ * @returns {boolean} True if obj is an instance of the class.
+ */
+global.isinstance = function (obj, classOrTuple) {
+    if (Array.isArray(classOrTuple)) {
+        return classOrTuple.some(cls => obj instanceof cls);
+    }
+    return obj instanceof classOrTuple;
+};

@@ -34,15 +34,21 @@ class PirateChest extends Boxes {
         if (h < 0) {
             ValueError(("box to low to allow for hinge (%i)" % h))
         }
-        let fingerJointSettings = this.edges["f"].settings;
-        fingerJointSettings.setValues(this.thickness, {angle: (180.0 / (n - 1))});
-        fingerJointSettings.edgeObjects(this, {chars: "gGH"});
+        // create edge for non 90 degree joints in the lid
+        // Create new FingerJointSettings to avoid modifying the original
+        let fingerJointSettings = new edges.FingerJointSettings(this.thickness, {
+            finger: this.edges["f"].settings.finger,
+            space: this.edges["f"].settings.space,
+            surroundingspaces: this.edges["f"].settings.surroundingspaces,
+            angle: (180.0 / (n - 1))
+        });
+        fingerJointSettings.edgeObjects(this, "gGH");
         this.ctx.save();
         this.rectangularWall(x, y, "FFFF", {move: "up", label: "Bottom"});
         let frontlid;
         let toplids;
         let backlid;
-        [frontlid, toplids, backlid] = this.topside(y);
+        [frontlid, toplids, backlid] = this.topside(y, {n: n, move: "only", bottom: "P"});
         this.rectangularWall(x, backlid, "qFgF", {move: "up", label: "lid back"});
         for (let _ = 0; _ < (n - 2); _ += 1) {
             this.rectangularWall(x, toplids, "GFgF", {move: "up", label: "lid top"});
@@ -71,41 +77,43 @@ class PirateChest extends Boxes {
         this.topside(y, {n: n, move: "right", bottom: "P", label: "lid right"});
     }
 
-    topside(y, n, bottom, move, label) {
+    topside(y, options = {}) {
+        let { n = this.n, bottom = 'e', move = null, label = "" } = options;
         let radius;
         let hp;
         let side;
-        [radius, hp, side] = this.regularPolygon(((n - 1) * 2));
-        const edgeG = this.edges["G"] || this.edges["e"];
-        let tx = (y + (2 * edgeG.spacing()));
+        [radius, hp, side] = this.regularPolygon(((n - 1) * 2), null, y / 2.0, null);
+        const edgeF = this.edges["f"];
+        const edgeBottom = this.edges[bottom] || this.edges["e"];
+        let tx = (y + (2 * edgeF.spacing()));
         let lidheight = ((n % 2) ? hp : radius);
-        let ty = ((lidheight + edgeG.spacing()) + edgeG.spacing());
-        if (this.move(tx, ty, move)) {
-            return [((side / 2) + edgeG.spacing()), side, (side / 2)];
+        let ty = ((lidheight + edgeF.spacing()) + edgeBottom.spacing());
+        if (this.move(tx, ty, move, true)) {
+            return [(side / 2) + edgeBottom.spacing(), side, side / 2];
         }
-        this.moveTo(edgeG.margin(), edgeG.margin());
-        edgeG.draw(y);
+        this.moveTo(edgeF.margin(), edgeBottom.margin());
+        edgeBottom.draw(y);
         this.corner(90);
         if (bottom === "p") {
-            edgeG.draw(((side / 2) + edgeG.spacing()));
+            edgeF.draw(((side / 2) + edgeBottom.spacing()));
         }
         else {
-            edgeG.draw((side / 2));
+            edgeF.draw((side / 2));
         }
         this.corner((180 / (n - 1)));
         for (let _ = 0; _ < (n - 2); _ += 1) {
-            edgeG.draw(side);
+            edgeF.draw(side);
             this.corner((180 / (n - 1)));
         }
         if (bottom === "P") {
-            edgeG.draw(((side / 2) + edgeG.spacing()));
+            edgeF.draw(((side / 2) + edgeBottom.spacing()));
         }
         else {
-            edgeG.draw((side / 2));
+            edgeF.draw((side / 2));
         }
         this.corner(90);
-        this.move(tx, ty, move, {label: label});
-        return [((side / 2) + edgeG.spacing()), side, (side / 2)];
+        this.move(tx, ty, move, false, label);
+        return [(side / 2) + edgeBottom.spacing(), side, side / 2];
     }
 
 }

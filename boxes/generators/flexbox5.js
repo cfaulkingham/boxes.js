@@ -1,5 +1,5 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, FlexSettings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
@@ -8,8 +8,8 @@ import { Color  } from '../Color.js';
 class FlexBox5 extends Boxes {
     constructor() {
         super();
-        this.addSettingsArgs(boxes.edges.FingerJointSettings);
-        this.addSettingsArgs(boxes.edges.FlexSettings);
+        this.addSettingsArgs(FingerJointSettings);
+        this.addSettingsArgs(FlexSettings);
         // this.buildArgParser("x", "h", "outside");
         this.argparser.add_argument("--top_diameter", {action: "store", type: "float", default: 60, help: "diameter at the top"});
         this.argparser.add_argument("--bottom_diameter", {action: "store", type: "float", default: 60, help: "diameter at the bottom"});

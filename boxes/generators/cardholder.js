@@ -9,7 +9,7 @@ class CardHolder extends Boxes {
     // Default configuration for test runner and standalone usage
     static get defaultConfig() {
         return {
-            sx: "65*3",
+            sx: [65, 65, 65],  // Parsed form of "65*3"
             y: 50,
             h: 50,
             angle: 7.5,

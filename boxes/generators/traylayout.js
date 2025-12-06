@@ -57,7 +57,7 @@ export { TrayLayoutFile };
 class TrayLayout extends Boxes {
     constructor() {
         super();
-        this.addSettingsArgs(boxes.edges.FingerJointSettings);
+        this.addSettingsArgs(FingerJointSettings);
         this.addSettingsArgs(lids.LidSettings);
         // this.buildArgParser("h", "hi", "outside", "sx", "sy");
         this.argparser.add_argument("--layout", {action: "store", type: "str", default: "

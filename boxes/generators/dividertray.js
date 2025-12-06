@@ -4,6 +4,10 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import * as lids from '../lids.js';
+import '../globals.js';
+
+const { boolarg, list, enumerate, reversed } = global;
 // dict import removed - using native JS Map instead
 
 class NotchSettings extends Boxes {

@@ -4,6 +4,9 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import '../globals.js';
+
+const { boolarg } = global;
 
 class Desksign extends Boxes {
     constructor() {

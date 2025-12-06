@@ -1,5 +1,5 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, FlexSettings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
@@ -8,8 +8,8 @@ import { Color  } from '../Color.js';
 class FlexBox extends Boxes {
     constructor() {
         super();
-        this.addSettingsArgs(boxes.edges.FingerJointSettings);
-        this.addSettingsArgs(boxes.edges.FlexSettings);
+        this.addSettingsArgs(FingerJointSettings);
+        this.addSettingsArgs(FlexSettings);
         // this.buildArgParser("x", "y", "h", "outside");
         this.argparser.add_argument("--radius", {action: "store", type: "float", default: 15, help: "Radius of the latch in mm"});
         this.argparser.add_argument("--latchsize", {action: "store", type: "float", default: 8, help: "size of latch in multiples of thickness"});
