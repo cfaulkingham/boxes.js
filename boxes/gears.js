@@ -453,8 +453,39 @@ class Gears {
      */
     draw(options = {}, move = "") {
         this.parseArgs(options);
-        // ... (Implement full draw logic if needed, but for now just having generateSpokes complete is key)
-        // Since I'm refactoring Boxes, I should make sure Gears is usable.
+        
+        // Handle rack drawing
+        if (this.options.draw_rack || this.options.drawrack) {
+            this.drawRack();
+        }
+    }
+
+    /**
+     * Draw a gear rack based on current options.
+     */
+    drawRack() {
+        const pitch = this.calcCircularPitch();
+        const addendum = pitch / Math.PI;
+        const toothCount = this.options.rack_teeth_length || this.options.teeth_length || 12;
+        const baseHeight = this.options.rack_base_height !== undefined ? this.options.rack_base_height : (this.options.base_height || 8);
+        const tabLength = this.options.rack_base_tab !== undefined ? this.options.rack_base_tab : (this.options.base_tab || 0);
+        const pressureAngle = this.options.angle || 20.0;
+        const clearance = this.options.clearance || 0;
+
+        // Generate rack points - returns { points: [[x,y], ...], guidePoints }
+        const result = generateRackPoints(
+            toothCount, pitch, addendum, pressureAngle,
+            baseHeight, tabLength, clearance
+        );
+
+        const points = result.points;
+        if (!points || points.length < 2) return;
+
+        // Draw the rack path - points are [x, y] arrays
+        this.boxes.ctx.move_to(points[0][0], points[0][1]);
+        for (let i = 1; i < points.length; i++) {
+            this.boxes.ctx.line_to(points[i][0], points[i][1]);
+        }
     }
 }
 

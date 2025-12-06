@@ -1816,72 +1816,63 @@ class ChestHingeTop extends BaseEdge {
         const s = this.settings.get('hinge_strength');
         const play = this.settings.get('play');
 
-        let first_segment, draw_rest_of_edge;
+        let final_segment, draw_rest_of_edge;
         if (this.settings.get('finger_joints_on_lid')) {
-            first_segment = p + s;
+            final_segment = t - s - play;
             draw_rest_of_edge = () => {
-                this.boxes.edge(p + s);
-                this.boxes.corner(90);
-                this.boxes.edges["F"].draw(l - p);
-                this.boxes.corner(90);
+                if (this.boxes.edges["F"]) {
+                    this.boxes.edges["F"].draw(l - p);
+                }
             };
         } else {
-            first_segment = l + t;
-            draw_rest_of_edge = () => {
-                this.boxes.edge(l + t);
-            }
+            final_segment = l + t - p - s - play;
+            draw_rest_of_edge = () => {};
         }
 
-        const poly = [0, -90, first_segment, -90, t, -90];
+        // poly = (0, -180, t, -180, 0, (-90, p + s + play), 0, 90, final_segment)
+        // The tuple (-90, radius) means a corner with that angle and radius
+        const poly = [0, -180, t, -180, 0, [-90, p + s + play], 0, 90, final_segment];
 
         if (this.reversed) {
             draw_rest_of_edge();
-            this.boxes.edge(t);
+            // Reverse the polyline
+            this.boxes.polyline(...[...poly].reverse());
         } else {
             this.boxes.polyline(...poly);
-            if (this.settings.get('finger_joints_on_lid')) {
-                this.boxes.edges["F"].draw(l - p);
-                this.boxes.corner(90);
-            }
+            draw_rest_of_edge();
         }
     }
 
     startwidth() {
-        if (this.reversed) return this.settings.get('pin_height') + this.settings.get('hinge_strength');
+        const play = this.settings.get('play');
+        if (this.reversed) return play + this.settings.get('pin_height') + this.settings.get('hinge_strength');
         return 0.0;
     }
 
     endwidth() {
+        const play = this.settings.get('play');
         if (this.reversed) return 0.0;
-        return this.settings.get('pin_height') + this.settings.get('hinge_strength');
+        return play + this.settings.get('pin_height') + this.settings.get('hinge_strength');
     }
 
     margin() {
+        const play = this.settings.get('play');
         if (this.reversed) return 0.0;
-        return this.settings.get('pin_height') + this.settings.get('hinge_strength');
+        return play + this.settings.get('pin_height') + this.settings.get('hinge_strength');
     }
 }
 
 /**
  * Chest hinge front.
  */
-class ChestHingeFront extends BaseEdge {
+class ChestHingeFront extends Edge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = 'Q';
     }
 
-    draw(l, kw = {}) {
-        const t = this.settings.thickness;
-        const p = this.settings.get('pin_height');
-        const s = this.settings.get('hinge_strength');
-
-        this.boxes.edge(l - p);
-        this.boxes.polyline(0, 90, p + s, [90, t], 0, 90, p);
-    }
-
-    endwidth() {
-        return this.settings.get('pin_height') + this.settings.get('hinge_strength') + this.settings.thickness;
+    startwidth() {
+        return this.settings.get('pin_height') + this.settings.get('hinge_strength');
     }
 }
 
@@ -1893,6 +1884,7 @@ class ChestHingePin extends BaseEdge {
         super(boxes, settings);
         this.char = 'q';
     }
+
     draw(l, kw = {}) {
         const t = this.settings.thickness;
         const p = this.settings.get('pin_height');
@@ -1900,11 +1892,29 @@ class ChestHingePin extends BaseEdge {
         const pinh = this.settings.pinheight();
         const play = this.settings.get('play');
 
-        const total_h = p + s + t - play;
-        const total_w = pinh - play;
+        let middle_segment, draw_rest_of_edge;
+        if (this.settings.get('finger_joints_on_lid')) {
+            middle_segment = [0];
+            draw_rest_of_edge = () => {
+                this.boxes.edge(t);
+                if (this.boxes.edges["F"]) {
+                    this.boxes.edges["F"].draw(l);
+                }
+                this.boxes.edge(t);
+            };
+        } else {
+            middle_segment = [l + 2 * t];
+            draw_rest_of_edge = () => {};
+        }
 
-        this.boxes.moveTo(p + s + 0.5 * t, 0.5 * t);
-        this.boxes.rectangularHole(0, 0, total_h, total_w);
+        const poly = [0, -90, play + s + p - pinh, -90, t, 90, pinh, 90];
+        this.boxes.polyline(...poly);
+        draw_rest_of_edge();
+        this.boxes.polyline(...middle_segment.concat([...poly].reverse()));
+    }
+
+    margin() {
+        return this.settings.get('play') + this.settings.get('pin_height') + this.settings.get('hinge_strength');
     }
 }
 
@@ -2636,6 +2646,7 @@ class FlexEdge extends BaseEdge {
         const sections = Math.max(Math.floor((h_adj - connection) / width), 1);
         const sheight = ((h_adj - connection) / sections) - connection;
 
+        this.boxes.ctx.stroke();
         for (let i = 1; i < lines; i++) {
             const pos = i * dist + leftover / 2;
 
@@ -2673,6 +2684,7 @@ class FlexEdge extends BaseEdge {
             }
         }
 
+        this.boxes.ctx.stroke();
         // Draw the baseline like a normal edge and then advance
         this.boxes.ctx.move_to(0, 0);
         this.boxes.ctx.line_to(x, 0);
