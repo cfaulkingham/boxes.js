@@ -144,9 +144,17 @@ async function testGenerator(name, genericOpts = {}, generatorArgs = []) {
                     // Check if next arg is a value or another option
                     let parsedValue;
                     if (value && !value.startsWith('--')) {
-                        // Try to parse as number if it looks like one
-                        const numValue = parseFloat(value);
-                        parsedValue = isNaN(numValue) ? value : numValue;
+                        // Try to parse as boolean first
+                        const lowerValue = value.toLowerCase();
+                        if (lowerValue === 'true') {
+                            parsedValue = true;
+                        } else if (lowerValue === 'false') {
+                            parsedValue = false;
+                        } else {
+                            // Try to parse as number if it looks like one
+                            const numValue = parseFloat(value);
+                            parsedValue = isNaN(numValue) ? value : numValue;
+                        }
                         i++; // Skip the value in next iteration
                     } else {
                         // Boolean flag

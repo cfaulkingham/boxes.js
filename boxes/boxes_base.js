@@ -126,6 +126,8 @@ class Boxes {
         if (defaults.outside !== undefined) {
             this.argparser.add_argument("--outside", {action: "store", type: "bool", default: defaults.outside, help: "treat dimensions as outside measurements"});
         }
+        // Add labels argument
+        this.argparser.add_argument("--labels", {action: "store", type: "bool", default: true, help: "add labels to parts"});
     }
 
     parseArgs(args) {
@@ -387,7 +389,16 @@ class Boxes {
 
         if (!before) {
             this.ctx.restore();
-            // label logic ignored
+            // Render label if labels are enabled and label is provided
+            if (this.labels && label && label !== "" && label !== "invisible") {
+                this.ctx.save();
+                // Position label at the center-bottom of the part
+                this.ctx.translate(x / 2, y - 3);
+                this.ctx.rotate(0);
+                // Render the label with default styling
+                this.text(label, 0, 0, 0, "center bottom", 5);
+                this.ctx.restore();
+            }
             this.ctx.stroke();
         }
 
@@ -951,7 +962,7 @@ class Boxes {
              this.hexHolesRectangle(x - 2 * kw.holesMargin, y - 2 * kw.holesMargin, {settings: kw.holesSettings});
         }
 
-        this.move(overallwidth, overallheight, move, false);
+        this.move(overallwidth, overallheight, move, false, label);
     }
 
     flangedWall(x, y, edges="FFFF", kw={}) {
