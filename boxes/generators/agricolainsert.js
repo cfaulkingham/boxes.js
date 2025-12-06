@@ -1,9 +1,22 @@
 import { Boxes  } from '../boxes.js';
 import { FingerJointSettings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
-import { edges  } from '../edges.js';
+import { edges, BaseEdge  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import { SlotDescriptionsGenerator, DividerSlotsEdge  } from './dividertray.js';
+
+// Helper to emulate Python's functools.partial
+// If fn is already bound (like an arrow function) it works directly
+// If fn is a method passed with its context (e.g., this.method.bind(this)), it works
+// For unbound methods, we store context separately
+function partial(fn, ...presetArgs) {
+    // If fn is a bound function or arrow function, just call it with preset args
+    const result = function(...laterArgs) {
+        return fn(...presetArgs, ...laterArgs);
+    };
+    return result;
+}
 
 class AgricolaInsert extends Boxes {
     constructor() {
@@ -48,22 +61,24 @@ class AgricolaInsert extends Boxes {
         let sin = Math.sin(rad);
         let slots_number = 19;
         let slot_depth = 30;
-        let slot_descriptions = SlotDescriptionsGenerator.generate_all_same_angles(/* unknown node ListComp */, this.thickness, 0.2, slot_depth, card_tray_height, angle);
+        // Generate array of slots_number elements, each being tray_inner_length / slots_number
+        let slot_widths = Array(slots_number).fill(tray_inner_length / slots_number);
+        let slot_descriptions = new SlotDescriptionsGenerator().generate_all_same_angles(slot_widths, this.thickness, 0.2, slot_depth, card_tray_height, angle);
         slot_descriptions.adjust_to_target_length(tray_inner_length);
         let sloped_wall_height = (sleeved_cards_width - (this.thickness * (tan + (1 / tan))));
         let sloped_wall_posx_at_y0 = ((tray_inner_length - (sloped_wall_height * tan)) - (cos * this.thickness));
         let sloped_wall_posx = (sloped_wall_posx_at_y0 + ((cos * this.thickness) / 2));
         let sloped_wall_posy = ((sin * this.thickness) / 2);
-        let dse = DividerSlotsEdge(this, slot_descriptions.descriptions);
+        let dse = new DividerSlotsEdge(this, slot_descriptions.descriptions);
         for (let _ = 0; _ < 2; _ += 1) {
-            this.rectangularWall(tray_inner_length, card_tray_height, ["e", "e", dse, "f"], {move: "up", callback: [partial(() => this.fingerHolesAt(sloped_wall_posx, sloped_wall_posy, sloped_wall_height))]});
+            this.rectangularWall(tray_inner_length, card_tray_height, ["e", "e", dse, "f"], {move: "up", callback: [partial(() => this.fingerHolesAt(sloped_wall_posx, sloped_wall_posy, sloped_wall_height, 90 - angle))]});
         }
         let spacer_height = (card_tray_height / 2);
         let spacer_spacing = (card_tray_width - 99.8);
         let spacer_upper_width = (sloped_wall_posx_at_y0 + (spacer_height * tan));
         this.trapezoidWall(spacer_height, spacer_upper_width, sloped_wall_posx_at_y0, "fefe", {move: "up rotated"});
         this.rectangularWall(card_tray_width, card_tray_height, "eFeF", {move: "up", callback: [partial(() => this.fingerHolesAt((spacer_spacing - (this.thickness / 2)), 0, spacer_height))]});
-        this.rectangularWall(card_tray_width, sloped_wall_height, "efef", {move: "up", callback: [partial(this.generate_card_tray_sloped_wall_holes, card_tray_width, sloped_wall_height, spacer_height, spacer_spacing, rad)]});
+        this.rectangularWall(card_tray_width, sloped_wall_height, "efef", {move: "up", callback: [partial(this.generate_card_tray_sloped_wall_holes.bind(this), card_tray_width, sloped_wall_height, spacer_height, spacer_spacing, rad)]});
         this.ctx.restore();
         this.rectangularWall(card_tray_length, 0, "FFFF", {move: "right only"});
         this.ctx.save();
@@ -80,8 +95,7 @@ class AgricolaInsert extends Boxes {
     }
 
     explain(strings) {
-        this.text(str.join("
-", strings), {fontsize: 7, align: "bottom left"});
+        this.text(strings.join("\n"), 0, 0, 0, "bottom left", 7);
     }
 
     generate_sloped_wall_holes(side_wall_length, rad, sloped_wall_height) {
@@ -91,7 +105,7 @@ class AgricolaInsert extends Boxes {
         let posx_at_y0 = (side_wall_length - (sloped_wall_height * tan));
         let posx = (posx_at_y0 - ((cos * this.thickness) / 2));
         let posy = ((sin * this.thickness) / 2);
-        this.fingerHolesAt(posx, posy, sloped_wall_height, {angle: (90 - (rad * 180 / Math.PI))});
+        this.fingerHolesAt(posx, posy, sloped_wall_height, 90 - (rad * 180 / Math.PI));
     }
 
     generate_card_tray_sloped_wall_holes(side_wall_length, sloped_wall_height, spacer_height, spacer_spacing, rad) {
@@ -138,11 +152,11 @@ class AgricolaInsert extends Boxes {
         let corner_length = 53.5;
         this.rectangularWall(length, ((2 * row_width) + this.thickness), "FfFf", {move: "up", callback: [partial(() => this.fingerHolesAt(0, (row_width + (0.5 * this.thickness)), length, 0))]});
         for (let i = 0; i < 2; i += 1) {
-            this.rectangularWall(length, lowered_height, ["f", "f", MoorBoxSideEdge(this, corner_length, lowered_corner_height, (i % 2) === 0), "f"], {move: "up"});
+            this.rectangularWall(length, lowered_height, ["f", "f", new MoorBoxSideEdge(this, corner_length, lowered_corner_height, (i % 2) === 0), "f"], {move: "up"});
         }
         this.rectangularWall(length, (height / 2), "ffef", {move: "up"});
         for (let i = 0; i < 2; i += 1) {
-            this.rectangularWall(((2 * row_width) + this.thickness), lowered_height, ["F", "F", MoorBoxHoleEdge(this, height, lowered_corner_height, (i % 2) === 0), "F"], {move: "up", callback: [partial(this.generate_side_finger_holes, row_width, (height / 2))]});
+            this.rectangularWall(((2 * row_width) + this.thickness), lowered_height, ["F", "F", new MoorBoxHoleEdge(this, height, lowered_corner_height, (i % 2) === 0), "F"], {move: "up", callback: [partial(this.generate_side_finger_holes.bind(this), row_width, (height / 2))]});
         }
         this.ctx.restore();
         this.rectangularWall(length, 0, "FFFF", {move: "right only"});
@@ -156,9 +170,9 @@ class AgricolaInsert extends Boxes {
         let border_height = 12;
         let room_box_length = ((row_width * 2) + this.thickness);
         this.ctx.save();
-        this.rectangularWall(room_box_length, height, "eFfF", {move: "up", callback: [partial(this.generate_side_finger_holes, row_width, height)]});
-        this.rectangularWall(room_box_length, width, "FFfF", {move: "up", callback: [partial(this.generate_side_finger_holes, row_width, width)]});
-        this.rectangularWall(room_box_length, border_height, "FFeF", {move: "up", callback: [partial(this.generate_side_finger_holes, row_width, border_height)]});
+        this.rectangularWall(room_box_length, height, "eFfF", {move: "up", callback: [partial(this.generate_side_finger_holes.bind(this), row_width, height)]});
+        this.rectangularWall(room_box_length, width, "FFfF", {move: "up", callback: [partial(this.generate_side_finger_holes.bind(this), row_width, width)]});
+        this.rectangularWall(room_box_length, border_height, "FFeF", {move: "up", callback: [partial(this.generate_side_finger_holes.bind(this), row_width, border_height)]});
         for (let _ = 0; _ < 3; _ += 1) {
             this.trapezoidWall(width, height, border_height, "ffef", {move: "up"});
         }
@@ -177,8 +191,8 @@ class AgricolaInsert extends Boxes {
         let bed_head_length = 20;
         let bed_foot_height = 18;
         let support_length = 38;
-        let bed_edge = Bed2SidesEdge(this, bed_inner_length, bed_head_length, bed_foot_height);
-        let noop_edge = edges.NoopEdge(this);
+        let bed_edge = new Bed2SidesEdge(this, bed_inner_length, bed_head_length, bed_foot_height);
+        let noop_edge = new edges.NoopEdge(this);
         this.ctx.save();
         let optim_180_x = (((bed_inner_length + this.thickness) + bed_head_length) + (2 * this.spacing));
         let optim_180_y = (((2 * bed_foot_height) - player_box_height) + (2 * this.spacing));
@@ -188,9 +202,9 @@ class AgricolaInsert extends Boxes {
         }
         this.ctx.restore();
         this.moveTo(0, (((bed_inner_height + this.thickness) + this.spacing) + optim_180_y));
-        this.rectangularWall(bed_inner_length, bed_inner_width, "feff", {move: "up", callback: [partial(this.generate_bed_holes, bed_inner_width, cardboard_bed_hole_margin, cardboard_bed_hole_length, support_length)]});
+        this.rectangularWall(bed_inner_length, bed_inner_width, "feff", {move: "up", callback: [partial(this.generate_bed_holes.bind(this), bed_inner_width, cardboard_bed_hole_margin, cardboard_bed_hole_length, support_length)]});
         this.ctx.save();
-        this.rectangularWall(bed_inner_width, bed_inner_height, ["F", "f", BedHeadEdge(this, (bed_inner_height - 15)), "f"], {move: "right"});
+        this.rectangularWall(bed_inner_width, bed_inner_height, ["F", "f", new BedHeadEdge(this, (bed_inner_height - 15)), "f"], {move: "right"});
         for (let _ = 0; _ < 2; _ += 1) {
             this.rectangularWall((cardboard_bed_foot_height - this.thickness), support_length, "efee", {move: "right"});
         }
@@ -211,7 +225,7 @@ class AgricolaInsert extends Boxes {
             let bed_feet_middle_y = (y + ((direction * bed_feet_width) / 2));
             let support_middle_y = (y + ((direction * this.thickness) / 2));
             this.rectangularHole(margin, bed_feet_middle_y, hole_length, bed_feet_width, {center_x: false});
-            this.fingerHolesAt(support_start, support_middle_y, support_length, {angle: 0});
+            this.fingerHolesAt(support_start, support_middle_y, support_length, 0);
             this.rectangularHole((support_start + support_length), bed_feet_middle_y, hole_length, bed_feet_width, {center_x: false});
         }
     }
@@ -283,21 +297,21 @@ class AgricolaInsert extends Boxes {
 }
 
 export { AgricolaInsert };
-class MoorBoxSideEdge extends Boxes {
+class MoorBoxSideEdge extends BaseEdge {
     constructor(boxes, corner_length, corner_height, lower_corner) {
-        super();
+        super(boxes, null);
         this.corner_height = corner_height;
         this.lower_corner = lower_corner;
         this.corner_length = corner_length;
     }
 
-    __call__(length) {
+    draw(length, kw = {}) {
         let radius = (this.corner_height / 2);
         if (this.lower_corner) {
-            this.polyline(((length - this.corner_height) - this.corner_length), [90, radius], 0, [-90, radius], this.corner_length);
+            this.boxes.polyline(((length - this.corner_height) - this.corner_length), [90, radius], 0, [-90, radius], this.corner_length);
         }
         else {
-            this.polyline(length);
+            this.boxes.polyline(length);
         }
     }
 
@@ -312,16 +326,16 @@ class MoorBoxSideEdge extends Boxes {
 }
 
 export { MoorBoxSideEdge };
-class MoorBoxHoleEdge extends Boxes {
+class MoorBoxHoleEdge extends BaseEdge {
     constructor(boxes, height, corner_height, lower_corner) {
-        super();
+        super(boxes, null);
         this.height = height;
         this.corner_height = corner_height;
         this.lower_corner = lower_corner;
     }
 
-    __call__(length) {
-        let one_side_width = ((length - this.thickness) / 2);
+    draw(length, kw = {}) {
+        let one_side_width = ((length - this.boxes.thickness) / 2);
         let notch_width = 20;
         let radius = 6;
         let upper_edge = (((one_side_width - notch_width) - (2 * radius)) / 2);
@@ -332,8 +346,9 @@ class MoorBoxHoleEdge extends Boxes {
         let one_side_polyline = (margin1, margin2) => [upper_edge, [90, radius], (hole_depth - margin1), [-90, radius], lower_edge, [-90, radius], (hole_depth - margin2), [90, radius], upper_edge];
         let normal_side_polyline = one_side_polyline(hole_start, hole_start);
         let corner_side_polyline = one_side_polyline(lowered_hole_start, (lowered_hole_start + this.corner_height));
-        let full_polyline = ((normal_side_polyline + [0, this.thickness, 0]) + (this.lower_corner ? corner_side_polyline : normal_side_polyline));
-        this.polyline(...full_polyline);
+        // Concatenate arrays properly in JS
+        let full_polyline = [...normal_side_polyline, 0, this.boxes.thickness, 0, ...(this.lower_corner ? corner_side_polyline : normal_side_polyline)];
+        this.boxes.polyline(...full_polyline);
     }
 
     startwidth() {
@@ -347,43 +362,43 @@ class MoorBoxHoleEdge extends Boxes {
 }
 
 export { MoorBoxHoleEdge };
-class BedHeadEdge extends Boxes {
+class BedHeadEdge extends BaseEdge {
     constructor(boxes, hole_depth) {
-        super();
+        super(boxes, null);
         this.hole_depth = hole_depth;
     }
 
-    __call__(length) {
+    draw(length, kw = {}) {
         let hole_length = 16;
         let upper_corner = 10;
         let lower_corner = 6;
         let depth = ((this.hole_depth - upper_corner) - lower_corner);
         let upper_edge = (((length - hole_length) - (2 * upper_corner)) / 2);
         let lower_edge = (hole_length - (2 * lower_corner));
-        this.polyline(upper_edge, [90, upper_corner], depth, [-90, lower_corner], lower_edge, [-90, lower_corner], depth, [90, upper_corner], upper_edge);
+        this.boxes.polyline(upper_edge, [90, upper_corner], depth, [-90, lower_corner], lower_edge, [-90, lower_corner], depth, [90, upper_corner], upper_edge);
     }
 
 }
 
 export { BedHeadEdge };
-class Bed2SidesEdge extends Boxes {
+class Bed2SidesEdge extends BaseEdge {
     constructor(boxes, bed_length, full_head_length, full_foot_height) {
-        super();
+        super(boxes, null);
         this.bed_length = bed_length;
         this.full_head_length = full_head_length;
         this.full_foot_height = full_foot_height;
     }
 
-    __call__(bed_height) {
+    draw(bed_height, kw = {}) {
         let foot_corner = 6;
         let middle_corner = 3;
         let head_corner = 10;
-        let foot_height = ((this.full_foot_height - this.thickness) - foot_corner);
-        let head_length = ((this.full_head_length - head_corner) - this.thickness);
+        let foot_height = ((this.full_foot_height - this.boxes.thickness) - foot_corner);
+        let head_length = ((this.full_head_length - head_corner) - this.boxes.thickness);
         let corners = ((foot_corner + middle_corner) + head_corner);
         let head_height = ((bed_height - foot_height) - corners);
         let middle_length = ((this.bed_length - head_length) - corners);
-        this.polyline(foot_height, [90, foot_corner], middle_length, [-90, middle_corner], head_height, [90, head_corner], head_length);
+        this.boxes.polyline(foot_height, [90, foot_corner], middle_length, [-90, middle_corner], head_height, [90, head_corner], head_length);
     }
 
 }

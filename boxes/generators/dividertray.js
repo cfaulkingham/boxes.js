@@ -1,10 +1,10 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, BaseEdge  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
-import { dict  } from './dict.js';
+// dict import removed - using native JS Map instead
 
 class NotchSettings extends Boxes {
 }
@@ -93,15 +93,11 @@ class DividerTray extends Boxes {
             this.generate_divider(this.sx, divider_height, "up only");
         }
         if (this.debug) {
+            // Debug output - simplified for JS port
             let debug_info = ["Debug"];
-            debug_info.append(/* unknown node JoinedStr */);
-            debug_info.append(unknown.format(str.join("|", /* unknown node ListComp */)));
-            debug_info.append(/* unknown node JoinedStr */);
-            debug_info.append(unknown.format(str.join("|", /* unknown node ListComp */)));
-            debug_info.append(/* unknown node JoinedStr */);
-            debug_info.append(/* unknown node JoinedStr */);
-            this.text(str.join("
-", debug_info), {x: 5, y: 5, align: "bottom left"});
+            debug_info.push(`Slot angle: ${this.Slot_angle}`);
+            debug_info.push(`Slot depth: ${this.Slot_depth}`);
+            this.text(debug_info.join("\n"), {x: 5, y: 5, align: "bottom left"});
         }
     }
 
@@ -149,79 +145,88 @@ class DividerTray extends Boxes {
 }
 
 export { DividerTray };
-class SlottedEdgeDescriptions extends Boxes {
+class SlottedEdgeDescriptions {
     constructor() {
-        super();
+        this.descriptions = [];
     }
 
     add(description) {
-        this.descriptions.append(description);
+        this.descriptions.push(description);
     }
 
     get_straight_edges() {
-        return /* unknown node ListComp */;
+        // Filter descriptions to only StraightEdgeDescription instances
+        return this.descriptions.filter(d => d instanceof StraightEdgeDescription);
     }
 
     get_last_edge() {
-        return this.descriptions[-1];
+        return this.descriptions[this.descriptions.length - 1];
     }
 
     adjust_to_target_length(target_length) {
-        let actual_length = /* unknown node ListComp */.reduce((a, b) => a + b, 0);
+        // Sum of tracing_length() for ALL descriptions (slots and straight edges)
+        let actual_length = this.descriptions.map(d => d.tracing_length()).reduce((a, b) => a + b, 0);
         let compensation = (actual_length - target_length);
-        let compensation_ratio = (compensation / /* unknown node ListComp */.reduce((a, b) => a + b, 0));
-        for (let edge of this.get_straight_edges()) {
+        // Sum of asked_length for straight edges only (for ratio calculation)
+        let straight_edges = this.get_straight_edges();
+        let total_asked = straight_edges.map(d => d.asked_length).reduce((a, b) => a + b, 0);
+        let compensation_ratio = (compensation / total_asked);
+        for (let edge of straight_edges) {
             edge.outside_ratio = (1 - compensation_ratio);
         }
     }
 
     total_length() {
-        return /* unknown node ListComp */.reduce((a, b) => a + b, 0);
+        // Sum of tracing_length() for all descriptions
+        return this.descriptions.map(d => d.tracing_length()).reduce((a, b) => a + b, 0);
     }
 
 }
 
 export { SlottedEdgeDescriptions };
-class StraightEdgeDescription extends Boxes {
-    constructor(asked_length, round_edge_compensation, outside_ratio, angle_compensation) {
-        super();
+class StraightEdgeDescription {
+    constructor(asked_length, round_edge_compensation = 0, outside_ratio = 1, angle_compensation = 0) {
         this.asked_length = asked_length;
         this.round_edge_compensation = round_edge_compensation;
         this.outside_ratio = outside_ratio;
         this.angle_compensation = angle_compensation;
     }
 
-    __repr__() {
-        return /* unknown node JoinedStr */;
+    toString() {
+        return `StraightEdgeDescription(${this.asked_length}, ${this.round_edge_compensation}, ${this.outside_ratio}, ${this.angle_compensation})`;
     }
 
-    tracing_length() {;
+    tracing_length() {
         return (((this.asked_length * this.outside_ratio) - this.round_edge_compensation) + this.angle_compensation);
     }
 
-    useful_length() {;
+    useful_length() {
         return (this.asked_length * this.outside_ratio);
     }
 
 }
 
 export { StraightEdgeDescription };
-class Memoizer extends dict {
+class Memoizer extends Map {
     constructor(computation) {
         super();
         this.computation = computation;
     }
 
-    __missing__(key) {
-        return res;
+    get(key) {
+        if (!super.has(key)) {
+            const res = this.computation(key);
+            super.set(key, res);
+            return res;
+        }
+        return super.get(key);
     }
 
 }
 
 export { Memoizer };
-class SlotDescription extends Boxes {
-    constructor(width, depth, angle, radius, start_radius, end_radius) {
-        super();
+class SlotDescription {
+    constructor(width, depth = 20, angle = 0, radius = 0, start_radius = null, end_radius = null) {
         this.depth = depth;
         this.width = width;
         this.start_radius = (start_radius === null ? radius : start_radius);
@@ -229,73 +234,75 @@ class SlotDescription extends Boxes {
         this.angle = angle;
     }
 
-    __repr__() {
-        return /* unknown node JoinedStr */;
+    toString() {
+        return `SlotDescription(width=${this.width}, depth=${this.depth}, angle=${this.angle})`;
     }
 
     _div_by_cos() {
-        return SlotDescription._div_by_cos_cache[this.angle];
+        // Memoization would be nice, but let's just compute
+        return 1 / Math.cos(this.angle * Math.PI / 180);
     }
 
     _tan() {
-        return SlotDescription._tan_cache[this.angle];
+        return Math.tan(this.angle * Math.PI / 180);
     }
 
-    angle_corrected_width() {;
+    angle_corrected_width() {
         return (this.width * this._div_by_cos());
     }
 
-    round_edge_start_correction() {;
+    round_edge_start_correction() {
         return (this.start_radius * (this._div_by_cos() - this._tan()));
     }
 
-    round_edge_end_correction() {;
+    round_edge_end_correction() {
         return (this.end_radius * (this._div_by_cos() + this._tan()));
     }
 
-    _depth_angle_correction() {;
+    _depth_angle_correction() {
         let extra_depth = (this.width * this._tan());
         return extra_depth;
     }
 
-    corrected_start_depth() {;
+    corrected_start_depth() {
         let extra_depth = this._depth_angle_correction();
         return ((this.depth + Math.max(0, extra_depth)) - this.round_edge_start_correction());
     }
 
-    corrected_end_depth() {;
+    corrected_end_depth() {
         let extra_depth = this._depth_angle_correction();
         return ((this.depth + Math.max(0, -extra_depth)) - this.round_edge_end_correction());
     }
 
-    tracing_length() {;
+    tracing_length() {
         return ((this.round_edge_start_correction() + this.angle_corrected_width()) + this.round_edge_end_correction());
     }
 
 }
 
 export { SlotDescription };
-class SlotDescriptionsGenerator extends Boxes {
-    generate_all_same_angles(sections, thickness, extra_slack, depth, height, angle, radius) {
+class SlotDescriptionsGenerator {
+    generate_all_same_angles(sections, thickness, extra_slack, depth, height, angle, radius = 2) {
         let width = (thickness + extra_slack);
-        let descriptions = SlottedEdgeDescriptions();
+        let descriptions = new SlottedEdgeDescriptions();
         let first_correction = 0;
         let current_section = 0;
+        let slot;
         if (sections[0] === 0) {
-            let slot = SlotDescription(width);
+            slot = new SlotDescription(width, depth, angle, radius, 0, radius);
             descriptions.add(slot);
             first_correction = slot.round_edge_end_correction();
             current_section += 1;
         }
         let first_length = sections[current_section];
         current_section += 1;
-        descriptions.add(StraightEdgeDescription(first_length));
+        descriptions.add(new StraightEdgeDescription(first_length, first_correction));
         for (let l of sections.slice(current_section)) {
-            slot = SlotDescription(width);
+            slot = new SlotDescription(width, depth, angle, radius);
             let previous_edge = descriptions.get_last_edge();
             previous_edge.round_edge_compensation += slot.round_edge_start_correction();
             descriptions.add(slot);
-            descriptions.add(StraightEdgeDescription(l, slot.round_edge_end_correction()));
+            descriptions.add(new StraightEdgeDescription(l, slot.round_edge_end_correction()));
         }
         let end_length = (height * Math.tan((angle * Math.PI / 180)));
         descriptions.get_last_edge().angle_compensation += end_length;
@@ -305,20 +312,24 @@ class SlotDescriptionsGenerator extends Boxes {
 }
 
 export { SlotDescriptionsGenerator };
-class DividerNotchesEdge extends Boxes {
+class DividerNotchesEdge extends BaseEdge {
     constructor(boxes, sx) {
-        super();
+        super(boxes, null);
         this.sx = sx;
+        // Default notch settings
+        this.Notch_upper_radius = 1;
+        this.Notch_lower_radius = 1;
+        this.Notch_depth = 5;
     }
 
-    __call__(_) {
+    draw(_, kw = {}) {
         let first = true;
         for (let width of this.sx) {
             if (first) {
                 first = false;
             }
             else {
-                this.edge(this.thickness);
+                this.boxes.edge(this.boxes.thickness);
             }
             this.edge_with_notch(width);
         }
@@ -328,47 +339,45 @@ class DividerNotchesEdge extends Boxes {
         let upper_third = (((width - (2 * this.Notch_upper_radius)) - (2 * this.Notch_lower_radius)) / 3);
         if (upper_third > 0) {
             let straightHeight = ((this.Notch_depth - this.Notch_upper_radius) - this.Notch_lower_radius);
-            this.polyline(upper_third, [90, this.Notch_upper_radius], straightHeight, [-90, this.Notch_lower_radius], upper_third, [-90, this.Notch_lower_radius], straightHeight, [90, this.Notch_upper_radius], upper_third);
+            this.boxes.polyline(upper_third, [90, this.Notch_upper_radius], straightHeight, [-90, this.Notch_lower_radius], upper_third, [-90, this.Notch_lower_radius], straightHeight, [90, this.Notch_upper_radius], upper_third);
         }
         else {
-            this.edge(width);
+            this.boxes.edge(width);
         }
     }
 
 }
 
 export { DividerNotchesEdge };
-class DividerSlotsEdge extends Boxes {
+class DividerSlotsEdge extends BaseEdge {
     constructor(boxes, descriptions) {
-        super();
+        super(boxes, null);
         this.descriptions = descriptions;
     }
 
-    __call__(length) {
-        this.ctx.save();
+    draw(length, kw = {}) {
+        this.boxes.ctx.save();
         for (let description of this.descriptions) {
-            if (isinstance(description, SlotDescription)) {
+            if (description instanceof SlotDescription) {
                 this.do_slot(description);
             }
-            else {
-                if (isinstance(description, StraightEdgeDescription)) {
-                    this.do_straight_edge(description);
-                }
+            else if (description instanceof StraightEdgeDescription) {
+                this.do_straight_edge(description);
             }
         }
-        this.ctx.restore();
-        this.moveTo(length);
+        this.boxes.ctx.restore();
+        this.boxes.moveTo(length);
     }
 
     do_straight_edge(straight_edge) {
-        this.edge(straight_edge.tracing_length());
+        this.boxes.edge(straight_edge.tracing_length());
     }
 
     do_slot(slot) {
-        this.ctx.save();
-        this.polyline(0, [(90 - slot.angle), slot.start_radius], slot.corrected_start_depth(), -90, slot.width, -90, slot.corrected_end_depth(), [(90 + slot.angle), slot.end_radius]);
-        this.ctx.restore();
-        this.moveTo(slot.tracing_length());
+        this.boxes.ctx.save();
+        this.boxes.polyline(0, [(90 - slot.angle), slot.start_radius], slot.corrected_start_depth(), -90, slot.width, -90, slot.corrected_end_depth(), [(90 + slot.angle), slot.end_radius]);
+        this.boxes.ctx.restore();
+        this.boxes.moveTo(slot.tracing_length());
     }
 
 }

@@ -115,21 +115,26 @@ class Boxes {
     /**
      * Register settings arguments.
      * @param {class} SettingsClass - Settings class definition.
-     * @param {string} [prefix=null] - Prefix for arguments.
+     * @param {string|Object} [prefix=null] - Prefix for arguments, or defaults object if no prefix.
      * @param {Object} [defaults={}] - Default values.
      */
     addSettingsArgs(SettingsClass, prefix = null, defaults = {}) {
-        // Mock implementation.
-        // In python this adds arguments to argparse.
-        // Here we might want to store default values.
+        // Handle case where prefix is actually the defaults object (common pattern)
+        if (typeof prefix === 'object' && prefix !== null) {
+            defaults = prefix;
+            prefix = null;
+        }
+        
         prefix = prefix || SettingsClass.name.replace("Settings", "");
 
-        // Create an instance to register it (or just rely on the generator to init it later)
-        // Python boxes.py instantiates settings objects in _buildObjects.
-        // Here we just record we need it?
-        // Actually ABox calls this in __init__.
-        // Then `render` is called.
-        // `_buildObjects` is called in `open`.
+        // Store the settings class and defaults for later use in _buildObjects
+        if (!this.edgesettings) {
+            this.edgesettings = {};
+        }
+        this.edgesettings[prefix] = {
+            cls: SettingsClass,
+            defaults: defaults
+        };
     }
 
     /**
@@ -329,8 +334,12 @@ class Boxes {
             this.addPart(e);
         }
 
-        const fjSettings = new FingerJointSettings(this.thickness, true);
-        // apply overrides from edgesettings if any
+        // Get FingerJoint settings defaults from edgesettings if available
+        let fjDefaults = {};
+        if (this.edgesettings && this.edgesettings['FingerJoint']) {
+            fjDefaults = this.edgesettings['FingerJoint'].defaults || {};
+        }
+        const fjSettings = new FingerJointSettings(this.thickness, true, fjDefaults);
         fjSettings.edgeObjects(this);
         this.fingerHolesAt = (x, y, length, angle = 90) => {
             // Find FingerHoles part
