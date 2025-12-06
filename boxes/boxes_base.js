@@ -229,20 +229,22 @@ class Boxes {
         const spacingParsed = Array.isArray(this.spacing) ? this.spacing : [this.spacing, 0];
         this.spacing = 2 * this.burn + spacingParsed[0] * this.thickness + spacingParsed[1];
         
-        // Reference rectangle
+        // Reference rectangle (matching Python)
         if (this.reference && this.format !== 'svg_Ponoko') {
             const refText = `${this.reference.toFixed(1)}mm, burn:${this.burn.toFixed(2)}mm`;
-            // Make box wide enough for text (min 150mm) but use reference value if larger
-            const boxWidth = Math.max(this.reference, 100);
             const boxHeight = 10;
-            this.move(boxWidth, boxHeight, "up", true);
-            this.ctx.rectangle(0, 0, boxWidth, boxHeight);
-            // Center text in the box
-            // y should be at vertical center, but text "middle" alignment will offset by -0.5*height
-            // So we need to compensate: center of box (5mm) + 0.5*fontsize + 2mm adjustment
+            this.move(this.reference, boxHeight, "up", true);
+            this.ctx.rectangle(0, 0, this.reference, boxHeight);
             const fontSize = 6;
-            this.text(refText, boxWidth / 2.0, boxHeight / 2.0 + fontSize / 2.0 + 2, 0, "center middle", fontSize, Color.ANNOTATIONS);
-            this.move(boxWidth, boxHeight, "up");
+            
+            if (this.reference < 80) {
+                // Text outside box to the right (doesn't fit inside)
+                this.text(refText, this.reference + 5, boxHeight / 2.0 + fontSize / 2.0 + 2, 0, "left middle", fontSize, Color.ANNOTATIONS);
+            } else {
+                // Text centered inside box
+                this.text(refText, this.reference / 2.0, boxHeight / 2.0 + fontSize / 2.0 + 2, 0, "center middle", fontSize, Color.ANNOTATIONS);
+            }
+            this.move(this.reference, boxHeight, "up");
             this.ctx.stroke();
         }
     }
