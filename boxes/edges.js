@@ -651,6 +651,7 @@ class GrippingEdge extends BaseEdge {
         const style = this.settings.get('style');
         if (typeof this[style] === 'function') {
             this[style](length);
+        } else {
             throw new Error(`Unknown GrippingEdge style: ${style}`);
         }
     }

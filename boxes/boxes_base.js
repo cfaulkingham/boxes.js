@@ -1,6 +1,12 @@
 import { SVGContext } from './svg_context.js';
 import { Color } from './Color.js';
-import { Settings, OutSetEdge, Edge, FingerJointSettings } from './edges.js';
+import { 
+    Settings, OutSetEdge, Edge, FingerJointSettings, DoveTailSettings,
+    GripSettings, StackableSettings, ClickSettings, HingeSettings,
+    ChestHingeSettings, CabinetHingeSettings, SlideOnLidSettings,
+    RoundedTriangleEdgeSettings, GroovedSettings, MountingSettings,
+    HandleEdgeSettings, FlexSettings, FlexEdge, GearSettings, RackEdge
+} from './edges.js';
 import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf } from './vectors.js';
 import { NutHole, HexSizes } from './nuthole.js';
 import { ArgParser } from './argparser.js';
@@ -322,38 +328,62 @@ class Boxes {
         this.addPart(new Edge(this, null));
         this.addPart(new OutSetEdge(this, null));
 
-        // Add missing edges d and D (simple edges for now if they don't exist)
-        if (!this.edges['d']) {
-            const e = new Edge(this, null);
-            e.char = 'd';
-            this.addPart(e);
-        }
-        if (!this.edges['D']) {
-            const e = new Edge(this, null);
-            e.char = 'D';
-            this.addPart(e);
-        }
+        // Helper to get settings defaults from edgesettings
+        const getDefaults = (name) => {
+            return (this.edgesettings && this.edgesettings[name]) 
+                ? (this.edgesettings[name].defaults || {}) 
+                : {};
+        };
 
-        // Get FingerJoint settings defaults from edgesettings if available
-        let fjDefaults = {};
-        if (this.edgesettings && this.edgesettings['FingerJoint']) {
-            fjDefaults = this.edgesettings['FingerJoint'].defaults || {};
-        }
-        const fjSettings = new FingerJointSettings(this.thickness, true, fjDefaults);
+        // Add GripSettings (char 'g')
+        new GripSettings(this.thickness, true, getDefaults('Grip')).edgeObjects(this);
+
+        // Add FingerJoint settings (chars 'f', 'F', 'h')
+        const fjSettings = new FingerJointSettings(this.thickness, true, getDefaults('FingerJoint'));
         fjSettings.edgeObjects(this);
-        this.fingerHolesAt = (x, y, length, angle = 90) => {
-            // Find FingerHoles part
-            // It's usually attached to FingerHoleEdge or available via boxes instance if added
-            // In python: self.addPart(edges.FingerHoles(self, s), name="fingerHolesAt")
-            // My edges.js creates FingerHoles but doesn't explicitly add it as 'fingerHolesAt' to boxes in edgeObjects unless I do so.
-            // FingerJointSettings.edgeObjects adds FingerJointEdge, CounterPart, FingerHoleEdge.
-            // FingerHoleEdge has .fingerHoles property.
-            // But boxes.fingerHolesAt needs to be a function.
-            // Python: self.addPart(edges.FingerHoles(self, s), name="fingerHolesAt") -> self.fingerHolesAt = edges.FingerHoles(...) which is callable.
-            // In JS I need to make it callable.
 
-            // Let's fix this in edgeObjects or here.
-            // I'll grab it from 'h' edge for now.
+        // Add Stackable settings (chars 's', 'S', 'š', 'Š')
+        new StackableSettings(this.thickness, true, getDefaults('Stackable')).edgeObjects(this);
+
+        // Add DoveTail settings (chars 'd', 'D')
+        new DoveTailSettings(this.thickness, true, getDefaults('DoveTail')).edgeObjects(this);
+
+        // Add Flex edge (char 'X') - FlexSettings doesn't have edgeObjects, add directly
+        const flexSettings = new FlexSettings(this.thickness, true, getDefaults('Flex'));
+        this.addPart(new FlexEdge(this, flexSettings));
+
+        // Add Rack edge (char 'R') - GearSettings doesn't have edgeObjects, add directly
+        const gearSettings = new GearSettings(this.thickness, true, getDefaults('Gear'));
+        this.addPart(new RackEdge(this, gearSettings));
+
+        // Add Click settings (chars 'c', 'C')
+        new ClickSettings(this.thickness, true, getDefaults('Click')).edgeObjects(this);
+
+        // Add Hinge settings (chars 'i', 'j', 'k', 'I', 'J', 'K')
+        new HingeSettings(this.thickness, true, getDefaults('Hinge')).edgeObjects(this);
+
+        // Add ChestHinge settings (chars 'o', 'O', 'p', 'P', 'q', 'Q')
+        new ChestHingeSettings(this.thickness, true, getDefaults('ChestHinge')).edgeObjects(this);
+
+        // Add CabinetHinge settings (chars 'u', 'U', 'v', 'V')
+        new CabinetHingeSettings(this.thickness, true, getDefaults('CabinetHinge')).edgeObjects(this);
+
+        // Add SlideOnLid settings (chars 'l', 'L', 'n', 'm', 'N', 'M')
+        new SlideOnLidSettings(this.thickness, true, getDefaults('SlideOnLid')).edgeObjects(this);
+
+        // Add RoundedTriangleEdge settings (chars 't', 'T')
+        new RoundedTriangleEdgeSettings(this.thickness, true, getDefaults('RoundedTriangleEdge')).edgeObjects(this);
+
+        // Add Grooved settings (chars 'z', 'Z')
+        new GroovedSettings(this.thickness, true, getDefaults('Grooved')).edgeObjects(this);
+
+        // Add Mounting settings (char 'G')
+        new MountingSettings(this.thickness, true, getDefaults('Mounting')).edgeObjects(this);
+
+        // Add HandleEdge settings (chars 'y', 'Y')
+        new HandleEdgeSettings(this.thickness, true, getDefaults('HandleEdge')).edgeObjects(this);
+
+        this.fingerHolesAt = (x, y, length, angle = 90) => {
             if (this.edges['h'] && this.edges['h'].fingerHoles) {
                 this.edges['h'].fingerHoles.draw(x, y, length, angle);
             }

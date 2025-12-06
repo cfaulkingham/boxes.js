@@ -21,8 +21,13 @@ class AllEdges extends Boxes {
     render() {
         let x = this.x;
         let t = this.thickness;
-        let chars = list(this.edges.keys());
-        chars.sort({key: (c) => (c.lower() + (c.isupper() ? c : ""))});
+        let chars = Object.keys(this.edges);
+        // Sort: lowercase first, then uppercase (Python: c.lower() + (c.isupper() ? c : ""))
+        chars.sort((a, b) => {
+            const keyA = a.toLowerCase() + (a === a.toUpperCase() && a !== a.toLowerCase() ? a : "");
+            const keyB = b.toLowerCase() + (b === b.toUpperCase() && b !== b.toLowerCase() ? b : "");
+            return keyA.localeCompare(keyB);
+        });
         chars.reverse();
         this.moveTo(0, (10 * t));
         for (let c of chars) {
@@ -31,13 +36,13 @@ class AllEdges extends Boxes {
             this.moveTo(x, 0, 90);
             this.edge((t + this.edges[c].startwidth()));
             this.corner(90);
-            this.edges[c](x, {h: (4 * t)});
+            this.edges[c].draw(x, {h: (4 * t)});
             this.corner(90);
             this.edge((t + this.edges[c].endwidth()));
             this.move(0, 0, "");
             this.ctx.restore();
             this.moveTo(0, ((3 * t) + this.edges[c].spacing()));
-            this.text(/* unknown node JoinedStr */);
+            this.text(`${c} - ${this.edges[c].description || ''}`);
             this.moveTo(0, (12 * t));
         }
     }

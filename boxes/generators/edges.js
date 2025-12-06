@@ -13,9 +13,13 @@ class Edges extends Boxes {
     render() {
         this.ctx = null;
         this._buildObjects();
-        let chars = this.edges.keys();
-        for (let c of sorted(chars)) {
-            console.log(("%s %s - %s" % [c, this.edges[c].__class__.__name__, this.edges[c].__doc__]));
+        let chars = Object.keys(this.edges);
+        chars.sort();
+        for (let c of chars) {
+            const edge = this.edges[c];
+            const className = edge.constructor ? edge.constructor.name : 'unknown';
+            const doc = edge.__doc__ || '';
+            console.log(`${c} ${className} - ${doc}`);
         }
     }
 
