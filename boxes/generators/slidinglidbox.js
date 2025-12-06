@@ -14,7 +14,7 @@ class SlidingLidBox extends Boxes {
         this.argparser.add_argument("--rail", {action: "store", type: "float", default: 1.5, help: "width of the rail (multiples of thickness)"});
         this.argparser.add_argument("--margin_t", {action: "store", type: "float", default: 0.1, help: "vertical margin for sliding lid (multiples of thickness)"});
         this.argparser.add_argument("--margin_s", {action: "store", type: "float", default: 0.05, help: "margin to add at both sides of sliding lid (multiples of thickness)"});
-        this.argparser.add_argument("--lid_type", {action: "store", type: "str", default: "hole", choices: /* unknown node Set */, help: "add an optional grip hole to the lid"});
+        this.argparser.add_argument("--lid_type", {action: "store", type: "str", default: "hole", choices: ["hole", "lip", "none"], help: "add an optional grip hole to the lid"});
         this.argparser.add_argument("--hole_length", {action: "store", type: "float", default: 40, help: "length of the grip hole in mm"});
         this.argparser.add_argument("--hole_width", {action: "store", type: "float", default: 20, help: "width of the grip hole in mm"});
         this.argparser.add_argument("--hole_radius", {action: "store", type: "float", default: 10, help: "radius of the grip hole in mm"});

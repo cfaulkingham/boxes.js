@@ -297,12 +297,18 @@ class AirHolesForNicotHatchingCageCutout extends HexHolesCutout {
 
 export { AirHolesForNicotHatchingCageCutout };
 class BeeQueenTransportBoxLidSettings extends LidSettings {
+    static absolute_params = {
+        ...LidSettings.absolute_params,
+        "cover": ["none", "airholes", "queenicon", "queenicon_airholes"],
+        "queenicon_scale": 75.0,
+        "queenicon_angle": [0, 90],
+    };
 }
 
 export { BeeQueenTransportBoxLidSettings };
 class BeeQueenTransportBoxLid extends Lid {
-    constructor() {
-        super();
+    constructor(boxes, settings) {
+        super(boxes, settings);
         this.ncb = 0;
     }
 
@@ -376,25 +382,33 @@ class BeeQueenTransportBox extends _TopEdge {
         top_edge: "eStG",
         bottom_edge: "Fhsše"
     };
+    
+    static LIDSETTINGS = {
+        style: "overthetop"
+    };
 
     _buildObjects() {
         super._buildObjects();
-        this.lidSettings = new BeeQueenTransportBoxLidSettings(this.thickness, true);
+        // Get lid settings from edgesettings or use defaults
+        const lidEdgeSettings = this.edgesettings?.BeeQueenTransportBoxLid || {};
+        // Merge with LIDSETTINGS defaults
+        const mergedSettings = { ...BeeQueenTransportBox.LIDSETTINGS, ...lidEdgeSettings };
+        this.lidSettings = new BeeQueenTransportBoxLidSettings(this.thickness, true, mergedSettings);
         this.lid = new BeeQueenTransportBoxLid(this, this.lidSettings);
     }
 
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
-        this.addSettingsArgs(BeeQueenTransportBoxLidSettings, {None: this.LIDSETTINGS});
+        this.addSettingsArgs(BeeQueenTransportBoxLidSettings, BeeQueenTransportBox.LIDSETTINGS);
         this.addSettingsArgs(edges.StackableSettings);
         this.argparser.add_argument("--top_edge", {action: "store", type: ArgparseEdgeType(BeeQueenTransportBox.CHOICES["top_edge"]), choices: [...BeeQueenTransportBox.CHOICES["top_edge"]], default: BeeQueenTransportBox.DEFAULT["top_edge"], help: "edge type for top edge"});
         this.argparser.add_argument("--bottom_edge", {action: "store", type: ArgparseEdgeType(BeeQueenTransportBox.CHOICES["bottom_edge"]), choices: [...BeeQueenTransportBox.CHOICES["bottom_edge"]], default: BeeQueenTransportBox.DEFAULT["bottom_edge"], help: "edge type for bottom edge"});
         this.buildArgParser({sx: BeeQueenTransportBox.DEFAULT["sx"], sy: BeeQueenTransportBox.DEFAULT["sy"], sh: BeeQueenTransportBox.DEFAULT["sh"]});
         this.argparser.add_argument("--aw", {action: "store", type: "float", default: BeeQueenTransportBox.DEFAULT["aw"], help: "air hole slot width in mm"});
-        this.argparser.add_argument("--ah", {action: "store", type: argparseSections, default: BeeQueenTransportBox.DEFAULT["ah"], help: "air hole sections bottom to top in mm"});
-        this.argparser.add_argument("--ax", {action: "store", type: argparseSections, default: BeeQueenTransportBox.DEFAULT["ax"], help: "air hole sections left to right in %% of the box width"});
-        this.argparser.add_argument("--ay", {action: "store", type: argparseSections, default: BeeQueenTransportBox.DEFAULT["ay"], help: "air hole sections back to front in %% of the box depth"});
+        this.argparser.add_argument("--ah", {action: "store", type: "str", default: BeeQueenTransportBox.DEFAULT["ah"], help: "air hole sections bottom to top in mm"});
+        this.argparser.add_argument("--ax", {action: "store", type: "str", default: BeeQueenTransportBox.DEFAULT["ax"], help: "air hole sections left to right in %% of the box width"});
+        this.argparser.add_argument("--ay", {action: "store", type: "str", default: BeeQueenTransportBox.DEFAULT["ay"], help: "air hole sections back to front in %% of the box depth"});
         //let cutout_choices = /* unknown node ListComp */;
         //let cutout_descriptions = unknown.join(/* unknown node GeneratorExp */);
         //let layers = /* unknown node ListComp */;
@@ -413,9 +427,29 @@ class BeeQueenTransportBox extends _TopEdge {
         ValueError(/* unknown node JoinedStr */)
     }
 
-    cutouts(layer) {
+    cutouts(layer = 0) {
+        // Get the layer property name (layer0, layer1, etc.)
+        const layerPropName = `layer${layer}`;
+        const cutoutName = this[layerPropName];
+        
+        // Skip if no cutout configured for this layer
+        if (!cutoutName || cutoutName === "None") {
+            return;
+        }
+        
         let y = 0.0;
-        let cutout = this.get_cutout(getattr(this, /* unknown node JoinedStr */));
+        let cutout;
+        try {
+            cutout = this.get_cutout(cutoutName);
+        } catch (e) {
+            // If cutout not found, skip
+            return;
+        }
+        
+        if (!cutout || !cutout.DIMENSIONS) {
+            return;
+        }
+        
         for (let dy of this.sy) {
             let x = 0.0;
             for (let dx of this.sx) {
@@ -479,6 +513,17 @@ class BeeQueenTransportBox extends _TopEdge {
     }
 
     render() {
+        // Parse section strings to arrays if needed
+        if (typeof this.ah === 'string') {
+            this.ah = this._parseSections(this.ah);
+        }
+        if (typeof this.ax === 'string') {
+            this.ax = this._parseSections(this.ax);
+        }
+        if (typeof this.ay === 'string') {
+            this.ay = this._parseSections(this.ay);
+        }
+        
         let x = this.sx.reduce((a, b) => a + b, 0);
         let y = this.sy.reduce((a, b) => a + b, 0);
         let h = (this.sh.reduce((a, b) => a + b, 0) + (this.thickness * (this.sh.length - 1)));
@@ -495,11 +540,13 @@ class BeeQueenTransportBox extends _TopEdge {
         this.rectangularWall(y, h, [b, "f", t_right, "f"], {ignore_widths: [1, 6], callback: [() => [this.sideholes(y), this.airholes(y, this.ay), this.debugview(false)]], move: "right", label: "Right"});
         this.ctx.restore();
         this.rectangularWall(x, h, [b, "F", t_back, "F"], {ignore_widths: [1, 6], move: "up only"});
-        if (b === "eš") {
-            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts()], move: "right"}); // label: /* unknown node JoinedStr */});
+        // Inner layers - bottom layer only if bottom edge is not "e" or "š"
+        if (!["e", "š"].includes(b)) {
+            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts(0)], move: "right", label: "Bottom Layer"});
         }
         for (let layer = 1; layer < this.sh.length; layer += 1) {
-            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts(layer)], move: "right"}); //label: /* unknown node JoinedStr */});
+            const currentLayer = layer; // Capture for closure
+            this.rectangularWall(x, y, "ffff", {callback: [() => this.cutouts(currentLayer)], move: "right", label: `Layer ${layer}`});
         }
         this.lid(x, y, this.top_edge);
     }

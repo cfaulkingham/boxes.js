@@ -25,9 +25,9 @@ class TrayLayoutFile extends Boxes {
         this.sy = sy;
         let x = sx.length;
         let y = sy.length;
-        this.hwalls = /* unknown node ListComp */;
-        this.vwalls = /* unknown node ListComp */;
-        this.floors = /* unknown node ListComp */;
+        this.hwalls = Array.from({length: y + 1}, () => Array(x).fill(true));
+        this.vwalls = Array.from({length: y}, () => Array(x + 1).fill(true));
+        this.floors = Array.from({length: y}, () => Array(x).fill(true));
     }
 
     __str__() {
@@ -74,7 +74,7 @@ to remove the floor for this compartment.
         }
     }
 
-    vWalls(x, y) {;
+    vWalls(x, y) {
         let result = 0;
         if ((y > 0 && this.vwalls[(y - 1)][x])) {
             result += 1;
@@ -85,7 +85,7 @@ to remove the floor for this compartment.
         return result;
     }
 
-    hWalls(x, y) {;
+    hWalls(x, y) {
         let result = 0;
         if ((x > 0 && this.hwalls[y][(x - 1)])) {
             result += 1;
@@ -96,14 +96,14 @@ to remove the floor for this compartment.
         return result;
     }
 
-    vFloor(x, y) {;
+    vFloor(x, y) {
         if (y >= this.y.length) {
             return false;
         }
         return ((x > 0 && this.floors[y][(x - 1)]) || (x < this.x.length && this.floors[y][x]));
     }
 
-    hFloor(x, y) {;
+    hFloor(x, y) {
         if (x >= this.x.length) {
             return false;
         }
@@ -187,7 +187,7 @@ to remove the floor for this compartment.
             end += 1;
             lengths.pop();
             edges.pop();
-            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [boxes.new edges.CompoundEdge(this, edges, lengths), (this.vWalls(end, y) ? "f" : "e"), "e", (this.vWalls(start, y) ? "f" : "e")], {move: "right"});
+            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [new edges.CompoundEdge(this, edges, lengths), (this.vWalls(end, y) ? "f" : "e"), "e", (this.vWalls(start, y) ? "f" : "e")], {move: "right"});
             start = end;
         }
         this.ctx.restore();
@@ -225,9 +225,9 @@ to remove the floor for this compartment.
             end += 1;
             lengths.pop();
             edges.pop();
-            let upper = /* unknown node ListComp */;
-            edges = /* unknown node ListComp */;
-            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [boxes.new edges.CompoundEdge(this, edges, lengths), "eFf"[this.hWalls(x, end)], boxes.new edges.CompoundEdge(this, upper, list(reversed(lengths))), "eFf"[this.hWalls(x, start)]], {move: "right"});
+            let upper = edges.map(e => e === 'f' ? 'f' : 'e');
+            let edgesCopy = edges.slice();
+            this.rectangularWall(lengths.reduce((a, b) => a + b, 0), h, [new edges.CompoundEdge(this, edgesCopy, lengths), "eFf"[this.hWalls(x, end)], new edges.CompoundEdge(this, upper, lengths.slice().reverse()), "eFf"[this.hWalls(x, start)]], {move: "right"});
             start = end;
         }
         this.ctx.restore();

@@ -31,22 +31,22 @@ class FatBallDispenser extends Boxes {
         this.argparser.add_argument("--roof_support_fraction", {action: "store", type: "float", default: 0.3, help: "The radius of the roof support part as a fraction of the roof radius."});
     }
 
-    calc_tile_angle(radius, height) {;
-        const cross = (a, b) => {;
+    calc_tile_angle(radius, height) {
+        const cross = (a, b) => {
             let c = [((a[1] * b[2]) - (a[2] * b[1])), ((a[2] * b[0]) - (a[0] * b[2])), ((a[0] * b[1]) - (a[1] * b[0]))];
             return c;
         };
 
-        const scalar = (a, b) => {;
+        const scalar = (a, b) => {
             return (((a[0] * b[0]) + (a[1] * b[1])) + (a[2] * b[2]));
         };
 
-        const norm = (a) => {;
+        const norm = (a) => {
             return Math.sqrt((((a[0] ** 2) + (a[1] ** 2)) + (a[2] ** 2)));
         };
 
-        const add = (a, b) => {;
-            return /* unknown node ListComp */;
+        const add = (a, b) => {
+            return a.map((v, i) => v + b[i]);
         };
 
         let ar_center = ((360 / this.sides) * Math.PI / 180);
@@ -64,7 +64,7 @@ class FatBallDispenser extends Boxes {
         return e;
     }
 
-    get_pole_callback(pole_inset, pole_diameter, r_ceiling) {;
+    get_pole_callback(pole_inset, pole_diameter, r_ceiling) {
         const cb = (number) => {
             if (number === 0) {
                 if (r_ceiling > 0) {
@@ -82,7 +82,7 @@ class FatBallDispenser extends Boxes {
                 let y = (pole_inset * Math.sin(rads));
                 this.hole(x, y, (pole_diameter / 2.0));
             }
-            if ((r_ceiling > 0 && /* unknown node Compare */)) {
+            if ((r_ceiling > 0 && number > 0)) {
                 let a_center = (360.0 / this.sides);
                 let a_base = ((180 - (360 / this.sides)) / 2);
                 let clearance = (this.pole_clearance_factor * this.pole_clearance);
@@ -115,7 +115,7 @@ class FatBallDispenser extends Boxes {
         return cb;
     }
 
-    get_roof_callback(r_polygon, r_hole) {;
+    get_roof_callback(r_polygon, r_hole) {
         const cb = (number) => {
             if (number === 0) {
                 this.hole(0, 0, r_hole);
@@ -131,22 +131,22 @@ class FatBallDispenser extends Boxes {
         return cb;
     }
 
-    balcony_wall(x, y, finger_padding, callback, move, label) {;
-        let edges = "efeeee";
-        edges = /* unknown node ListComp */;
-        edges += edges;
-        let overallwidth = ((x + edges[-1].spacing()) + edges[3].spacing());
-        let overallheight = ((y + edges[1].spacing()) + edges[4].spacing());
+    balcony_wall(x, y, finger_padding, callback, move, label) {
+        let edgeStr = "efeeee";
+        let wallEdges = edgeStr.split('').map(e => this.edges[e] || e);
+        wallEdges = wallEdges.concat(wallEdges);
+        let overallwidth = ((x + (wallEdges[wallEdges.length-1].spacing ? wallEdges[wallEdges.length-1].spacing() : 0)) + (wallEdges[3].spacing ? wallEdges[3].spacing() : 0));
+        let overallheight = ((y + (wallEdges[1].spacing ? wallEdges[1].spacing() : 0)) + (wallEdges[4].spacing ? wallEdges[4].spacing() : 0));
         if (this.move(overallwidth, overallheight, move)) {
             return;
         }
-        this.moveTo(0, edges[1].margin());
-        for (let [i, l] of enumerate([finger_padding, x, finger_padding, y, (x + (2 * finger_padding)), y])) {
-            this.cc(callback, i, {y: (edges[i].startwidth() + this.burn)});
+        this.moveTo(0, wallEdges[1].margin ? wallEdges[1].margin() : 0);
+        for (let [i, l] of [finger_padding, x, finger_padding, y, (x + (2 * finger_padding)), y].entries()) {
+            this.cc(callback, i, {y: ((wallEdges[i].startwidth ? wallEdges[i].startwidth() : 0) + this.burn)});
             let e1;
             let e2;
-            [e1, e2] = [edges[i], edges[(i + 1)]];
-            edges[i](l);
+            [e1, e2] = [wallEdges[i], wallEdges[(i + 1)]];
+            if (typeof wallEdges[i] === 'function') wallEdges[i](l); else this.edge(l);
             if (i >= 2) {
                 this.edgeCorner(e1, e2, 90);
             }
@@ -165,7 +165,7 @@ class FatBallDispenser extends Boxes {
         this.move(overallwidth, overallheight, move, {label: label});
     }
 
-    roof_tile(r_roof, move, label) {;
+    roof_tile(r_roof, move, label) {
         let a_base = ((180 - (360 / this.sides)) / 2.0);
         let ar_base = (a_base * Math.PI / 180);
         let h_roof = this.roof_height;
@@ -177,25 +177,25 @@ class FatBallDispenser extends Boxes {
         let ar_roof = (a_roof * Math.PI / 180);
         let ar_tile_base = Math.atan((h_roof_tile / (l_roof / 2)));
         let a_tile_base = (ar_tile_base * 180 / Math.PI);
-        let edges = /* unknown node ListComp */;
-        let overallwidth = (l_roof + (2 * edges[0].spacing()));
-        let overallheight = (h_roof_tile + (2 * edges[0].spacing()));
+        let roofEdges = "eee".split('').map(e => this.edges[e] || e);
+        let overallwidth = (l_roof + (2 * (roofEdges[0].spacing ? roofEdges[0].spacing() : 0)));
+        let overallheight = (h_roof_tile + (2 * (roofEdges[0].spacing ? roofEdges[0].spacing() : 0)));
         let l_side = (Math.sqrt((((0.5 * l_roof) ** 2) + (h_roof_tile ** 2))) - r_roof_hole);
         if (this.move(overallwidth, overallheight, move)) {
             return;
         }
-        this.moveTo(0, edges[0].margin());
+        this.moveTo(0, roofEdges[0].margin ? roofEdges[0].margin() : 0);
         let e1;
         let e2;
         let e3;
-        [e1, e2, e3] = [edges[0], edges[1], edges[2]];
-        e1(l_roof);
+        [e1, e2, e3] = [roofEdges[0], roofEdges[1], roofEdges[2]];
+        if (typeof e1 === 'function') e1(l_roof); else this.edge(l_roof);
         this.edgeCorner(e1, e2, (180 - a_tile_base));
-        e2(l_side);
+        if (typeof e2 === 'function') e2(l_side); else this.edge(l_side);
         this.corner(90);
         this.corner(-(180 - (2 * a_tile_base)), {radius: r_roof_hole});
         this.corner(90);
-        e3(l_side);
+        if (typeof e3 === 'function') e3(l_side); else this.edge(l_side);
         this.edgeCorner(e3, e1, (180 - a_tile_base));
         let dy = (this.thickness * Math.tan(ar_roof));
         let dx = (dy / Math.tan(ar_tile_base));
@@ -227,16 +227,16 @@ class FatBallDispenser extends Boxes {
         this.move(overallwidth, overallheight, move, {label: label});
     }
 
-    lock_part(r_inner, r_outer, move, label) {;
+    lock_part(r_inner, r_outer, move, label) {
         let number_of_edges = (2 * (2 + Math.floor(this.sides / 2)));
-        let edges = /* unknown node ListComp */;
+        let lockEdges = Array(number_of_edges).fill(null).map(() => this.edges["e"]);
         let a_center = (360 / this.sides);
         let a_base = ((180 - (360 / this.sides)) / 2);
         let _;
         let l_inner;
-        [r_inner, _, l_inner] = this.regularPolygon();
+        [_, _, l_inner] = this.regularPolygon(this.sides, r_inner);
         let l_outer;
-        [r_outer, _, l_outer] = this.regularPolygon();
+        [_, _, l_outer] = this.regularPolygon(this.sides, r_outer);
         let overallwidth;
         let overallheight;
         [overallwidth, overallheight] = [(1.5 * r_outer), ((3 ** 0.5) * r_outer)];
@@ -247,9 +247,10 @@ class FatBallDispenser extends Boxes {
         for (let i = 0; i < number_of_edges; i += 1) {
             let e1;
             let e2;
-            [e1, e2] = [edges[i], edges[((i + 1) % number_of_edges)]];
+            [e1, e2] = [lockEdges[i], lockEdges[((i + 1) % number_of_edges)]];
+            let length;
             if ([(second_half - 1), (number_of_edges - 1)].includes(i)) {
-                let length = (r_outer - r_inner);
+                length = (r_outer - r_inner);
             }
             else {
                 if (i < second_half) {
@@ -259,8 +260,9 @@ class FatBallDispenser extends Boxes {
                     length = l_inner;
                 }
             }
+            let angle;
             if ([(second_half - 2)].includes(i)) {
-                let angle = (180 - a_base);
+                angle = (180 - a_base);
             }
             else {
                 if ([(second_half - 1)].includes(i)) {
@@ -285,7 +287,7 @@ class FatBallDispenser extends Boxes {
                     }
                 }
             }
-            e1(length);
+            if (typeof e1 === 'function') e1(length); else this.edge(length);
             this.edgeCorner(e1, e2, angle);
         }
         this.move(overallwidth, overallheight, move, {label: label});

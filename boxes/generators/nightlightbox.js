@@ -171,9 +171,10 @@ C 28.42 15 3", help: "extra holes for connectors or buttons ; enter one line per
     render() {
         let t = this.thickness;
         let y = (((this.BackgroundDepth + this.DiffuserPlateThickness) + ((this.WoodPlateThickness + this.InterPlateSpacing) * this.WoodPlatesCount)) + this.InterPlateSpacing);
+        let x, h;
         if (this.BoxStyle === "minimalist") {
-            let x = (((t * 4) + this.PlateVisibleWidth) + this.Margin);
-            let h = ((this.PlateVisibleHeight + (t * 4)) + this.Margin);
+            x = (((t * 4) + this.PlateVisibleWidth) + this.Margin);
+            h = ((this.PlateVisibleHeight + (t * 4)) + this.Margin);
         }
         else {
             x = (((t * 8) + this.PlateVisibleWidth) + this.Margin);

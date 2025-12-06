@@ -28,8 +28,8 @@ class HobbyCase extends Boxes {
         this.sum_h = (this.rows * this.unit_h);
         this.inside_h = (this.sum_h + ((this.rows - 1) * this.thickness));
         this.outside_h = (this.inside_h + (2 * this.thickness));
-        this.shelves_n = /* unknown node ListComp */;
-        this.railsets = /* unknown node ListComp */;
+        this.shelves_n = this.shelves_n.map(n => parseInt(n));
+        this.railsets = this.shelves_n.map(n => this.rows - n);
         this.inside_depth = this.unit_d;
         this.outside_depth = (!this.inset_shelves ? this.unit_d : (this.unit_d + (2 * this.thickness)));
         let s = this.edgesettings.get("FingerJoint", /* unknown node Dict */);
@@ -39,7 +39,7 @@ class HobbyCase extends Boxes {
 
     top_and_bottom(move) {
         for (let name of ["bottom", "top"]) {
-            this.rectangularWall(this.inside_w, this.outside_depth, "fFeF", {callback: [this.topAndBottomHolesCallback], move: move, label: /* unknown node JoinedStr */});
+            this.rectangularWall(this.inside_w, this.outside_depth, "fFeF", {callback: [this.topAndBottomHolesCallback], move: move, label: name});
         }
     }
 
@@ -58,7 +58,7 @@ class HobbyCase extends Boxes {
     }
 
     verticalWall(x, y, edges, move, label) {
-        label = /* unknown node JoinedStr */;
+        label = label || `vertical wall ${x}x${y}`;
         this.rectangularWall(x, y, edges, {callback: [this.slotsHolesCallback], move: move, label: label});
     }
 
@@ -73,15 +73,15 @@ class HobbyCase extends Boxes {
         let hole_edge_length = (this.unit_w[0] / 2);
         let straight_edge_length = ((x - (2 * hole_edge_length)) / 3);
         let lengths = [straight_edge_length, hole_edge_length, straight_edge_length, hole_edge_length, straight_edge_length];
-        let edge_with_cutouts = boxes.new edges.CompoundEdge(this, _edges, lengths);
-        this.rectangularWall(x, y, ["e", "e", edge_with_cutouts, "e"], {move: move, label: /* unknown node JoinedStr */});
+        let edge_with_cutouts = new edges.CompoundEdge(this, _edges, lengths);
+        this.rectangularWall(x, y, ["e", "e", edge_with_cutouts, "e"], {move: move, label: `cover ${x}x${y}`});
     }
 
     shelves(move) {
         for (let [columnIndex, unit_width] of enumerate(this.unit_w)) {
             let x = unit_width;
             let y = this.inside_depth;
-            this.partsMatrix(this.shelves_n[columnIndex], 0, move, this.rectangularWall, x, y, "efff", {label: /* unknown node JoinedStr */});
+            this.partsMatrix(this.shelves_n[columnIndex], 0, move, this.rectangularWall, x, y, "efff", {label: `shelf ${columnIndex}`});
         }
     }
 
@@ -102,7 +102,7 @@ class HobbyCase extends Boxes {
     }
 
     base_plate(move) {
-        this.rectangularWall(this.inside_w, this.inside_h, "FFFF", {callback: [this.baseplate_callback], label: /* unknown node JoinedStr */, move: move});
+        this.rectangularWall(this.inside_w, this.inside_h, "FFFF", {callback: [this.baseplate_callback], label: "base plate", move: move});
     }
 
     baseplate_callback() {

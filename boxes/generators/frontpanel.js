@@ -6,8 +6,8 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 const str_to_bool = (s) => {
-    return ["true", "1", "t", "y", "yes", "yeah", "yup", "certainly", "uh-huh"].includes(s.lower());
-}
+    return ["true", "1", "t", "y", "yes", "yeah", "yup", "certainly", "uh-huh"].includes(s.toLowerCase());
+};
 
 class FrontPanel extends Boxes {
     constructor() {
@@ -54,7 +54,7 @@ nema 20 20 17
     }
 
     drawRect(x, y, w, h, r, center_x, center_y) {
-        [x, y, w, h, r] = /* unknown node GeneratorExp */;
+        [x, y, w, h, r] = [x, y, w, h, r].map(v => parseFloat(v));
         [x, y] = this.applyOffset(x, y);
         center_x = str_to_bool(center_x);
         center_y = str_to_bool(center_y);
@@ -62,20 +62,20 @@ nema 20 20 17
     }
 
     drawCircle(x, y, r) {
-        [x, y, r] = /* unknown node GeneratorExp */;
+        [x, y, r] = [x, y, r].map(v => parseFloat(v));
         [x, y] = this.applyOffset(x, y);
         this.hole(x, y, r);
     }
 
     drawMountingHole(x, y, d_shaft, d_head, angle) {
-        [x, y, d_shaft, d_head, angle] = /* unknown node GeneratorExp */;
+        [x, y, d_shaft, d_head, angle] = [x, y, d_shaft, d_head, angle].map(v => parseFloat(v));
         [x, y] = this.applyOffset(x, y);
         this.mountingHole(x, y, d_shaft, d_head, angle);
     }
 
     drawOutline(w, h) {
-        [w, h] = /* unknown node GeneratorExp */;
-        if (this.outline === null) {
+        [w, h] = [w, h].map(v => parseFloat(v));
+        if (this.outline !== null) {
             this.offset = this.applyOffset((this.outline[0] + 10), 0);
         }
         this.outline = [w, h];
@@ -87,15 +87,15 @@ nema 20 20 17
     }
 
     drawText(x, y, size, text, angle, align) {
-        [x, y, size, angle] = /* unknown node GeneratorExp */;
+        [x, y, size, angle] = [x, y, size, angle].map(v => parseFloat(v));
         [x, y] = this.applyOffset(x, y);
         align = align.replace("|", " ");
         this.text({text: text, x: x, y: y, fontsize: size, angle: angle, align: align});
     }
 
     drawNema(x, y, size, screwhole_size) {
-        [x, y, size, screwhole_size] = /* unknown node GeneratorExp */;
-        if (this.nema_sizes.includes(size)) {
+        [x, y, size, screwhole_size] = [x, y, size, screwhole_size].map(v => parseFloat(v));
+        if (this.nema_sizes && this.nema_sizes.includes(size)) {
             [x, y] = this.applyOffset(x, y);
             this.NEMA(size, x, y, {screwholes: screwhole_size});
         }
@@ -104,7 +104,14 @@ nema 20 20 17
     parse_layout(layout) {
         let f = io.StringIO(layout);
         let line = 0;
-        let objects = /* unknown node Dict */;
+        let objects = {
+            "outline": this.drawOutline.bind(this),
+            "rect": this.drawRect.bind(this),
+            "circle": this.drawCircle.bind(this),
+            "text": this.drawText.bind(this),
+            "mountinghole": this.drawMountingHole.bind(this),
+            "nema": this.drawNema.bind(this)
+        };
         for (let l of f.readlines()) {
             line += 1;
             l = re.sub("#.*$", "", l);

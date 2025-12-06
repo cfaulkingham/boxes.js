@@ -253,8 +253,7 @@ class CanStorage extends Boxes {
         this.move(pusherV, pusherH, {where: "right", before: false, label: "Pusher"});
         this.move(pusherV, pusherH, {where: "up", before: true, label: "Pusher"});
         this.DrawPusher();
-        this.text("Glue the Pusher pieces into slots on bottom
-and back plates to prevent stuck cans.", (pusherV + 3), 0, {fontsize: 4, color: Color.ANNOTATIONS});
+        this.text("Glue the Pusher pieces into slots on bottom\nand back plates to prevent stuck cans.", (pusherV + 3), 0, {fontsize: 4, color: Color.ANNOTATIONS});
         this.move(pusherV, pusherH, {where: "up", before: false, label: "Pusher"});
         this.move(pusherV, pusherH, {where: "left only", before: true, label: "Pusher"});
         this.move(pusherV, pusherH, {where: "left only", before: true, label: "Pusher"});
@@ -263,8 +262,7 @@ and back plates to prevent stuck cans.", (pusherV + 3), 0, {fontsize: 4, color: 
             this.rectangularWall((this.edges["š"].settings.width + (3 * this.thickness)), (this.edges["š"].settings.height - (4 * this.burn)), "eeee", {move: "right", label: "Stabilizer 2"});
             this.rectangularWall((this.edges["š"].settings.width + (5 * this.thickness)), (this.edges["š"].settings.height - (4 * this.burn)), "eeee", {move: "right", label: "Stabilizer 3"});
             this.rectangularWall((this.edges["š"].settings.width + (5 * this.thickness)), (this.edges["š"].settings.height - (4 * this.burn)), "eeee", {move: "right", label: "Stabilizer 4"});
-            this.text("Glue a stabilizer on the inside of each bottom
-side stacking foot for lateral stabilization.", 3, 0, {fontsize: 4, color: Color.ANNOTATIONS});
+            this.text("Glue a stabilizer on the inside of each bottom\nside stacking foot for lateral stabilization.", 3, 0, {fontsize: 4, color: Color.ANNOTATIONS});
         }
     }
 

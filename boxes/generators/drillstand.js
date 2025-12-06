@@ -54,7 +54,7 @@ class DrillStand extends Boxes {
         [x, sx, y, sy, sh] = [this.x, this.sx, this.y, this.sy, this.sh];
         let eh = extra_height;
         let fh = foot_height;
-        edges = /* unknown node ListComp */;
+        edges = edges.split('').map(e => this.edges[e] || e);
         let tw = ((sy.reduce((a, b) => a + b, 0) + (t * sy.length)) + t);
         let th = (((Math.max(sh) + eh) + fh) + edges[0].spacing());
         if (this.move(tw, th, move, true)) {
@@ -129,7 +129,7 @@ class DrillStand extends Boxes {
         let sy;
         let sh;
         [x, sx, y, sy, sh] = [this.x, this.sx, this.y, this.sy, this.sh];
-        edges = /* unknown node ListComp */;
+        edges = edges.split('').map(e => this.edges[e] || e);
         let eh = this.extra_height;
         let tw = ((x + edges[1].spacing()) + edges[3].spacing());
         let th = (((h + eh) + edges[0].spacing()) + edges[2].spacing());

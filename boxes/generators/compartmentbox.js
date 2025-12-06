@@ -11,7 +11,7 @@ class CompartmentBox extends TypeTray {
         super();
         this.addSettingsArgs(edges.StackableSettings);
         // this.buildArgParser("sx", "sy", "h", "outside", "bottom_edge");
-        this.argparser.add_argument("--handle", {action: "store", type: "str", default: "lip", choices: /* unknown node Set */, help: "how to grab the lid to remove"});
+        this.argparser.add_argument("--handle", {action: "store", type: "str", default: "lip", choices: ["lip", "hole", "none"], help: "how to grab the lid to remove"});
         this.argparser.add_argument("--radius", {action: "store", type: "float", default: 10, dest: "radius", help: "radius of the grip hole in mm"});
         this.argparser.add_argument("--holes", {action: "store", type: "str", default: "70", help: "width of hole(s) in percentage of maximum hole width"});
         this.argparser.add_argument("--margin_t", {action: "store", type: "float", default: 0.1, dest: "margin_vertical", help: "vertical margin for sliding lid (multiples of thickness)"});
@@ -61,7 +61,7 @@ class CompartmentBox extends TypeTray {
         let be = (b !== "e" ? "f" : "e");
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
             let e = [edges.SlottedEdge(this, this.sx, be), "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"];
-            this.rectangularWall(x, h, e, {move: "up", label: /* unknown node JoinedStr */});
+            this.rectangularWall(x, h, e, {move: "up", label: `inner x wall ${i}`});
         }
         let handle = this.handle;
         let x_compensated = (x - ((2 * margin_side) * t));
@@ -89,7 +89,7 @@ class CompartmentBox extends TypeTray {
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "mirror up", label: "right side"});
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
             e = [edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
-            this.rectangularWall(y, h, e, {move: "up", label: /* unknown node JoinedStr */});
+            this.rectangularWall(y, h, e, {move: "up", label: `inner y wall ${i}`});
         }
         let lip_front_edge = (this.handle === "lip" ? "e" : "E");
         if (split_lip) {

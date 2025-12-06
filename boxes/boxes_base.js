@@ -164,6 +164,9 @@ class Boxes {
         if (defaults.sy !== undefined) {
             this.argparser.add_argument("--sy", { action: "store", type: "str", default: defaults.sy, help: "sections back to front in mm" });
         }
+        if (defaults.sh !== undefined) {
+            this.argparser.add_argument("--sh", { action: "store", type: "str", default: defaults.sh, help: "sections bottom to top in mm" });
+        }
         if (defaults.outside !== undefined) {
             this.argparser.add_argument("--outside", { action: "store", type: "bool", default: defaults.outside, help: "treat dimensions as outside measurements" });
         }
@@ -222,12 +225,15 @@ class Boxes {
             // In python: if key.startswith(setting + '_'): ...
         }
 
-        // Parse sx and sy from string format (e.g., "65*4" -> [65, 65, 65, 65])
+        // Parse sx, sy, and sh from string format (e.g., "65*4" -> [65, 65, 65, 65])
         if (typeof this.sx === 'string') {
             this.sx = this._parseSections(this.sx);
         }
         if (typeof this.sy === 'string') {
             this.sy = this._parseSections(this.sy);
+        }
+        if (typeof this.sh === 'string') {
+            this.sh = this._parseSections(this.sh);
         }
 
         // Parse spacing from string format (e.g., "0.5" -> [0.5, 0] or "0.5:2" -> [0.5, 2])
@@ -237,18 +243,33 @@ class Boxes {
     }
 
     _parseSections(spec) {
-        // Parse section specification like "65*4" or "10:20:30"
+        // Parse section specification like "65*4", "10:20:30", or "5:45*3:5"
         // Returns an array of numbers
-        if (spec.includes('*')) {
-            const parts = spec.split('*');
-            const value = parseFloat(parts[0]);
-            const count = parseInt(parts[1]);
-            return Array(count).fill(value);
-        } else if (spec.includes(':')) {
-            return spec.split(':').map(v => parseFloat(v));
-        } else {
-            return [parseFloat(spec)];
+        // "5:45*3:5" means [5, 45, 45, 45, 5]
+        if (!spec || typeof spec !== 'string') {
+            return spec;
         }
+        
+        const result = [];
+        // Split by colon first to get individual segments
+        const segments = spec.split(':');
+        
+        for (const segment of segments) {
+            if (segment.includes('*')) {
+                // Handle "45*3" format -> [45, 45, 45]
+                const parts = segment.split('*');
+                const value = parseFloat(parts[0]);
+                const count = parseInt(parts[1]);
+                for (let i = 0; i < count; i++) {
+                    result.push(value);
+                }
+            } else {
+                // Simple number
+                result.push(parseFloat(segment));
+            }
+        }
+        
+        return result;
     }
 
     _parseSpacing(spec) {

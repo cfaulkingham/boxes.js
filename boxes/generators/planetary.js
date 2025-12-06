@@ -35,8 +35,13 @@ class Planetary extends Boxes {
             planets = Math.min(this.maxplanets, planets);
         }
         let ta = (this.sunteeth + ringteeth);
+        let planetpositions;
         if ((ta % planets)) {
-            let planetpositions = /* unknown node ListComp */;
+            // Generate positions for planets when not evenly divisible
+            planetpositions = [];
+            for (let i = 0; i < planets; i++) {
+                planetpositions.push((360 * i) / planets);
+            }
         }
         else {
             planetpositions = planets;

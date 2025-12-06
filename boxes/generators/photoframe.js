@@ -12,27 +12,27 @@ class Dimensions extends Boxes {
         this.check();
     }
 
-    photo_x() {;
+    photo_x() {
         return this.x;
     }
 
-    photo_y() {;
+    photo_y() {
         return this.y;
     }
 
-    frame_h() {;
+    frame_h() {
         return this.frame_w;
     }
 
-    mat_hole_x() {;
+    mat_hole_x() {
         return (this.photo_x - (2 * this.matting_overlap));
     }
 
-    mat_hole_y() {;
+    mat_hole_y() {
         return (this.photo_y - (2 * this.matting_overlap));
     }
 
-    golden_matting_width() {;
+    golden_matting_width() {
         let phi = ((1 + Math.sqrt(5)) / 2);
         let a = 4;
         let x = this.mat_hole_x;
@@ -44,11 +44,11 @@ class Dimensions extends Boxes {
         return x1;
     }
 
-    fixed_glass_size() {;
-        return bool((this.glass_w && this.glass_h));
+    fixed_glass_size() {
+        return !!(this.glass_w && this.glass_h);
     }
 
-    matting_w() {;
+    matting_w() {
         if (this.fixed_glass_size) {
             let visible = (this.glass_w - (2 * this.frame_overlap));
             return ((visible - this.mat_hole_x) / 2);
@@ -59,7 +59,7 @@ class Dimensions extends Boxes {
         return this.matting_w_param;
     }
 
-    matting_h() {;
+    matting_h() {
         if (this.fixed_glass_size) {
             let visible = (this.glass_h - (2 * this.frame_overlap));
             return ((visible - this.mat_hole_y) / 2);
@@ -70,57 +70,57 @@ class Dimensions extends Boxes {
         return this.matting_h_param;
     }
 
-    mat_x() {;
+    mat_x() {
         return ((this.mat_hole_x + (2 * this.matting_w)) + (2 * this.frame_overlap));
     }
 
-    mat_y() {;
+    mat_y() {
         return ((this.mat_hole_y + (2 * this.matting_h)) + (2 * this.frame_overlap));
     }
 
-    visible_mat_ratio() {;
+    visible_mat_ratio() {
         let visible_mat_area = (this.window_x * this.window_y);
         let visible_photo_area = (this.mat_hole_x * this.mat_hole_y);
         return (visible_mat_area / visible_photo_area);
     }
 
-    pocket_x() {;
+    pocket_x() {
         return (this.mat_x + this.guide_fudge);
     }
 
-    pocket_y() {;
+    pocket_y() {
         return (this.base_y - this.guide_h);
     }
 
-    guide_w() {;
+    guide_w() {
         return ((this.base_x - this.pocket_x) / 2);
     }
 
-    guide_h() {;
+    guide_h() {
         return ((this.base_y - this.mat_y) / 2);
     }
 
-    window_x() {;
+    window_x() {
         return (this.mat_x - (this.frame_overlap * 2));
     }
 
-    window_y() {;
+    window_y() {
         return (this.mat_y - (this.frame_overlap * 2));
     }
 
-    base_x() {;
+    base_x() {
         return (this.window_x + (2 * this.frame_w));
     }
 
-    base_y() {;
+    base_y() {
         return (this.window_y + (2 * this.frame_h));
     }
 
-    centre_x() {;
+    centre_x() {
         return (this.base_x / 2);
     }
 
-    centre_y() {;
+    centre_y() {
         return (this.base_y / 2);
     }
 
@@ -228,7 +228,7 @@ class PhotoFrame extends Boxes {
         this.render_photo();
     }
 
-    render_middle() {;
+    render_middle() {
         let stack_n = 1;
         if (this.d.unsplit_middle) {
             for (let _ = 0; _ < stack_n; _ += 1) {
@@ -348,14 +348,14 @@ class PhotoFrame extends Boxes {
         this.rectangularWall(d.base_x, d.base_y, (holes ? "eeGe" : "eeee"), {callback: callback, move: "up", label: label});
     }
 
-    photo_registration_rectangle() {;
+    photo_registration_rectangle() {
         let d = this.d;
         this.set_source_color(Color.ETCHING);
         this.rectangular_etching(d.centre_x, d.centre_y, d.photo_x, d.photo_y);
         this.ctx.stroke();
     }
 
-    rectangular_etching(x, y, dx, dy, r, center_x, center_y) {;
+    rectangular_etching(x, y, dx, dy, r, center_x, center_y) {
         logger.debug(/* unknown node JoinedStr */);
         r = Math.min(r, (dx / 2.0), (dy / 2.0));
         let x_start = (center_x ? x : (x + (dx / 2.0)));

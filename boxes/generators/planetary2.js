@@ -23,8 +23,9 @@ class Planetary2 extends Boxes {
 
     pins(r, rh, nr, angle) {
         this.moveTo(0, 0, angle);
+        let ang;
         if (nr < 8) {
-            let ang = (20 + (10 * nr));
+            ang = (20 + (10 * nr));
         }
         else {
             ang = (15 + (10 * (nr - 8)));
@@ -57,8 +58,11 @@ class Planetary2 extends Boxes {
             planets = Math.min(this.maxplanets, planets);
         }
         let ta = (this.sunteeth + ringteeth);
-        let planetpositions = /* unknown node ListComp */;
-        let secondary_offsets = /* unknown node ListComp */;
+        let planetpositions = [];
+        for (let i = 0; i < planets; i++) {
+            planetpositions.push((360 * i) / planets);
+        }
+        let secondary_offsets = planetpositions.map(() => 0);
         let ratio = ((1 + (ringteeth / this.sunteeth)) * (-ringteeth / this.deltateeth));
         let profile_shift = 20;
         let pressure_angle = 20;

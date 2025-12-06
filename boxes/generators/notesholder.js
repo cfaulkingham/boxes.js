@@ -128,10 +128,30 @@ class NotesHolder extends Boxes {
             let u_edge = USlotEdge(this, o, outer_edge);
             let outer_width = this.edges[outer_edge].startwidth();
             if (this.opening > 0.0) {
-                let front_edge = CompoundEdge(this, ([u_edge, edges.OutSetEdge(this, outer_width)] * sx.length).slice(0, -1), /* unknown node ListComp */.slice(0, -1));
+                let edge_array = [];
+                let lengths_array = [];
+                for (let i = 0; i < sx.length; i++) {
+                    edge_array.push(u_edge);
+                    lengths_array.push(sx[i]);
+                    if (i < sx.length - 1) {
+                        edge_array.push(new edges.OutSetEdge(this, outer_width));
+                        lengths_array.push(this.thickness);
+                    }
+                }
+                var front_edge = new CompoundEdge(this, edge_array, lengths_array);
             }
             if ((this.opening > 0.0 && this.back_openings)) {
-                let back_edge = CompoundEdge(this, ([u_edge, edges.OutSetEdge(this, outer_width)] * sx.length).slice(0, -1), /* unknown node ListComp */.slice(0, -1));
+                let edge_array = [];
+                let lengths_array = [];
+                for (let i = 0; i < sx.length; i++) {
+                    edge_array.push(u_edge);
+                    lengths_array.push(sx[i]);
+                    if (i < sx.length - 1) {
+                        edge_array.push(new edges.OutSetEdge(this, outer_width));
+                        lengths_array.push(this.thickness);
+                    }
+                }
+                var back_edge = new CompoundEdge(this, edge_array, lengths_array);
             }
             this.rectangularWall(x, y, [front_edge, outer_edge, back_edge, outer_edge], {callback: [this.fingerHoleCB(sx, y)], move: "up"});
         }

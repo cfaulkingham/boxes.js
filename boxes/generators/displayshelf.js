@@ -59,21 +59,21 @@ class DisplayShelf extends Boxes {
             hypotenuse = Math.sqrt(((horizontal_cut ** 2) + (vertical_cut ** 2)));
         }
         let top = (width - horizontal_cut);
-        let edges = (this.include_bottom ? "he" : "ee");
+        let sideEdges = (this.include_bottom ? "he" : "ee");
         let le = (this.include_bottom ? this.edges["h"].startwidth() : this.edges["e"].startwidth());
-        edges += (this.include_front ? "f" : "e");
-        edges += (this.include_back ? "eefe" : "eeee");
-        let borders = [width, 90, le, 0, front, (90 - this.angle), hypotenuse, this.angle, top, 90, height, 0, le, 90];
-        this.polygonWall(borders, {edge: edges, callback: [this.generate_finger_holes], move: "up", label: "left side"});
-        this.polygonWall(borders, {edge: edges, callback: [this.generate_finger_holes], move: "up", label: "right side"});
+        sideEdges += (this.include_front ? "f" : "e");
+        sideEdges += (this.include_back ? "eefe" : "eeee");
+        let borders = [width, 90, le, 0, this.front_wall_height, (90 - this.angle), hypotenuse, this.angle, top, 90, height, 0, le, 90];
+        this.polygonWall(borders, {edge: sideEdges, callback: [this.generate_finger_holes], move: "up", label: "left side"});
+        this.polygonWall(borders, {edge: sideEdges, callback: [this.generate_finger_holes], move: "up", label: "right side"});
     }
 
     generate_rectangular_sides(width, height) {
-        let edges = (this.include_bottom ? "h" : "e");
-        edges += (this.include_front ? "fe" : "ee");
-        edges += (this.include_back ? "f" : "e");
-        this.rectangularWall(width, height, edges, {callback: [this.generate_finger_holes], move: "up", label: "left side"});
-        this.rectangularWall(width, height, edges, {callback: [this.generate_finger_holes], move: "up", label: "right side"});
+        let sideEdges = (this.include_bottom ? "h" : "e");
+        sideEdges += (this.include_front ? "fe" : "ee");
+        sideEdges += (this.include_back ? "f" : "e");
+        this.rectangularWall(width, height, sideEdges, {callback: [this.generate_finger_holes], move: "up", label: "left side"});
+        this.rectangularWall(width, height, sideEdges, {callback: [this.generate_finger_holes], move: "up", label: "right side"});
     }
 
     generate_shelve_finger_holes() {
@@ -101,13 +101,13 @@ class DisplayShelf extends Boxes {
     generate_shelves() {
         if (this.front_wall_height) {
             for (let i = 0; i < this.num; i += 1) {
-                this.rectangularWall(this.x, this.sl, "ffef", {callback: [this.generate_shelve_finger_holes], move: "up", label: /* unknown node JoinedStr */});
-                this.rectangularWall(this.x, this.front_wall_height, "Ffef", {callback: [this.generate_front_lip_finger_holes], move: "up", label: /* unknown node JoinedStr */});
+                this.rectangularWall(this.x, this.sl, "ffef", {callback: [this.generate_shelve_finger_holes], move: "up", label: `shelf ${i}`});
+                this.rectangularWall(this.x, this.front_wall_height, "Ffef", {callback: [this.generate_front_lip_finger_holes], move: "up", label: `front lip ${i}`});
             }
         }
         else {
             for (let i = 0; i < this.num; i += 1) {
-                this.rectangularWall(this.x, this.sl, "Efef", {callback: [this.generate_shelve_finger_holes], move: "up", label: /* unknown node JoinedStr */});
+                this.rectangularWall(this.x, this.sl, "Efef", {callback: [this.generate_shelve_finger_holes], move: "up", label: `shelf ${i}`});
             }
         }
     }
@@ -122,7 +122,7 @@ class DisplayShelf extends Boxes {
         }
         for (let i = 0; i < this.num; i += 1) {
             for (let j = 0; j < (this.sx.length - 1); j += 1) {
-                this.rectangularWall(this.sl, this.divider_wall_height, edges_, {move: "up", label: /* unknown node JoinedStr */});
+                this.rectangularWall(this.sl, this.divider_wall_height, edges_, {move: "up", label: `divider ${i}-${j}`});
             }
         }
     }
@@ -134,10 +134,9 @@ class DisplayShelf extends Boxes {
         [sx, y, h] = [this.sx, this.y, this.h];
         let front = this.front_wall_height;
         let thickness = this.thickness;
-        if (this.outside) {
-            let bottom = (this.include_bottom ? (thickness + this.edges["h"].startwidth()) : true);
-        }
-        this.sl = (((y - (thickness * (Math.cos(a) + abs(Math.sin(a))))) - Math.max(0, (Math.sin(a) * front))) / Math.cos(a));
+        let a = this.angle * Math.PI / 180;
+        this.radians = a;
+        this.sl = (((y - (thickness * (Math.cos(a) + Math.abs(Math.sin(a))))) - Math.max(0, (Math.sin(a) * front))) / Math.cos(a));
         if (this.slope_top) {
             this.generate_sloped_sides(y, h);
         }
@@ -146,22 +145,23 @@ class DisplayShelf extends Boxes {
         }
         this.generate_shelves();
         this.generate_dividers();
+        let x = sx.reduce((a, b) => a + b, 0) + (this.thickness * (sx.length - 1));
         let b = (this.include_bottom ? "h" : "e");
         if (this.include_back) {
             this.rectangularWall(x, h, (b + "FeF"), {label: "back wall", move: "up"});
         }
         if (this.include_front) {
             if (this.slope_top) {
-                this.rectangularWall(x, this.front, (b + "FeF"), {label: "front wall", move: "up"});
+                this.rectangularWall(x, this.front_wall_height, (b + "FeF"), {label: "front wall", move: "up"});
             }
             else {
                 this.rectangularWall(x, h, (b + "FeF"), {label: "front wall", move: "up"});
             }
         }
         if (this.include_bottom) {
-            let edges = (this.include_front ? "ff" : "ef");
-            edges += (this.include_back ? "ff" : "ef");
-            this.rectangularWall(x, y, edges, {label: "bottom wall", move: "up"});
+            let bottomEdges = (this.include_front ? "ff" : "ef");
+            bottomEdges += (this.include_back ? "ff" : "ef");
+            this.rectangularWall(x, y, bottomEdges, {label: "bottom wall", move: "up"});
         }
     }
 

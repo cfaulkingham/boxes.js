@@ -6,7 +6,13 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 let pitches = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
-let pressure_units = /* unknown node Dict */;
+let pressure_units = {
+    "Pa": 1.0,
+    "mbar": 100.0,
+    "mmH2O": 9.80665,
+    "mmWS": 9.80665,
+    "inH2O": 249.089
+};
 class OrganPipe extends Boxes {
     getFrequency(pitch, octave, base_freq) {
         let steps = ((pitches.index(pitch) + ((octave - 4) * 12)) - 9);

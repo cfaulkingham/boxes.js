@@ -48,19 +48,19 @@ class GridfinityTrayLayout extends TrayLayout {
         let stepx = (this.x / countx);
         let stepy = (this.y / county);
         for (let i = 0; i < countx; i += 1) {
-            let line = ((" |" * i) + /* unknown node JoinedStr */);
+            let line = (" |".repeat(i) + ` ,> ${stepx.toFixed(1)}mm\n`);
             layout += line;
         }
         for (let i = 0; i < county; i += 1) {
-            layout += (("+-" * countx) + /* unknown node JoinedStr */);
-            layout += (("| " * countx) + /* unknown node JoinedStr */);
+            layout += ("+-".repeat(countx) + `+\n`);
+            layout += ("| ".repeat(countx) + `| ${stepy.toFixed(1)}mm\n`);
         }
         layout += (("+-" * countx) + "+
 ");
         return layout;
     }
 
-    rectangularEtching(x, y, dx, dy, r, center_x, center_y) {;
+    rectangularEtching(x, y, dx, dy, r, center_x, center_y) {
         r = Math.min(r, (dx / 2.0), (dy / 2.0));
         let x_start = (center_x ? x : (x + (dx / 2.0)));
         let y_start = (center_y ? (y - (dy / 2.0)) : y);
@@ -80,8 +80,8 @@ class GridfinityTrayLayout extends TrayLayout {
         let m = this.opening_margin;
         this.ctx.stroke();
         this.ctx.save();
-        for (let xx of /* unknown node Set */) {
-            for (let yy of /* unknown node Set */) {
+        for (let xx = 0; xx < this.nx; xx++) {
+            for (let yy = 0; yy < this.ny; yy++) {
                 this.set_source_color(Color.ETCHING);
                 this.rectangularEtching(((x + (p / 2)) + (xx * p)), ((y + (p / 2)) + (yy * p)), (o - m), (o - m));
             }
@@ -90,7 +90,7 @@ class GridfinityTrayLayout extends TrayLayout {
         this.ctx.restore();
     }
 
-    generatePad(x, y, r, move) {;
+    generatePad(x, y, r, move) {
         if (this.move(x, y, move)) {
             return;
         }

@@ -53,22 +53,29 @@ class Atreus21 extends Boxes {
         let [case_x, case_y] = this._case_x_y();
         let margin = ((2 * this.border) + 1);
         for (let reverse of [false, true]) {
+            // keyholder
             this.outer();
-            this.half({reverse: reverse});
+            this.half(null, { reverse: reverse });
             this.holes();
-            this.moveTo((case_x + margin));
+            this.moveTo(case_x + margin);
+
+            // support
             this.outer();
-            this.half(this.support, {reverse: reverse});
+            this.half(this.support.bind(this), { reverse: reverse });
             this.holes();
-            this.moveTo((-case_x - margin), (case_y + margin));
+            this.moveTo(-case_x - margin, case_y + margin);
+
+            // hotplug
             this.outer();
-            this.half(this.hotplug, {reverse: reverse});
+            this.half(this.hotplug.bind(this), { reverse: reverse });
             this.holes();
-            this.moveTo((case_x + margin));
+            this.moveTo(case_x + margin);
+
+            // border
             this.outer();
             this.rim();
             this.holes();
-            this.moveTo((-case_x - margin), (case_y + margin));
+            this.moveTo(-case_x - margin, case_y + margin);
         }
     }
 
@@ -104,7 +111,8 @@ class Atreus21 extends Boxes {
         this.moveTo(0, -b);
         let corner = [90, b];
         // [x, corner, y, corner] * 2 in Python means repeating the array twice
-        this.polyline(...[x, corner, y, corner, x, corner, y, corner].flat());
+        // Do NOT flatten - polyline expects corner as [angle, radius] arrays
+        this.polyline(x, corner, y, corner, x, corner, y, corner);
         this.ctx.restore();
     }
 
@@ -141,7 +149,15 @@ class Atreus21 extends Boxes {
 
 }
 
-// Mix in Keyboard methods
-Object.assign(Atreus21.prototype, Keyboard.prototype);
+// Mix in Keyboard methods (using getOwnPropertyNames since class methods are non-enumerable)
+for (let name of Object.getOwnPropertyNames(Keyboard.prototype)) {
+    if (name !== 'constructor' && !Atreus21.prototype.hasOwnProperty(name)) {
+        Object.defineProperty(
+            Atreus21.prototype,
+            name,
+            Object.getOwnPropertyDescriptor(Keyboard.prototype, name)
+        );
+    }
+}
 
 export { Atreus21 };

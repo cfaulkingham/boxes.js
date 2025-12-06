@@ -19,7 +19,7 @@ class Silverware extends Boxes {
     }
 
     wall(x, y, h, r) {
-        this.surroundingWall(x, y, r, h, {top: "E", bottom: "h", callback: /* unknown node Dict */, move: "up"});
+        this.surroundingWall(x, y, r, h, {top: "E", bottom: "h", callback: {}, move: "up"});
     }
 
     centerWall(x, h) {

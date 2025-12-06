@@ -6,6 +6,9 @@ import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
 class Keyboard extends Boxes {
+    static STANDARD_KEY_SPACING = 19.05;
+    static SWITCH_CASE_SIZE = 14;
+    
     constructor() {
         super();
     }
@@ -49,8 +52,9 @@ class Keyboard extends Boxes {
         let main_hole_size = 4;
         let pcb_mount_size = 1.7;
         let led_hole_size = 1;
+        let pin_hole_size;
         if (with_hotswap) {
-            let pin_hole_size = 2.9;
+            pin_hole_size = 2.9;
         }
         else {
             pin_hole_size = 1.5;
@@ -76,24 +80,24 @@ class Keyboard extends Boxes {
         }
     }
 
-    apply_callback_on_columns(cb, columns_definition, spacing, reverse) {
+    apply_callback_on_columns(cb, columns_definition, { spacing = null, reverse = false } = {}) {
         if (spacing === null) {
-            spacing = this.STANDARD_KEY_SPACING;
+            spacing = Keyboard.STANDARD_KEY_SPACING;
         }
         if (reverse) {
-            columns_definition = list(reversed(columns_definition));
+            columns_definition = [...columns_definition].reverse();
         }
         for (let [offset, nb_keys] of columns_definition) {
             this.moveTo(0, offset);
-            for (let _ = 0; _ < nb_keys; _ += 1) {
+            for (let i = 0; i < nb_keys; i++) {
                 cb();
                 this.moveTo(0, spacing);
             }
-            this.moveTo(spacing, (-nb_keys * spacing));
+            this.moveTo(spacing, -nb_keys * spacing);
             this.moveTo(0, -offset);
         }
-        let total_width = (columns_definition.length * spacing);
-        this.moveTo((-1 * total_width));
+        let total_width = columns_definition.length * spacing;
+        this.moveTo(-total_width);
     }
 
     outer_hole(radius, centered) {;
@@ -101,8 +105,10 @@ class Keyboard extends Boxes {
         if (centered) {
             this.moveTo(-half_size, -half_size);
         }
-        let straight_edge = (Keyboard.SWITCH_CASE_SIZE - (2 * radius));
-        let polyline = ([straight_edge, [-90, radius]] * 4);
+        let straight_edge = Keyboard.SWITCH_CASE_SIZE - (2 * radius);
+        // [straight_edge, [-90, radius]] * 4 in Python repeats array 4 times
+        let segment = [straight_edge, [-90, radius]];
+        let polyline = [...segment, ...segment, ...segment, ...segment];
         this.moveTo(this.burn, radius, 90);
         this.polyline(...polyline);
         this.moveTo(0, 0, 270);
@@ -119,8 +125,11 @@ class Keyboard extends Boxes {
             this.moveTo(-half_size, -half_size);
         }
         let btn_half_side = [0.98, 90, 0.81, -90, 3.5, -90, 0.81, 90, 2.505];
-        let btn_full_side = [...btn_half_side, 0, ...btn_half_side.slice(0,  /* step -1 ignored */)];
-        let btn = ([...btn_full_side, -90] * 4);
+        // btn_half_side[::-1] in Python reverses the array
+        let btn_full_side = [...btn_half_side, 0, ...[...btn_half_side].reverse()];
+        // [...btn_full_side, -90] * 4 in Python repeats the array 4 times
+        let btn_segment = [...btn_full_side, -90];
+        let btn = [...btn_segment, ...btn_segment, ...btn_segment, ...btn_segment];
         this.moveTo((this.burn + 0.81), 0.81, 90);
         this.polyline(...btn);
         this.moveTo(0, 0, 270);
@@ -131,7 +140,7 @@ class Keyboard extends Boxes {
     }
 
     configured_plate_cutout(support) {;
-        if (this.cutout_type.lower() === "castle") {
+        if (this.cutout_type.toLowerCase() === "castle") {
             if (support) {
                 this.outer_hole();
             }

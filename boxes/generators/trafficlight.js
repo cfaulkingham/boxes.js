@@ -71,7 +71,7 @@ class TrafficLight extends Boxes {
     }
 
     wall(h1, h2, w, edges, callback, move, label) {
-        edges = /* unknown node ListComp */;
+        edges = edges.split('').map(e => this.edges[e] || e);
         edges += edges;
         let overallwidth = ((w + edges[-1].spacing()) + edges[1].spacing());
         let overallheight = ((Math.max(h1, h2) + edges[0].spacing()) + edges[2].spacing());

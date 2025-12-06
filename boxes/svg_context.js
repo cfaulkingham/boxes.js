@@ -485,6 +485,10 @@ class SVGContext {
         };
         const textAnchor = anchorMap[halign] || "start";
 
+        // Capture the current transformation matrix for proper text rotation
+        const m = this.matrix;
+        const matrix = { a: m.a, b: m.b, c: m.c, d: m.d, e: m.e, f: m.f };
+
         this.textElements.push({
             text: text,
             x: pos.x,
@@ -492,7 +496,8 @@ class SVGContext {
             fontsize: fontsize,
             color: color,
             font: font,
-            anchor: textAnchor
+            anchor: textAnchor,
+            matrix: matrix
         });
     }
 
@@ -602,7 +607,10 @@ class SVGContext {
                 const g = Math.round(t.color[1] * 255);
                 const b = Math.round(t.color[2] * 255);
                 const fillColor = `rgb(${r},${g},${b})`;
-                svg += `    <text x="${t.x.toFixed(2)}" y="${t.y.toFixed(2)}" font-family="${t.font}" font-size="${t.fontsize}px" fill="${fillColor}" text-anchor="${t.anchor}">${this._escapeXml(t.text)}</text>\n`;
+                // Use transform matrix for proper text rotation (like Python version)
+                const m = t.matrix;
+                const transform = `matrix(${m.a.toFixed(3)} ${m.b.toFixed(3)} ${m.c.toFixed(3)} ${m.d.toFixed(3)} ${m.e.toFixed(3)} ${m.f.toFixed(3)})`;
+                svg += `    <text dominant-baseline="hanging" font-size="${t.fontsize}px" style="font-family: ${t.font}; fill: ${fillColor}" text-anchor="${t.anchor}" transform="${transform}">${this._escapeXml(t.text)}</text>\n`;
             }
         }
 

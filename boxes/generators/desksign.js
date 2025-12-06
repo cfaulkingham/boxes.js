@@ -37,7 +37,7 @@ Boxes.py", help: "optional text to engrave (leave blank to omit)"});
         let h = (Math.sin((angle * Math.PI / 180)) * height);
         let fontsize = this.fontsize;
         if ((label && fontsize)) {
-            this.rectangularWall(width, height, "eheh", {move: "right", callback: [() => this.text(("%s" % label), (width / 2), ((height / 2) + verticaltextoffset))]});
+            this.rectangularWall(width, height, "eheh", {move: "right", callback: [() => this.text(label, (width / 2), ((height / 2) + verticaltextoffset))]});
         }
         else {
             this.rectangularWall(width, height, "eheh", {move: "right"});

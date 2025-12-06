@@ -131,7 +131,7 @@ class GridfinityBase extends Boxes {
         this.edge(3);
     }
 
-    plate_to_plate_tab(x, y) {;
+    plate_to_plate_tab(x, y) {
         this.edge(3);
         this.corner(53, 0);
         this.edge(5);
@@ -168,7 +168,7 @@ class GridfinityBase extends Boxes {
         for (let i = 0; i < (Y % num_y); i += 1) {
             segment_heights[i] += 1;
         }
-        let grid_segments = /* unknown node Dict */;
+        let grid_segments = {};
         let y_start = 0;
         let row_index = 0;
         for (let h of segment_heights) {
@@ -229,7 +229,7 @@ class GridfinityBase extends Boxes {
         }
     }
 
-    render_split(x, y, h, nx, ny, pitch, margin) {;
+    render_split(x, y, h, nx, ny, pitch, margin) {
         let pad_x = (x - (nx * pitch));
         let pad_y = (y - (ny * pitch));
         let panel_nx = Math.floor((this.panel_x - pad_x) / pitch);
@@ -382,7 +382,7 @@ class GridfinityBase extends Boxes {
         }
     }
 
-    render_unsplit(x, y, h, nx, ny, pitch, margin) {;
+    render_unsplit(x, y, h, nx, ny, pitch, margin) {
         let t1;
         let t2;
         let t3;

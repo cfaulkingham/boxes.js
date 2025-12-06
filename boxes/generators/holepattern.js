@@ -17,15 +17,32 @@ class HolePattern extends Boxes {
         let x;
         let y;
         [x, y] = [this.x, this.y];
+        let border;
         if (this.shape === "ellipse") {
-            let border = /* unknown node ListComp */;
+            // Ellipse border points
+            let steps = 36;
+            border = [];
+            for (let i = 0; i < steps; i++) {
+                let angle = (2 * Math.PI * i) / steps;
+                border.push([(x/2) + (x/2) * Math.cos(angle), (y/2) + (y/2) * Math.sin(angle)]);
+            }
         }
         else {
             if (this.shape === "oval") {
                 let r = (Math.min(x, y) / 2);
                 let dx = Math.max((x - y), 0);
                 let dy = Math.max((y - x), 0);
-                border = /* unknown node ListComp */;
+                // Oval border: two semicircles connected by straight lines
+                let steps = 18;
+                border = [];
+                for (let i = 0; i <= steps; i++) {
+                    let angle = Math.PI * i / steps;
+                    border.push([r + dx/2 + r * Math.cos(angle + Math.PI/2), r + r * Math.sin(angle + Math.PI/2)]);
+                }
+                for (let i = 0; i <= steps; i++) {
+                    let angle = Math.PI * i / steps;
+                    border.push([r + dx/2 + r * Math.cos(angle - Math.PI/2), y - r + r * Math.sin(angle - Math.PI/2)]);
+                }
             }
             else {
                 if (this.shape === "hexagon") {
