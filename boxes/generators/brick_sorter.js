@@ -5,7 +5,7 @@ import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
-class BrickSorter extends Boxes {
+class brick_sorter extends Boxes {
     constructor() {
         super();
         
@@ -154,4 +154,4 @@ class BrickSorter extends Boxes {
 
 }
 
-export { BrickSorter };
+export { brick_sorter};

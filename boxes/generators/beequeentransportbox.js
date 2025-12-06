@@ -360,10 +360,27 @@ class BeeQueenTransportBoxLid extends Lid {
 
 export { BeeQueenTransportBoxLid };
 class BeeQueenTransportBox extends _TopEdge {
+    static DEFAULT = {
+        sx: "5:45*3:5",
+        sy: "5:25*3:5", 
+        sh: "12:80",
+        aw: 3.0,
+        ah: "50:25",
+        ax: "10:20:10:20:10:20:10",
+        ay: "20:60:20",
+        bottom_edge: "s",
+        top_edge: "e"
+    };
+    
+    static CHOICES = {
+        top_edge: "eStG",
+        bottom_edge: "Fhsše"
+    };
+
     _buildObjects() {
         super._buildObjects();
-        this.lidSettings = BeeQueenTransportBoxLidSettings(this.thickness, true);
-        this.lid = BeeQueenTransportBoxLid(this, this.lidSettings);
+        this.lidSettings = new BeeQueenTransportBoxLidSettings(this.thickness, true);
+        this.lid = new BeeQueenTransportBoxLid(this, this.lidSettings);
     }
 
     constructor() {
@@ -371,15 +388,15 @@ class BeeQueenTransportBox extends _TopEdge {
         this.addSettingsArgs(edges.FingerJointSettings);
         this.addSettingsArgs(BeeQueenTransportBoxLidSettings, {None: this.LIDSETTINGS});
         this.addSettingsArgs(edges.StackableSettings);
-        this.argparser.add_argument("--top_edge", {action: "store", type: ArgparseEdgeType(this.CHOICES["top_edge"]), choices: list(this.CHOICES["top_edge"]), default: this.DEFAULT["top_edge"], help: "edge type for top edge"});
-        this.argparser.add_argument("--bottom_edge", {action: "store", type: ArgparseEdgeType(this.CHOICES["bottom_edge"]), choices: list(this.CHOICES["bottom_edge"]), default: this.DEFAULT["bottom_edge"], help: "edge type for bottom edge"});
-        // this.buildArgParser();
-        this.argparser.add_argument("--aw", {action: "store", type: "float", default: this.DEFAULT["aw"], help: "air hole slot width in mm"});
-        this.argparser.add_argument("--ah", {action: "store", type: argparseSections, default: this.DEFAULT["ah"], help: "air hole sections bottom to top in mm"});
-        this.argparser.add_argument("--ax", {action: "store", type: argparseSections, default: this.DEFAULT["ax"], help: "air hole sections left to right in %% of the box width"});
-        this.argparser.add_argument("--ay", {action: "store", type: argparseSections, default: this.DEFAULT["ay"], help: "air hole sections back to front in %% of the box depth"});
+        this.argparser.add_argument("--top_edge", {action: "store", type: ArgparseEdgeType(BeeQueenTransportBox.CHOICES["top_edge"]), choices: [...BeeQueenTransportBox.CHOICES["top_edge"]], default: BeeQueenTransportBox.DEFAULT["top_edge"], help: "edge type for top edge"});
+        this.argparser.add_argument("--bottom_edge", {action: "store", type: ArgparseEdgeType(BeeQueenTransportBox.CHOICES["bottom_edge"]), choices: [...BeeQueenTransportBox.CHOICES["bottom_edge"]], default: BeeQueenTransportBox.DEFAULT["bottom_edge"], help: "edge type for bottom edge"});
+        this.buildArgParser({sx: BeeQueenTransportBox.DEFAULT["sx"], sy: BeeQueenTransportBox.DEFAULT["sy"], sh: BeeQueenTransportBox.DEFAULT["sh"]});
+        this.argparser.add_argument("--aw", {action: "store", type: "float", default: BeeQueenTransportBox.DEFAULT["aw"], help: "air hole slot width in mm"});
+        this.argparser.add_argument("--ah", {action: "store", type: argparseSections, default: BeeQueenTransportBox.DEFAULT["ah"], help: "air hole sections bottom to top in mm"});
+        this.argparser.add_argument("--ax", {action: "store", type: argparseSections, default: BeeQueenTransportBox.DEFAULT["ax"], help: "air hole sections left to right in %% of the box width"});
+        this.argparser.add_argument("--ay", {action: "store", type: argparseSections, default: BeeQueenTransportBox.DEFAULT["ay"], help: "air hole sections back to front in %% of the box depth"});
         //let cutout_choices = /* unknown node ListComp */;
-        let cutout_descriptions = unknown.join(/* unknown node GeneratorExp */);
+        //let cutout_descriptions = unknown.join(/* unknown node GeneratorExp */);
         //let layers = /* unknown node ListComp */;
        // for (let [n, default] of enumerate(layers)) {
         //    let layer = ((layers.length - 1) - n);
