@@ -165,6 +165,13 @@ class Boxes {
         // Override with args
         for (const [key, value] of Object.entries(args)) {
             this[key] = value;
+            
+            // Handle label/labels alias (both should work)
+            if (key === 'label') {
+                this.labels = value;
+            } else if (key === 'labels') {
+                this.label = value;
+            }
 
             // Check for edge settings
             // e.g. FingerJoint_thickness
@@ -229,8 +236,10 @@ class Boxes {
         const spacingParsed = Array.isArray(this.spacing) ? this.spacing : [this.spacing, 0];
         this.spacing = 2 * this.burn + spacingParsed[0] * this.thickness + spacingParsed[1];
         
-        // Reference rectangle (matching Python)
-        if (this.reference && this.format !== 'svg_Ponoko') {
+        // Reference rectangle (only show if labels are enabled)
+        // Support both 'label' and 'labels' property names (either can disable)
+        const showLabels = this.labels !== false && this.label !== false;
+        if (this.reference && showLabels && this.format !== 'svg_Ponoko') {
             const refText = `${this.reference.toFixed(1)}mm, burn:${this.burn.toFixed(2)}mm`;
             const boxHeight = 10;
             this.move(this.reference, boxHeight, "up", true);
