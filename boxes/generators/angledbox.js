@@ -105,13 +105,13 @@ class AngledBox extends Boxes {
             lx = x - 2 * r + side;
         }
 
-        // Deep copy the finger joint settings
-        let fingerJointSettings = this.edges["f"].settings.clone ? 
-            this.edges["f"].settings.clone() : 
-            Object.assign(Object.create(Object.getPrototypeOf(this.edges["f"].settings)), this.edges["f"].settings);
-        // setValues(thickness, relative, kwargs) - pass angle in kwargs
-        fingerJointSettings.setValues(this.thickness, true, {angle: (360.0 / (2 * (n + 1)))});
-        // edgeObjects(boxes, chars, add) - chars is a string, not object
+        // Create new FingerJointSettings with the angled angle
+        // Python: fingerJointSettings = copy.deepcopy(self.edges["f"].settings)
+        // Python: fingerJointSettings.setValues(self.thickness, angle=360./(2 * (n+1)))
+        let angledAngle = 360.0 / (2 * (n + 1));
+        let fingerJointSettings = new FingerJointSettings(this.thickness, true, {});
+        fingerJointSettings.angle = angledAngle;
+        // edgeObjects(boxes, chars, add) - creates edges with chars "gGH"
         fingerJointSettings.edgeObjects(this, "gGH");
         this.ctx.save();
         if (b !== "e") {
