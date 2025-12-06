@@ -1,12 +1,19 @@
-import { SVGContext  } from './svg_context.js';
-import { Color  } from './Color.js';
-import { Settings, OutSetEdge, Edge, FingerJointSettings  } from './edges.js';
-import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf  } from './vectors.js';
-import { NutHole, HexSizes  } from './nuthole.js';
+import { SVGContext } from './svg_context.js';
+import { Color } from './Color.js';
+import { Settings, OutSetEdge, Edge, FingerJointSettings } from './edges.js';
+import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf } from './vectors.js';
+import { NutHole, HexSizes } from './nuthole.js';
 import { ArgParser } from './argparser.js';
 import './globals.js';
 
+/**
+ * Base class for all box generators.
+ * Handles SVG context, argument parsing, and core drawing logic.
+ */
 class Boxes {
+    /**
+     * Initialize the Boxes instance.
+     */
     constructor() {
         this.ctx = new SVGContext();
         this.edges = {};
@@ -21,29 +28,29 @@ class Boxes {
         this.inner_corners = "loop"; // style for inner corners: "loop", "corner", "backarc"
 
         this.tx_sizes = {
-            1 : 0.61,
-            2 : 0.70,
-            3 : 0.82,
-            4 : 0.96,
-            5 : 1.06,
-            6 : 1.27,
-            7 : 1.49,
-            8 : 1.75,
-            9 : 1.87,
-            10 : 2.05,
-            15 : 2.40,
-            20 : 2.85,
-            25 : 3.25,
-            30 : 4.05,
-            40 : 4.85,
-            45 : 5.64,
-            50 : 6.45,
-            55 : 8.05,
-            60 : 9.60,
-            70 : 11.20,
-            80 : 12.80,
-            90 : 14.40,
-            100 : 16.00,
+            1: 0.61,
+            2: 0.70,
+            3: 0.82,
+            4: 0.96,
+            5: 1.06,
+            6: 1.27,
+            7: 1.49,
+            8: 1.75,
+            9: 1.87,
+            10: 2.05,
+            15: 2.40,
+            20: 2.85,
+            25: 3.25,
+            30: 4.05,
+            40: 4.85,
+            45: 5.64,
+            50: 6.45,
+            55: 8.05,
+            60: 9.60,
+            70: 11.20,
+            80: 12.80,
+            90: 14.40,
+            100: 16.00,
         };
 
         this.nema_sizes = {
@@ -69,31 +76,49 @@ class Boxes {
         this.init();
     }
 
+    /**
+     * Initialization method intended to be overridden by subclasses.
+     */
     init() {
         // Can be overridden
     }
 
+    /**
+     * Register a part (edge or component) with the box.
+     * @param {Object} part - The part instance.
+     * @param {string} [name=null] - Optional name to register the part under.
+     */
     addPart(part, name = null) {
         if (!name) {
-             name = part.constructor.name;
-             // Python does name[0].lower() + name[1:]
-             name = name.charAt(0).toLowerCase() + name.slice(1);
+            name = part.constructor.name;
+            // Python does name[0].lower() + name[1:]
+            name = name.charAt(0).toLowerCase() + name.slice(1);
         }
 
         if (part instanceof Edge || part instanceof OutSetEdge || (part.char && part.char.length === 1)) {
-             this.edges[part.char] = part;
+            this.edges[part.char] = part;
         } else {
-             this[name] = part;
+            this[name] = part;
         }
     }
 
+    /**
+     * Register multiple parts.
+     * @param {Object[]} parts - Array of parts.
+     */
     addParts(parts) {
         for (const part of parts) {
             this.addPart(part);
         }
     }
 
-    addSettingsArgs(SettingsClass, prefix=null, defaults={}) {
+    /**
+     * Register settings arguments.
+     * @param {class} SettingsClass - Settings class definition.
+     * @param {string} [prefix=null] - Prefix for arguments.
+     * @param {Object} [defaults={}] - Default values.
+     */
+    addSettingsArgs(SettingsClass, prefix = null, defaults = {}) {
         // Mock implementation.
         // In python this adds arguments to argparse.
         // Here we might want to store default values.
@@ -107,37 +132,45 @@ class Boxes {
         // `_buildObjects` is called in `open`.
     }
 
+    /**
+     * Build the argument parser with default values.
+     * @param {Object} [defaults={}] - Default values overrides.
+     */
     buildArgParser(defaults = {}) {
         // Set up default argument values for x, y, h, etc.
         if (defaults.x !== undefined) {
-            this.argparser.add_argument("--x", {action: "store", type: "float", default: defaults.x, help: "inner width in mm"});
+            this.argparser.add_argument("--x", { action: "store", type: "float", default: defaults.x, help: "inner width in mm" });
         }
         if (defaults.y !== undefined) {
-            this.argparser.add_argument("--y", {action: "store", type: "float", default: defaults.y, help: "inner depth in mm"});
+            this.argparser.add_argument("--y", { action: "store", type: "float", default: defaults.y, help: "inner depth in mm" });
         }
         if (defaults.h !== undefined) {
-            this.argparser.add_argument("--h", {action: "store", type: "float", default: defaults.h, help: "inner height in mm"});
+            this.argparser.add_argument("--h", { action: "store", type: "float", default: defaults.h, help: "inner height in mm" });
         }
         if (defaults.sx !== undefined) {
-            this.argparser.add_argument("--sx", {action: "store", type: "str", default: defaults.sx, help: "sections left to right in mm"});
+            this.argparser.add_argument("--sx", { action: "store", type: "str", default: defaults.sx, help: "sections left to right in mm" });
         }
         if (defaults.sy !== undefined) {
-            this.argparser.add_argument("--sy", {action: "store", type: "str", default: defaults.sy, help: "sections back to front in mm"});
+            this.argparser.add_argument("--sy", { action: "store", type: "str", default: defaults.sy, help: "sections back to front in mm" });
         }
         if (defaults.outside !== undefined) {
-            this.argparser.add_argument("--outside", {action: "store", type: "bool", default: defaults.outside, help: "treat dimensions as outside measurements"});
+            this.argparser.add_argument("--outside", { action: "store", type: "bool", default: defaults.outside, help: "treat dimensions as outside measurements" });
         }
         // Add labels argument
-        this.argparser.add_argument("--labels", {action: "store", type: "bool", default: true, help: "add labels to parts"});
-        
+        this.argparser.add_argument("--labels", { action: "store", type: "bool", default: true, help: "add labels to parts" });
+
         // Default settings arguments (matching Python's defaultgroup)
-        this.argparser.add_argument("--thickness", {action: "store", type: "float", default: 3.0, help: "thickness of the material (in mm)"});
-        this.argparser.add_argument("--burn", {action: "store", type: "float", default: 0.1, help: "burn correction (in mm)(bigger values for tighter fit)"});
-        this.argparser.add_argument("--spacing", {action: "store", type: "str", default: "0.5", help: "spacing around parts (multiples of thickness [: extra space in mm])"});
-        this.argparser.add_argument("--reference", {action: "store", type: "float", default: 100.0, help: "print reference rectangle with given length (in mm)(zero to disable)"});
-        this.argparser.add_argument("--inner_corners", {action: "store", type: "str", default: "loop", choices: ["loop", "corner", "backarc"], help: "style for inner corners"});
+        this.argparser.add_argument("--thickness", { action: "store", type: "float", default: 3.0, help: "thickness of the material (in mm)" });
+        this.argparser.add_argument("--burn", { action: "store", type: "float", default: 0.1, help: "burn correction (in mm)(bigger values for tighter fit)" });
+        this.argparser.add_argument("--spacing", { action: "store", type: "str", default: "0.5", help: "spacing around parts (multiples of thickness [: extra space in mm])" });
+        this.argparser.add_argument("--reference", { action: "store", type: "float", default: 100.0, help: "print reference rectangle with given length (in mm)(zero to disable)" });
+        this.argparser.add_argument("--inner_corners", { action: "store", type: "str", default: "loop", choices: ["loop", "corner", "backarc"], help: "style for inner corners" });
     }
 
+    /**
+     * Parse arguments and configure the box instance.
+     * @param {Object} args - Arguments dictionary.
+     */
     parseArgs(args) {
         // Set default values first
         this.diameter = 50.0;
@@ -165,7 +198,7 @@ class Boxes {
         // Override with args
         for (const [key, value] of Object.entries(args)) {
             this[key] = value;
-            
+
             // Handle label/labels alias (both should work)
             if (key === 'label') {
                 this.labels = value;
@@ -177,7 +210,7 @@ class Boxes {
             // e.g. FingerJoint_thickness
             // In python: if key.startswith(setting + '_'): ...
         }
-        
+
         // Parse sx and sy from string format (e.g., "65*4" -> [65, 65, 65, 65])
         if (typeof this.sx === 'string') {
             this.sx = this._parseSections(this.sx);
@@ -185,13 +218,13 @@ class Boxes {
         if (typeof this.sy === 'string') {
             this.sy = this._parseSections(this.sy);
         }
-        
+
         // Parse spacing from string format (e.g., "0.5" -> [0.5, 0] or "0.5:2" -> [0.5, 2])
         if (typeof this.spacing === 'string') {
             this.spacing = this._parseSpacing(this.spacing);
         }
     }
-    
+
     _parseSections(spec) {
         // Parse section specification like "65*4" or "10:20:30"
         // Returns an array of numbers
@@ -206,7 +239,7 @@ class Boxes {
             return [parseFloat(spec)];
         }
     }
-    
+
     _parseSpacing(spec) {
         // Parse spacing specification like "0.5" or "0.5:2"
         // Returns [multiplier, extra_mm]
@@ -222,6 +255,10 @@ class Boxes {
         }
     }
 
+    /**
+     * Start the drawing process.
+     * Initializes SVG context, builds parts, and sets up scaling/spacing.
+     */
     open() {
         if (this.ctx.paths.length > 0) return; // already opened?
 
@@ -235,7 +272,7 @@ class Boxes {
         // spacing = 2 * burn + spacing[0] * thickness + spacing[1]
         const spacingParsed = Array.isArray(this.spacing) ? this.spacing : [this.spacing, 0];
         this.spacing = 2 * this.burn + spacingParsed[0] * this.thickness + spacingParsed[1];
-        
+
         // Reference rectangle (only show if labels are enabled)
         // Support both 'label' and 'labels' property names (either can disable)
         const showLabels = this.labels !== false && this.label !== false;
@@ -245,7 +282,7 @@ class Boxes {
             this.move(this.reference, boxHeight, "up", true);
             this.ctx.rectangle(0, 0, this.reference, boxHeight);
             const fontSize = 6;
-            
+
             if (this.reference < 80) {
                 // Text outside box to the right (doesn't fit inside)
                 this.text(refText, this.reference + 5, boxHeight / 2.0 + fontSize / 2.0 + 2, 0, "left middle", fontSize, Color.ANNOTATIONS);
@@ -258,65 +295,82 @@ class Boxes {
         }
     }
 
+    /**
+     * Finish the drawing process and return the result.
+     * @returns {string} The generated SVG content.
+     */
     close() {
         return this.ctx.finish();
     }
 
+    /**
+     * Internal method to build component objects (edges, parts).
+     */
     _buildObjects() {
-         // Re-initialize edges
-         this.edges = {};
-         Object.defineProperty(this.edges, 'get', {
-             value: function(key, defaultVal) { return this[key] || defaultVal; },
-             enumerable: false,
-             writable: true
-         });
-         this.addPart(new Edge(this, null));
-         this.addPart(new OutSetEdge(this, null));
+        // Re-initialize edges
+        this.edges = {};
+        Object.defineProperty(this.edges, 'get', {
+            value: function (key, defaultVal) { return this[key] || defaultVal; },
+            enumerable: false,
+            writable: true
+        });
+        this.addPart(new Edge(this, null));
+        this.addPart(new OutSetEdge(this, null));
 
-         // Add missing edges d and D (simple edges for now if they don't exist)
-         if (!this.edges['d']) {
-             const e = new Edge(this, null);
-             e.char = 'd';
-             this.addPart(e);
-         }
-         if (!this.edges['D']) {
-             const e = new Edge(this, null);
-             e.char = 'D';
-             this.addPart(e);
-         }
+        // Add missing edges d and D (simple edges for now if they don't exist)
+        if (!this.edges['d']) {
+            const e = new Edge(this, null);
+            e.char = 'd';
+            this.addPart(e);
+        }
+        if (!this.edges['D']) {
+            const e = new Edge(this, null);
+            e.char = 'D';
+            this.addPart(e);
+        }
 
-         const fjSettings = new FingerJointSettings(this.thickness, true);
-         // apply overrides from edgesettings if any
-         fjSettings.edgeObjects(this);
-         this.fingerHolesAt = (x, y, length, angle=90) => {
-              // Find FingerHoles part
-              // It's usually attached to FingerHoleEdge or available via boxes instance if added
-              // In python: self.addPart(edges.FingerHoles(self, s), name="fingerHolesAt")
-              // My edges.js creates FingerHoles but doesn't explicitly add it as 'fingerHolesAt' to boxes in edgeObjects unless I do so.
-              // FingerJointSettings.edgeObjects adds FingerJointEdge, CounterPart, FingerHoleEdge.
-              // FingerHoleEdge has .fingerHoles property.
-              // But boxes.fingerHolesAt needs to be a function.
-              // Python: self.addPart(edges.FingerHoles(self, s), name="fingerHolesAt") -> self.fingerHolesAt = edges.FingerHoles(...) which is callable.
-              // In JS I need to make it callable.
+        const fjSettings = new FingerJointSettings(this.thickness, true);
+        // apply overrides from edgesettings if any
+        fjSettings.edgeObjects(this);
+        this.fingerHolesAt = (x, y, length, angle = 90) => {
+            // Find FingerHoles part
+            // It's usually attached to FingerHoleEdge or available via boxes instance if added
+            // In python: self.addPart(edges.FingerHoles(self, s), name="fingerHolesAt")
+            // My edges.js creates FingerHoles but doesn't explicitly add it as 'fingerHolesAt' to boxes in edgeObjects unless I do so.
+            // FingerJointSettings.edgeObjects adds FingerJointEdge, CounterPart, FingerHoleEdge.
+            // FingerHoleEdge has .fingerHoles property.
+            // But boxes.fingerHolesAt needs to be a function.
+            // Python: self.addPart(edges.FingerHoles(self, s), name="fingerHolesAt") -> self.fingerHolesAt = edges.FingerHoles(...) which is callable.
+            // In JS I need to make it callable.
 
-              // Let's fix this in edgeObjects or here.
-              // I'll grab it from 'h' edge for now.
-              if (this.edges['h'] && this.edges['h'].fingerHoles) {
-                  this.edges['h'].fingerHoles.draw(x, y, length, angle);
-              }
-         };
+            // Let's fix this in edgeObjects or here.
+            // I'll grab it from 'h' edge for now.
+            if (this.edges['h'] && this.edges['h'].fingerHoles) {
+                this.edges['h'].fingerHoles.draw(x, y, length, angle);
+            }
+        };
 
-         // Nuts
-         this.addPart(new NutHole(this));
+        // Nuts
+        this.addPart(new NutHole(this));
     }
 
     // Geometry / Drawing helpers
 
+    /**
+     * Calculate Euclidean distance between (0,0) and (dx, dy).
+     * @param {number} dx - X difference.
+     * @param {number} dy - Y difference.
+     * @returns {number} The distance.
+     */
     dist(dx, dy) {
         return Math.hypot(dx, dy);
     }
 
-    // Helper to wrap function call with color change (holeCol in python)
+    /**
+     * Execute a function with a specific color (e.g. for inner cuts).
+     * @param {Function} func - Function to execute.
+     * @param {...*} args - Arguments for the function.
+     */
     holeCol(func, ...args) {
         this.ctx.stroke();
         this.ctx.save();
@@ -329,7 +383,11 @@ class Boxes {
         }
     }
 
-    // Helper to wrap function call with restore (restore in python)
+    /**
+     * Execute a function while preserving SVG context state.
+     * @param {Function} func - Function to execute.
+     * @param {...*} args - Arguments.
+     */
     restore(func, ...args) {
         this.ctx.save();
         const pt = this.ctx.get_current_point();
@@ -341,20 +399,28 @@ class Boxes {
         }
     }
 
-    cc(callback, number, x=0.0, y=null, a=0.0) {
+    /**
+     * Call a callback function or execute drawing instructions.
+     * @param {Function|Array} callback - Function or array of functions/instructions.
+     * @param {number} number - Index or identifier passed to callback.
+     * @param {number} [x=0.0] - X translation.
+     * @param {number} [y=null] - Y translation.
+     * @param {number} [a=0.0] - Rotation angle.
+     */
+    cc(callback, number, x = 0.0, y = null, a = 0.0) {
         if (y === null) y = this.burn;
 
         if (callback && typeof callback.get === 'function') { // treat as list/map
-             callback = callback.get(number);
-             number = null;
+            callback = callback.get(number);
+            number = null;
         } else if (Array.isArray(callback)) {
-             if (number < callback.length) {
-                 callback = callback[number];
-                 number = null;
-             } else {
-                 // Index out of bounds - no callback to execute
-                 return;
-             }
+            if (number < callback.length) {
+                callback = callback[number];
+                number = null;
+            } else {
+                // Index out of bounds - no callback to execute
+                return;
+            }
         }
 
         if (callback && typeof callback === 'function') {
@@ -394,6 +460,12 @@ class Boxes {
         }
     }
 
+    /**
+     * Helper to retrieve an entry from a parameter that might be an array or value.
+     * @param {Array|*} param - Parameter.
+     * @param {number} idx - Index.
+     * @returns {*} The value at index or null/value.
+     */
     getEntry(param, idx) {
         if (Array.isArray(param)) {
             if (param.length > idx) {
@@ -406,12 +478,27 @@ class Boxes {
         }
     }
 
-    moveTo(x, y=0, angle=0) {
+    /**
+     * Move current point to new coordinates with rotation.
+     * @param {number} x - X coordinate.
+     * @param {number} [y=0] - Y coordinate.
+     * @param {number} [angle=0] - Rotation angle.
+     */
+    moveTo(x, y = 0, angle = 0) {
         this.ctx.translate(x, y);
         this.ctx.rotate(angle * Math.PI / 180.0);
     }
 
-    move(x, y, where, before=false, label="") {
+    /**
+     * Move to a relative position for the next part.
+     * @param {number} x - X separation.
+     * @param {number} y - Y separation.
+     * @param {string|Object} where - Direction (up, down, left, right, etc.).
+     * @param {boolean} [before=false] - Whether this move is a pre-move (check bounds).
+     * @param {string} [label=""] - Label for the part.
+     * @returns {boolean} True if drawing should be skipped (e.g. 'only' check).
+     */
+    move(x, y, where, before = false, label = "") {
         // Allow both a plain string (e.g. "right") or an options object
         // (e.g. { move: "right" }) for backward compatibility with
         // translated generators.
@@ -489,7 +576,13 @@ class Boxes {
         return dontdraw;
     }
 
-    corner(degrees, radius=0, tabs=0) {
+    /**
+     * Draw a corner (arc) of specified degrees and radius.
+     * @param {number|number[]} degrees - Angle in degrees (positive for left turn).
+     * @param {number} [radius=0] - Radius of the corner.
+     * @param {number} [tabs=0] - Number of tabs (unused in JS implementation yet?).
+     */
+    corner(degrees, radius = 0, tabs = 0) {
         // Handle tuple-like input [degrees, radius]
         if (Array.isArray(degrees)) {
             [degrees, radius] = degrees;
@@ -520,16 +613,25 @@ class Boxes {
         this._continueDirection(rad);
     }
 
-    edge(length, tabs=0) {
-         if (isNaN(length) || !isFinite(length)) {
-             console.error('edge() called with invalid length:', length);
-             return;
-         }
-         this.ctx.move_to(0, 0);
-         this.ctx.line_to(length, 0);
-         this.ctx.translate(length, 0);
+    /**
+     * Draw a straight line of specified length.
+     * @param {number} length - Length of the line.
+     * @param {number} [tabs=0] - Number of tabs (for future use).
+     */
+    edge(length, tabs = 0) {
+        if (isNaN(length) || !isFinite(length)) {
+            console.error('edge() called with invalid length:', length);
+            return;
+        }
+        this.ctx.move_to(0, 0);
+        this.ctx.line_to(length, 0);
+        this.ctx.translate(length, 0);
     }
 
+    /**
+     * Draw a perpendicular step (outward or inward).
+     * @param {number} out - Width of the step. Positive = outward.
+     */
     step(out) {
         if (out > 1E-5) {
             this.corner(-90);
@@ -542,6 +644,15 @@ class Boxes {
         }
     }
 
+    /**
+     * Draw a bezier curve.
+     * @param {number} x1 - Control point 1 X.
+     * @param {number} y1 - Control point 1 Y.
+     * @param {number} x2 - Control point 2 X.
+     * @param {number} y2 - Control point 2 Y.
+     * @param {number} x3 - End point X.
+     * @param {number} y3 - End point Y.
+     */
     curveTo(x1, y1, x2, y2, x3, y3) {
         this.ctx.curve_to(x1, y1, x2, y2, x3, y3);
         const dx = x3 - x2;
@@ -550,31 +661,41 @@ class Boxes {
         this._continueDirection(rad);
     }
 
-    _continueDirection(angle=0) {
+    _continueDirection(angle = 0) {
         // angle is in radians (matches Python implementation)
         this.ctx.translate(...this.ctx.get_current_point());
         this.ctx.rotate(angle);
     }
 
+    /**
+     * Draw a sequence of corners and edges (polyline).
+     * @param {...(number|Array)} args - Sequence of lengths and angles (corner params).
+     */
     polyline(...args) {
         for (let i = 0; i < args.length; i++) {
             if (i % 2 !== 0) { // angle
-                 if (Array.isArray(args[i])) {
-                     this.corner(args[i][0], args[i][1]);
-                 } else {
-                     this.corner(args[i]);
-                 }
+                if (Array.isArray(args[i])) {
+                    this.corner(args[i][0], args[i][1]);
+                } else {
+                    this.corner(args[i]);
+                }
             } else { // length
-                 if (Array.isArray(args[i])) {
-                     this.edge(args[i][0], args[i][1]);
-                 } else {
-                     this.edge(args[i]);
-                 }
+                if (Array.isArray(args[i])) {
+                    this.edge(args[i][0], args[i][1]);
+                } else {
+                    this.edge(args[i]);
+                }
             }
         }
     }
 
-    edgeCorner(edge1, edge2, angle=90) {
+    /**
+     * Draw a corner between two edges, accounting for their widths.
+     * @param {Edge|string} edge1 - First edge object or name.
+     * @param {Edge|string} edge2 - Second edge object or name.
+     * @param {number} [angle=90] - Angle between walls.
+     */
+    edgeCorner(edge1, edge2, angle = 90) {
         if (typeof edge1 === 'string') edge1 = this.edges[edge1] || this.edges['e'];
         if (typeof edge2 === 'string') edge2 = this.edges[edge2] || this.edges['e'];
 
@@ -583,21 +704,39 @@ class Boxes {
         this.edge(edge1.endwidth() * Math.tan(angle * Math.PI / 180 / 2.0));
     }
 
-    regularPolygon(corners=3, radius=null, h=null, side=null) {
+    /**
+     * Calculate parameters for a regular polygon.
+     * @param {number} [corners=3] - Number of corners.
+     * @param {number} [radius=null] - Radius.
+     * @param {number} [h=null] - Apothem (height from center).
+     * @param {number} [side=null] - Side length.
+     * @returns {number[]} Array of [radius, h, side].
+     */
+    regularPolygon(corners = 3, radius = null, h = null, side = null) {
         if (radius) {
             side = 2 * Math.sin(Math.PI / corners) * radius;
             h = radius * Math.cos(Math.PI / corners);
         } else if (h) {
             side = 2 * Math.tan(Math.PI / corners) * h;
-            radius = Math.sqrt((side/2)**2 + h**2);
+            radius = Math.sqrt((side / 2) ** 2 + h ** 2);
         } else if (side) {
-            h = 0.5 * side * Math.tan((90 - 180/corners) * Math.PI / 180);
-            radius = Math.sqrt((side/2)**2 + h**2);
+            h = 0.5 * side * Math.tan((90 - 180 / corners) * Math.PI / 180);
+            radius = Math.sqrt((side / 2) ** 2 + h ** 2);
         }
         return [radius, h, side];
     }
 
-    regularPolygonAt(x, y, corners, angle=0, r=null, h=null, side=null) {
+    /**
+     * Draw a regular polygon at a specific location.
+     * @param {number} x - X coordinate.
+     * @param {number} y - Y coordinate.
+     * @param {number} corners - Number of corners.
+     * @param {number} [angle=0] - Rotation angle.
+     * @param {number} [r=null] - Radius.
+     * @param {number} [h=null] - Apothem.
+     * @param {number} [side=null] - Side length.
+     */
+    regularPolygonAt(x, y, corners, angle = 0, r = null, h = null, side = null) {
         this.ctx.save();
         const pt = this.ctx.get_current_point();
         try {
@@ -605,10 +744,10 @@ class Boxes {
             let vals = this.regularPolygon(corners, r, h, side);
             r = vals[0]; h = vals[1]; side = vals[2];
 
-            this.moveTo(-side/2.0, -h-this.burn);
+            this.moveTo(-side / 2.0, -h - this.burn);
             for (let i = 0; i < corners; i++) {
                 this.edge(side);
-                this.corner(360.0/corners);
+                this.corner(360.0 / corners);
             }
         } finally {
             this.ctx.move_to(...pt);
@@ -616,16 +755,27 @@ class Boxes {
         }
     }
 
-    regularPolygonWall(corners=3, r=null, h=null, side=null, edges='e', hole=null, callback=null, move=null) {
+    /**
+     * Draw a regular polygon wall (e.g. for creating polygonal boxes).
+     * @param {number} [corners=3] - Number of corners.
+     * @param {number} [r=null] - Radius.
+     * @param {number} [h=null] - Apothem.
+     * @param {number} [side=null] - Side length.
+     * @param {string|Array} [edges='e'] - Edge type(s).
+     * @param {number} [hole=null] - Center hole diameter.
+     * @param {Function} [callback=null] - Callback for faces.
+     * @param {string} [move=null] - Move commands.
+     */
+    regularPolygonWall(corners = 3, r = null, h = null, side = null, edges = 'e', hole = null, callback = null, move = null) {
         let vals = this.regularPolygon(corners, r, h, side);
         r = vals[0]; h = vals[1]; side = vals[2];
 
         // Handling edges as list or string
         let edgeList = [];
         if (typeof edges === 'string') {
-            for (let i=0; i<corners; i++) edgeList.push(edges);
+            for (let i = 0; i < corners; i++) edgeList.push(edges);
         } else if (Array.isArray(edges) && edges.length === 1) {
-            for (let i=0; i<corners; i++) edgeList.push(edges[0]);
+            for (let i = 0; i < corners; i++) edgeList.push(edges[0]);
         } else {
             edgeList = edges;
         }
@@ -636,39 +786,44 @@ class Boxes {
         let th;
         if (corners % 2 !== 0) {
             th = r + h + edgeList[0].spacing() + (
-                Math.max(edgeList[Math.floor(corners/2)].spacing(), edgeList[Math.floor(corners/2)+1].spacing()) /
-                Math.sin((90 - 180/corners) * Math.PI / 180)
+                Math.max(edgeList[Math.floor(corners / 2)].spacing(), edgeList[Math.floor(corners / 2) + 1].spacing()) /
+                Math.sin((90 - 180 / corners) * Math.PI / 180)
             );
         } else {
-            th = 2*h + edgeList[0].spacing() + edgeList[Math.floor(corners/2)].spacing();
+            th = 2 * h + edgeList[0].spacing() + edgeList[Math.floor(corners / 2)].spacing();
         }
 
         let tw = 0;
         for (let i = 0; i < corners; i++) {
-            let ang = (180 + 360*i)/corners;
-            tw = Math.max(tw, 2*Math.abs(Math.sin(ang * Math.PI / 180)) *
-                (r + Math.max(edgeList[i].spacing(), edgeList[i+1].spacing()) /
-                 Math.sin((90 - 180/corners) * Math.PI / 180)));
+            let ang = (180 + 360 * i) / corners;
+            tw = Math.max(tw, 2 * Math.abs(Math.sin(ang * Math.PI / 180)) *
+                (r + Math.max(edgeList[i].spacing(), edgeList[i + 1].spacing()) /
+                    Math.sin((90 - 180 / corners) * Math.PI / 180)));
         }
 
         if (this.move(tw, th, move, true)) return;
 
-        this.moveTo(0.5*tw - 0.5*side, edgeList[0].margin());
+        this.moveTo(0.5 * tw - 0.5 * side, edgeList[0].margin());
 
         if (hole) {
-            this.hole(side/2.0, h + edgeList[0].startwidth() + this.burn, hole/2.0);
+            this.hole(side / 2.0, h + edgeList[0].startwidth() + this.burn, hole / 2.0);
         }
 
-        this.cc(callback, 0, side/2.0, h + edgeList[0].startwidth() + this.burn);
+        this.cc(callback, 0, side / 2.0, h + edgeList[0].startwidth() + this.burn);
         for (let i = 0; i < corners; i++) {
-            this.cc(callback, i+1, 0, edgeList[i].startwidth() + this.burn);
+            this.cc(callback, i + 1, 0, edgeList[i].startwidth() + this.burn);
             edgeList[i].draw(side);
-            this.edgeCorner(edgeList[i], edgeList[i+1], 360.0/corners);
+            this.edgeCorner(edgeList[i], edgeList[i + 1], 360.0 / corners);
         }
 
         this.move(tw, th, move);
     }
 
+    /**
+     * Draw grip grooves.
+     * @param {number} length - Length of the grip area.
+     * @param {number} depth - Depth of the grooves.
+     */
     grip(length, depth) {
         const grooves = Math.max(Math.floor(length / (depth * 2.0)) + 1, 1);
         depth = length / grooves / 4.0;
@@ -687,13 +842,20 @@ class Boxes {
         this.edge(1.1 * this.thickness);
     }
 
-    _latchGrip(length, extra_length=0.0) {
+    _latchGrip(length, extra_length = 0.0) {
         this.corner(90, this.thickness / 4.0);
         this.grip(length / 2.0 - this.thickness / 2.0 - 0.2 * this.thickness + extra_length, this.thickness / 2.0);
         this.corner(90, this.thickness / 4.0);
     }
 
-    latch(length, positive=true, reverse=false, extra_length=0.0) {
+    /**
+     * Draw a latch mechanism.
+     * @param {number} length - Length of the latch.
+     * @param {boolean} [positive=true] - Positive (protruding) or negative part.
+     * @param {boolean} [reverse=false] - Reverse direction.
+     * @param {number} [extra_length=0.0] - Extra length compensation.
+     */
+    latch(length, positive = true, reverse = false, extra_length = 0.0) {
         const t = this.thickness;
         if (positive) {
             let poly = [0, -90, t, 90, length / 2.0, 90, t, -90, length / 2.0];
@@ -722,7 +884,14 @@ class Boxes {
         }
     }
 
-    handle(x, h, hl, r=30) {
+    /**
+     * Draw a handle.
+     * @param {number} x - Width/Position x(?).
+     * @param {number} h - Height.
+     * @param {number} hl - Handle Length (grip).
+     * @param {number} [r=30] - Radius.
+     */
+    handle(x, h, hl, r = 30) {
         const d = (x - hl - 2 * r) / 2.0;
 
         this.ctx.save();
@@ -746,6 +915,12 @@ class Boxes {
     }
 
     // Helper for walls
+    /**
+     * Determine if a wall should be split based on the number of pieces.
+     * @param {number} pieces - Number of pieces.
+     * @param {number} side - Side index (0-3).
+     * @returns {boolean} True if wall should be split.
+     */
     _splitWall(pieces, side) {
         // pieces: number of surrounding walls
         // side: 0..3 (left, top, right, bottom of rounded plate approx)
@@ -761,18 +936,26 @@ class Boxes {
         ][pieces][side]
         */
         const table = [
-             [false, false, false, false, true],
-             [true, false, false, false, true],
-             [true, false, true, false, true],
-             [true, true, true, false, true],
-             [true, true, true, true, true]
+            [false, false, false, false, true],
+            [true, false, false, false, true],
+            [true, false, true, false, true],
+            [true, true, true, false, true],
+            [true, true, true, true, true]
         ];
         if (pieces > 4) pieces = 4;
         if (pieces < 0) pieces = 0;
         return table[pieces][side];
     }
 
-    roundedPlate(x, y, r, edges="f", kw={}) {
+    /**
+     * Draw a rounded plate (base or lid) with optional holes.
+     * @param {number} x - Width.
+     * @param {number} y - Depth.
+     * @param {number} r - Corner radius.
+     * @param {string} [edges="f"] - Edge type.
+     * @param {Object} [kw={}] - options: callback, holesMargin, holesSettings, bedBolts, wallpieces, extend_corners, move, label.
+     */
+    roundedPlate(x, y, r, edges = "f", kw = {}) {
         const {
             callback = null,
             holesMargin = null,
@@ -815,16 +998,16 @@ class Boxes {
                     wallcount++;
                 }
             } else {
-                 this.cc(callback, wallcount, 0, edge.startwidth() + this.burn);
-                 edge.draw(l);
-                 wallcount++;
+                this.cc(callback, wallcount, 0, edge.startwidth() + this.burn);
+                edge.draw(l);
+                wallcount++;
             }
 
             if (extend_corners) {
                 if (corner_holes) {
                     this.ctx.save();
                     this.moveTo(0, edge.startwidth());
-                    this.polyline(0, [90, r], 0, -90, t, -90, 0, [-90, r+t], 0, -90, t, -90, 0);
+                    this.polyline(0, [90, r], 0, -90, t, -90, 0, [-90, r + t], 0, -90, t, -90, 0);
                     this.ctx.stroke();
                     this.ctx.restore();
                 }
@@ -847,13 +1030,21 @@ class Boxes {
             if (hr > holesMargin) hr -= holesMargin;
             else hr = 0;
 
-            this.hexHolesPlate(x - 2 * holesMargin, y - 2 * holesMargin, hr, {settings: holesSettings});
+            this.hexHolesPlate(x - 2 * holesMargin, y - 2 * holesMargin, hr, { settings: holesSettings });
         }
 
         this.move(overallwidth, overallheight, move, false, label);
     }
 
-    surroundingWall(x, y, r, h, kw={}) {
+    /**
+     * Draw surrounding walls for a rounded box.
+     * @param {number} x - Width of the box.
+     * @param {number} y - Depth of the box.
+     * @param {number} r - Corner radius.
+     * @param {number} h - Height of the wall.
+     * @param {Object} [kw={}] - options: bottom, top, left, right, pieces, extend_corners, callback, move.
+     */
+    surroundingWall(x, y, r, h, kw = {}) {
         const {
             bottom = 'e', top = 'e', left = 'D', right = 'd',
             pieces = 1,
@@ -883,7 +1074,7 @@ class Boxes {
         }
 
         // overallwidth calculation simplified
-        const overallwidth = 2*x + 2*y; // rough approx
+        const overallwidth = 2 * x + 2 * y; // rough approx
         const overallheight = h; // rough approx
 
         if (this.move(overallwidth, overallheight, move, true)) return;
@@ -896,53 +1087,53 @@ class Boxes {
         let sides;
         let wp = pieces;
         if (wp <= 2 && (y - 2 * r) < 1E-3) {
-             c4 *= 2;
-             sides = [x/2-r, x-2*r, x-2*r];
-             if (wp > 0) wp += 1;
+            c4 *= 2;
+            sides = [x / 2 - r, x - 2 * r, x - 2 * r];
+            if (wp > 0) wp += 1;
         } else {
-             sides = [x/2-r, y-2*r, x-2*r, y-2*r, x-2*r];
+            sides = [x / 2 - r, y - 2 * r, x - 2 * r, y - 2 * r, x - 2 * r];
         }
 
         for (let nr = 0; nr < sides.length; nr++) {
             const l = sides[nr];
             if (this._splitWall(wp, nr) && nr > 0) {
-                 this.cc(callback, wallcount, 0, bottomwidth + this.burn);
-                 wallcount++;
-                 bottomEdge.draw(l/2.0);
-                 tops.push(l/2.0);
+                this.cc(callback, wallcount, 0, bottomwidth + this.burn);
+                wallcount++;
+                bottomEdge.draw(l / 2.0);
+                tops.push(l / 2.0);
 
-                 // complete wall segment
-                 this.ctx.save();
-                 this.edgeCorner(bottomEdge, rightEdge, 90);
-                 rightEdge.draw(h);
-                 this.edgeCorner(rightEdge, topEdge, 90);
+                // complete wall segment
+                this.ctx.save();
+                this.edgeCorner(bottomEdge, rightEdge, 90);
+                rightEdge.draw(h);
+                this.edgeCorner(rightEdge, topEdge, 90);
 
-                 // draw tops reversed
-                 for (let n = tops.length - 1; n >= 0; n--) {
-                     const d = tops[n];
-                     // if n % 2 logic for flex... simplified to just drawing topEdge
-                     topEdge.draw(d);
-                 }
+                // draw tops reversed
+                for (let n = tops.length - 1; n >= 0; n--) {
+                    const d = tops[n];
+                    // if n % 2 logic for flex... simplified to just drawing topEdge
+                    topEdge.draw(d);
+                }
 
-                 this.edgeCorner(topEdge, leftEdge, 90);
-                 leftEdge.draw(h);
-                 this.edgeCorner(leftEdge, bottomEdge, 90);
-                 this.ctx.restore(); // restore to complete segment
+                this.edgeCorner(topEdge, leftEdge, 90);
+                leftEdge.draw(h);
+                this.edgeCorner(leftEdge, bottomEdge, 90);
+                this.ctx.restore(); // restore to complete segment
 
-                 if (nr === sides.length - 1) break;
+                if (nr === sides.length - 1) break;
 
-                 // start new wall segment
-                 tops = [];
-                 this.moveTo(rightEdge.margin() + leftEdge.margin() + this.spacing);
-                 this.cc(callback, wallcount, 0, bottomwidth + this.burn);
-                 wallcount++;
-                 bottomEdge.draw(l/2.0);
-                 tops.push(l/2.0);
+                // start new wall segment
+                tops = [];
+                this.moveTo(rightEdge.margin() + leftEdge.margin() + this.spacing);
+                this.cc(callback, wallcount, 0, bottomwidth + this.burn);
+                wallcount++;
+                bottomEdge.draw(l / 2.0);
+                tops.push(l / 2.0);
             } else {
-                 this.cc(callback, wallcount, 0, bottomwidth + this.burn);
-                 wallcount++;
-                 bottomEdge.draw(l);
-                 tops.push(l);
+                this.cc(callback, wallcount, 0, bottomwidth + this.burn);
+                wallcount++;
+                bottomEdge.draw(l);
+                tops.push(l);
             }
 
             this.step(bottomwidth - bottomEdge.endwidth());
@@ -957,7 +1148,14 @@ class Boxes {
         this.move(overallwidth, overallheight, move, false);
     }
 
-    rectangularWall(x, y, edges="eeee", kw={}) {
+    /**
+     * Draw a rectangular wall.
+     * @param {number} x - Width.
+     * @param {number} y - Height (or depth).
+     * @param {string|Array} [edges="eeee"] - Edges.
+     * @param {Object} [kw={}] - options: ignore_widths, move, label, callback, bedBolts, bedBoltSettings.
+     */
+    rectangularWall(x, y, edges = "eeee", kw = {}) {
         const { ignore_widths = [], move = null, label = "" } = kw;
         let { callback = null, bedBolts = null, bedBoltSettings = null } = kw;
 
@@ -965,14 +1163,14 @@ class Boxes {
 
         let edgeList;
         if (typeof edges === 'string') {
-             edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
+            edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
         } else if (Array.isArray(edges)) {
-             edgeList = edges.map(e => {
-                 if (typeof e === 'string') return this.edges[e] || this.edges['e'];
-                 return e;
-             });
+            edgeList = edges.map(e => {
+                if (typeof e === 'string') return this.edges[e] || this.edges['e'];
+                return e;
+            });
         } else {
-             throw new Error("edges must be string or array");
+            throw new Error("edges must be string or array");
         }
 
         // append for wrapping around? python: edges += edges
@@ -991,37 +1189,44 @@ class Boxes {
         const dims = [x, y, x, y];
 
         for (let i = 0; i < 4; i++) {
-             this.cc(callback, i, 0, fullEdges[i].startwidth() + this.burn);
+            this.cc(callback, i, 0, fullEdges[i].startwidth() + this.burn);
 
-             let l = dims[i];
-             let e1 = fullEdges[i];
-             let e2 = fullEdges[i+1];
+            let l = dims[i];
+            let e1 = fullEdges[i];
+            let e2 = fullEdges[i + 1];
 
-             if (ignore_widths.includes(2*i - 1) || ignore_widths.includes(2*i - 1 + 8)) {
-                 l += fullEdges[i-1 < 0 ? 3 : i-1].endwidth();
-             }
-             if (ignore_widths.includes(2*i)) {
-                 l += fullEdges[i+1].startwidth();
-                 e2 = this.edges['e'];
-             }
-             if (ignore_widths.includes(2*i+1)) {
-                 e1 = this.edges['e'];
-             }
+            if (ignore_widths.includes(2 * i - 1) || ignore_widths.includes(2 * i - 1 + 8)) {
+                l += fullEdges[i - 1 < 0 ? 3 : i - 1].endwidth();
+            }
+            if (ignore_widths.includes(2 * i)) {
+                l += fullEdges[i + 1].startwidth();
+                e2 = this.edges['e'];
+            }
+            if (ignore_widths.includes(2 * i + 1)) {
+                e1 = this.edges['e'];
+            }
 
-             // draw edge
-             fullEdges[i].draw(l, {bedBolts: this.getEntry(bedBolts, i), bedBoltSettings: this.getEntry(bedBoltSettings, i)});
-             this.edgeCorner(e1, e2, 90);
+            // draw edge
+            fullEdges[i].draw(l, { bedBolts: this.getEntry(bedBolts, i), bedBoltSettings: this.getEntry(bedBoltSettings, i) });
+            this.edgeCorner(e1, e2, 90);
         }
 
         if (kw.holesMargin !== undefined) { // Check if passed
-             this.moveTo(kw.holesMargin, kw.holesMargin + fullEdges[0].startwidth());
-             this.hexHolesRectangle(x - 2 * kw.holesMargin, y - 2 * kw.holesMargin, {settings: kw.holesSettings});
+            this.moveTo(kw.holesMargin, kw.holesMargin + fullEdges[0].startwidth());
+            this.hexHolesRectangle(x - 2 * kw.holesMargin, y - 2 * kw.holesMargin, { settings: kw.holesSettings });
         }
 
         this.move(overallwidth, overallheight, move, false, label);
     }
 
-    flangedWall(x, y, edges="FFFF", kw={}) {
+    /**
+     * Draw a wall with flanges (extensions) at corners.
+     * @param {number} x - Width.
+     * @param {number} y - Height.
+     * @param {string|Array} [edges="FFFF"] - Edges.
+     * @param {Object} [kw={}] - options: flanges, r, callback, move, label.
+     */
+    flangedWall(x, y, edges = "FFFF", kw = {}) {
         const {
             flanges = null,
             r = 0.0,
@@ -1035,9 +1240,9 @@ class Boxes {
 
         let edgeList;
         if (typeof edges === 'string') {
-             edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
+            edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
         } else {
-             edgeList = edges;
+            edgeList = edges;
         }
         edgeList = [...edgeList, ...edgeList];
         const fList = [...f, ...f];
@@ -1052,20 +1257,20 @@ class Boxes {
 
         for (let i = 0; i < 4; i++) {
             const l = (i % 2 !== 0) ? y : x;
-            const r_curr = Math.min(r, Math.max(fList[i < 1 ? 3 : i-1], fList[i])); // check index
-            const r_next = Math.min(r, Math.max(fList[i], fList[i+1]));
+            const r_curr = Math.min(r, Math.max(fList[i < 1 ? 3 : i - 1], fList[i])); // check index
+            const r_next = Math.min(r, Math.max(fList[i], fList[i + 1]));
 
             this.cc(callback, i, -r_curr, 0); // Python: self.cc(callback, i, x=-rl)
 
             if (fList[i] > 0) {
-                 if (edgeList[i] === this.edges["F"] || edgeList[i] === this.edges["h"]) {
-                     this.fingerHolesAt(fList[(i+3)%4] + edgeList[(i+3)%4].endwidth() - r_curr, 0.5 * this.thickness + fList[i], l, 0);
-                 }
-                 this.edge(l + fList[(i+3)%4] + fList[i+1] + edgeList[(i+3)%4].endwidth() + edgeList[i+1].startwidth() - r_curr - r_next);
+                if (edgeList[i] === this.edges["F"] || edgeList[i] === this.edges["h"]) {
+                    this.fingerHolesAt(fList[(i + 3) % 4] + edgeList[(i + 3) % 4].endwidth() - r_curr, 0.5 * this.thickness + fList[i], l, 0);
+                }
+                this.edge(l + fList[(i + 3) % 4] + fList[i + 1] + edgeList[(i + 3) % 4].endwidth() + edgeList[i + 1].startwidth() - r_curr - r_next);
             } else {
-                 this.edge(fList[(i+3)%4] + edgeList[(i+3)%4].endwidth() - r_curr);
-                 edgeList[i].draw(l);
-                 this.edge(fList[i+1] + edgeList[i+1].startwidth() - r_next);
+                this.edge(fList[(i + 3) % 4] + edgeList[(i + 3) % 4].endwidth() - r_curr);
+                edgeList[i].draw(l);
+                this.edge(fList[i + 1] + edgeList[i + 1].startwidth() - r_next);
             }
             this.corner(90, r_next);
         }
@@ -1073,12 +1278,21 @@ class Boxes {
         this.move(tw, th, move, false, label);
     }
 
-    rectangularTriangle(x, y, edges="eee", r=0.0, num=1, kw={}) {
+    /**
+     * Draw a right-angled triangular wall.
+     * @param {number} x - Width (base).
+     * @param {number} y - Height.
+     * @param {string|Array} [edges="eee"] - Edges.
+     * @param {number} [r=0.0] - Corner radius.
+     * @param {number} [num=1] - Number of triangles to draw (pairs).
+     * @param {Object} [kw={}] - options: bedBolts, bedBoltSettings, callback, move, label.
+     */
+    rectangularTriangle(x, y, edges = "eee", r = 0.0, num = 1, kw = {}) {
         // Extract num from kw if it's passed as an object
         if (kw.num !== undefined) {
             num = kw.num;
         }
-        
+
         const {
             bedBolts = null,
             bedBoltSettings = null,
@@ -1087,72 +1301,80 @@ class Boxes {
             label = ""
         } = kw;
 
-         let edgeList;
-         if (typeof edges === 'string') {
-             edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
-         } else {
-             edgeList = edges;
-         }
- 
-         if (edgeList.length === 2) edgeList.push(this.edges['e']);
-         if (edgeList.length !== 3) throw new Error("two or three edges required");
- 
-         r = Math.min(r, x, y);
-         const a = Math.atan2(y-r, x-r);
-         const alpha = a * 180 / Math.PI;
- 
-         let width;
-         if (a > 0) {
-             width = x + (edgeList[2].spacing() + this.spacing) / Math.sin(a) + edgeList[1].spacing() + this.spacing;
-         } else {
-             width = x + (edgeList[2].spacing() + this.spacing) + edgeList[1].spacing() + this.spacing;
-         }
-         const height = y + edgeList[0].spacing() + edgeList[2].spacing() * Math.cos(a) + 2*this.spacing + this.spacing;
- 
-         if (num > 1) {
-             width = 2*width - x + r - this.spacing;
-         }
-         const dx = width - x - edgeList[1].spacing() - this.spacing / 2;
-         const dy = edgeList[0].margin() + this.spacing / 2;
- 
-         const overallwidth = width * (Math.floor(num/2) + num%2) - this.spacing;
-         const overallheight = height - this.spacing;
- 
-         if (this.move(overallwidth, overallheight, move, true)) return;
- 
-         this.moveTo(dx - this.spacing / 2, dy - this.spacing / 2);
- 
-         for (let n = 0; n < num; n++) {
-             const lens = [x, y];
-             for (let i = 0; i < 2; i++) {
-                 this.cc(callback, i, 0, edgeList[i].startwidth() + this.burn);
-                 edgeList[i].draw(lens[i], {bedBolts: this.getEntry(bedBolts, i), bedBoltSettings: this.getEntry(bedBoltSettings, i)});
-                 if (i === 0) {
-                     this.edgeCorner(edgeList[i], edgeList[i+1], 90);
-                 }
-             }
-             this.edgeCorner(edgeList[1], 'e', 90);
- 
-             this.corner(alpha, r);
-             this.cc(callback, 2);
-             this.step(edgeList[2].startwidth());
-             edgeList[2].draw(Math.sqrt((x-r)**2 + (y-r)**2));
-             this.step(-edgeList[2].endwidth());
-             this.corner(90-alpha, r);
-             this.edge(edgeList[0].startwidth());
-             this.corner(90);
-             this.ctx.stroke();
- 
-             this.moveTo(width - 2*dx, height - 2*dy, 180);
-             if (n % 2 !== 0) {
-                 this.moveTo(width);
-             }
-         }
- 
-         this.move(overallwidth, overallheight, move, false, label);
+        let edgeList;
+        if (typeof edges === 'string') {
+            edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
+        } else {
+            edgeList = edges;
+        }
+
+        if (edgeList.length === 2) edgeList.push(this.edges['e']);
+        if (edgeList.length !== 3) throw new Error("two or three edges required");
+
+        r = Math.min(r, x, y);
+        const a = Math.atan2(y - r, x - r);
+        const alpha = a * 180 / Math.PI;
+
+        let width;
+        if (a > 0) {
+            width = x + (edgeList[2].spacing() + this.spacing) / Math.sin(a) + edgeList[1].spacing() + this.spacing;
+        } else {
+            width = x + (edgeList[2].spacing() + this.spacing) + edgeList[1].spacing() + this.spacing;
+        }
+        const height = y + edgeList[0].spacing() + edgeList[2].spacing() * Math.cos(a) + 2 * this.spacing + this.spacing;
+
+        if (num > 1) {
+            width = 2 * width - x + r - this.spacing;
+        }
+        const dx = width - x - edgeList[1].spacing() - this.spacing / 2;
+        const dy = edgeList[0].margin() + this.spacing / 2;
+
+        const overallwidth = width * (Math.floor(num / 2) + num % 2) - this.spacing;
+        const overallheight = height - this.spacing;
+
+        if (this.move(overallwidth, overallheight, move, true)) return;
+
+        this.moveTo(dx - this.spacing / 2, dy - this.spacing / 2);
+
+        for (let n = 0; n < num; n++) {
+            const lens = [x, y];
+            for (let i = 0; i < 2; i++) {
+                this.cc(callback, i, 0, edgeList[i].startwidth() + this.burn);
+                edgeList[i].draw(lens[i], { bedBolts: this.getEntry(bedBolts, i), bedBoltSettings: this.getEntry(bedBoltSettings, i) });
+                if (i === 0) {
+                    this.edgeCorner(edgeList[i], edgeList[i + 1], 90);
+                }
+            }
+            this.edgeCorner(edgeList[1], 'e', 90);
+
+            this.corner(alpha, r);
+            this.cc(callback, 2);
+            this.step(edgeList[2].startwidth());
+            edgeList[2].draw(Math.sqrt((x - r) ** 2 + (y - r) ** 2));
+            this.step(-edgeList[2].endwidth());
+            this.corner(90 - alpha, r);
+            this.edge(edgeList[0].startwidth());
+            this.corner(90);
+            this.ctx.stroke();
+
+            this.moveTo(width - 2 * dx, height - 2 * dy, 180);
+            if (n % 2 !== 0) {
+                this.moveTo(width);
+            }
+        }
+
+        this.move(overallwidth, overallheight, move, false, label);
     }
 
-    trapezoidWall(w, h0, h1, edges="eeee", kw={}) {
+    /**
+     * Draw a trapezoidal wall.
+     * @param {number} w - Width (base).
+     * @param {number} h0 - Height left.
+     * @param {number} h1 - Height right.
+     * @param {string|Array} [edges="eeee"] - Edges.
+     * @param {Object} [kw={}] - options: callback, move, label.
+     */
+    trapezoidWall(w, h0, h1, edges = "eeee", kw = {}) {
         const {
             callback = null,
             move = null,
@@ -1161,9 +1383,9 @@ class Boxes {
 
         let edgeList;
         if (typeof edges === 'string') {
-             edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
+            edgeList = edges.split('').map(e => this.edges[e] || this.edges['e']);
         } else {
-             edgeList = edges;
+            edgeList = edges;
         }
 
         const overallwidth = w + edgeList[3].spacing() + edgeList[1].spacing();
@@ -1171,8 +1393,8 @@ class Boxes {
 
         if (this.move(overallwidth, overallheight, move, true)) return;
 
-        const a = Math.atan((h1-h0)/w) * 180 / Math.PI;
-        const l = Math.sqrt((h0-h1)**2 + w**2);
+        const a = Math.atan((h1 - h0) / w) * 180 / Math.PI;
+        const l = Math.sqrt((h0 - h1) ** 2 + w ** 2);
 
         this.moveTo(edgeList[3].spacing(), edgeList[0].margin());
         this.cc(callback, 0, 0, edgeList[0].startwidth());
@@ -1208,57 +1430,57 @@ class Boxes {
 
         const nborders = [];
         for (let i = 0; i < borders.length; i++) {
-             if (i % 2 !== 0) { // angle
-                 nborders.push(borders[i]);
-             } else { // length
-                 const edge = edges[Math.floor(i/2) % edges.length];
-                 const margin = edge.margin();
-                 const l = borders[i];
-                 if (margin) {
-                     nborders.push(0.0, -90, margin, 90, l, 90, margin, -90, 0.0);
-                 } else {
-                     nborders.push(l);
-                 }
-             }
+            if (i % 2 !== 0) { // angle
+                nborders.push(borders[i]);
+            } else { // length
+                const edge = edges[Math.floor(i / 2) % edges.length];
+                const margin = edge.margin();
+                const l = borders[i];
+                if (margin) {
+                    nborders.push(0.0, -90, margin, 90, l, 90, margin, -90, 0.0);
+                } else {
+                    nborders.push(l);
+                }
+            }
         }
 
         const newBorders = nborders;
         for (let i = 0; i < newBorders.length; i++) {
             if (i % 2 !== 0) { // angle
-                 let a, r = 0;
-                 if (Array.isArray(newBorders[i])) {
-                     [a, r] = newBorders[i];
-                 } else {
-                     a = newBorders[i];
-                     angle = (angle + a) % 360;
-                     continue;
-                 }
+                let a, r = 0;
+                if (Array.isArray(newBorders[i])) {
+                    [a, r] = newBorders[i];
+                } else {
+                    a = newBorders[i];
+                    angle = (angle + a) % 360;
+                    continue;
+                }
 
-                 let centerx, centery;
-                 if (a > 0) {
-                     centerx = posx + r * Math.cos((angle+90) * Math.PI / 180);
-                     centery = posy + r * Math.sin((angle+90) * Math.PI / 180);
-                 } else {
-                     centerx = posx + r * Math.cos((angle-90) * Math.PI / 180);
-                     centery = posy + r * Math.sin((angle-90) * Math.PI / 180);
-                 }
+                let centerx, centery;
+                if (a > 0) {
+                    centerx = posx + r * Math.cos((angle + 90) * Math.PI / 180);
+                    centery = posy + r * Math.sin((angle + 90) * Math.PI / 180);
+                } else {
+                    centerx = posx + r * Math.cos((angle - 90) * Math.PI / 180);
+                    centery = posy + r * Math.sin((angle - 90) * Math.PI / 180);
+                }
 
-                 for (let direction of [0, 90, 180, 270]) {
-                     // simplified bounding box check for arc
-                     // ...
-                 }
-                 // Not implementing full arc bounding box logic for now, using checkpoints at start/end
-                 angle = (angle + a) % 360;
-                 if (a > 0) {
-                     posx = centerx + r * Math.cos((angle-90) * Math.PI / 180);
-                     posy = centery + r * Math.sin((angle-90) * Math.PI / 180);
-                 } else {
-                     posx = centerx + r * Math.cos((angle+90) * Math.PI / 180);
-                     posy = centery + r * Math.sin((angle+90) * Math.PI / 180);
-                 }
+                for (let direction of [0, 90, 180, 270]) {
+                    // simplified bounding box check for arc
+                    // ...
+                }
+                // Not implementing full arc bounding box logic for now, using checkpoints at start/end
+                angle = (angle + a) % 360;
+                if (a > 0) {
+                    posx = centerx + r * Math.cos((angle - 90) * Math.PI / 180);
+                    posy = centery + r * Math.sin((angle - 90) * Math.PI / 180);
+                } else {
+                    posx = centerx + r * Math.cos((angle + 90) * Math.PI / 180);
+                    posy = centery + r * Math.sin((angle + 90) * Math.PI / 180);
+                }
             } else { // length
-                 posx += newBorders[i] * Math.cos(angle * Math.PI / 180);
-                 posy += newBorders[i] * Math.sin(angle * Math.PI / 180);
+                posx += newBorders[i] * Math.cos(angle * Math.PI / 180);
+                posy += newBorders[i] * Math.sin(angle * Math.PI / 180);
             }
             checkpoint(posx, posy);
         }
@@ -1270,131 +1492,145 @@ class Boxes {
         return borders;
     }
 
-    polygonWall(borders, edge="f", kw={}) {
-         const {
-             turtle = false,
-             correct_corners = true,
-             callback = null,
-             move = null,
-             label = ""
-         } = kw;
+    /**
+     * Draw a single polygon wall (unfolded).
+     * @param {Array} borders - List of lengths and angles [l1, a1, l2, a2, ...].
+     * @param {string|Array} [edge="f"] - Edges.
+     * @param {Object} [kw={}] - options: turtle, correct_corners, callback, move, label.
+     */
+    polygonWall(borders, edge = "f", kw = {}) {
+        const {
+            turtle = false,
+            correct_corners = true,
+            callback = null,
+            move = null,
+            label = ""
+        } = kw;
 
-         let edges;
-         if (typeof edge === 'string') {
-             edges = [this.edges[edge] || this.edges['f']];
-         } else {
-             edges = edge.map(e => (typeof e === 'string' ? (this.edges[e] || this.edges['f']) : e));
-         }
+        let edges;
+        if (typeof edge === 'string') {
+            edges = [this.edges[edge] || this.edges['f']];
+        } else {
+            edges = edge.map(e => (typeof e === 'string' ? (this.edges[e] || this.edges['f']) : e));
+        }
 
-         const t = this.thickness;
+        const t = this.thickness;
 
-         // Calculate bounding box by tracing the polygon
-         let posx = 0, posy = 0;
-         let minx = 0, miny = 0, maxx = 0, maxy = 0;
-         let angle = 0;
-         let temp_length_correction = 0.0;
-         
-         for (let i = 0; i < borders.length; i += 2) {
-             let l = borders[i] - temp_length_correction;
-             const next_angle = borders[i + 1];
-             
-             if (correct_corners && typeof next_angle === 'number' && next_angle < 0) {
-                 temp_length_correction = t * Math.tan((-next_angle / 2) * Math.PI / 180);
-             } else {
-                 temp_length_correction = 0.0;
-             }
-             l -= temp_length_correction;
-             
-             // Move along edge
-             posx += l * Math.cos(angle * Math.PI / 180);
-             posy += l * Math.sin(angle * Math.PI / 180);
-             
-             minx = Math.min(minx, posx);
-             miny = Math.min(miny, posy);
-             maxx = Math.max(maxx, posx);
-             maxy = Math.max(maxy, posy);
-             
-             // Turn by angle (handle both simple angles and curve tuples)
-             if (Array.isArray(next_angle)) {
-                 // Curve: [angle, radius]
-                 const [curve_angle, radius] = next_angle;
-                 
-                 // For a curved corner, we need to account for the arc's extent
-                 // Calculate positions along the arc to get accurate bounds
-                 const start_angle = angle;
-                 const num_samples = Math.max(3, Math.ceil(Math.abs(curve_angle) / 30)); // Sample every 30° or so
-                 
-                 for (let j = 0; j <= num_samples; j++) {
-                     const t_param = j / num_samples;
-                     const current_angle = start_angle + curve_angle * t_param;
-                     
-                     // Position along the arc from the center
-                     const arc_x = posx + radius * Math.sin((start_angle + curve_angle * t_param) * Math.PI / 180) 
-                                        - radius * Math.sin(start_angle * Math.PI / 180);
-                     const arc_y = posy - radius * Math.cos((start_angle + curve_angle * t_param) * Math.PI / 180)
-                                        + radius * Math.cos(start_angle * Math.PI / 180);
-                     
-                     minx = Math.min(minx, arc_x);
-                     miny = Math.min(miny, arc_y);
-                     maxx = Math.max(maxx, arc_x);
-                     maxy = Math.max(maxy, arc_y);
-                 }
-                 
-                 // Update position after the curve
-                 posx += radius * Math.sin((angle + curve_angle) * Math.PI / 180) - radius * Math.sin(angle * Math.PI / 180);
-                 posy += -radius * Math.cos((angle + curve_angle) * Math.PI / 180) + radius * Math.cos(angle * Math.PI / 180);
-                 
-                 angle += curve_angle;
-             } else if (typeof next_angle === 'number') {
-                 angle += next_angle;
-             }
-         }
-         
-         // Add edge margins to the bounding box on all sides
-         const margin = edges[0].margin() || 0;
-         const tw = maxx - minx + 2 * margin;
-         const th = maxy - miny + 2 * margin;
-         
-         // Adjust minx/miny to account for margin offset
-         minx -= margin;
-         miny -= margin;
+        // Calculate bounding box by tracing the polygon
+        let posx = 0, posy = 0;
+        let minx = 0, miny = 0, maxx = 0, maxy = 0;
+        let angle = 0;
+        let temp_length_correction = 0.0;
 
-         // Check if we should skip drawing (move only)
-         if (this.move(tw, th, move, true)) return;
+        for (let i = 0; i < borders.length; i += 2) {
+            let l = borders[i] - temp_length_correction;
+            const next_angle = borders[i + 1];
 
-         // Offset to account for bounding box (polygon may have negative coords)
-         this.moveTo(-minx, -miny);
+            if (correct_corners && typeof next_angle === 'number' && next_angle < 0) {
+                temp_length_correction = t * Math.tan((-next_angle / 2) * Math.PI / 180);
+            } else {
+                temp_length_correction = 0.0;
+            }
+            l -= temp_length_correction;
 
-         let length_correction = 0.0;
+            // Move along edge
+            posx += l * Math.cos(angle * Math.PI / 180);
+            posy += l * Math.sin(angle * Math.PI / 180);
 
-         for (let i = 0; i < borders.length; i += 2) {
-             this.cc(callback, i/2);
-             this.edge(length_correction);
-             let l = borders[i] - length_correction;
-             const next_angle = borders[i+1];
+            minx = Math.min(minx, posx);
+            miny = Math.min(miny, posy);
+            maxx = Math.max(maxx, posx);
+            maxy = Math.max(maxy, posy);
 
-             if (correct_corners && typeof next_angle === 'number' && next_angle < 0) {
-                 length_correction = t * Math.tan((-next_angle / 2) * Math.PI / 180);
-             } else {
-                 length_correction = 0.0;
-             }
-             l -= length_correction;
+            // Turn by angle (handle both simple angles and curve tuples)
+            if (Array.isArray(next_angle)) {
+                // Curve: [angle, radius]
+                const [curve_angle, radius] = next_angle;
 
-             const e = edges[Math.floor(i/2) % edges.length];
-             e.draw(l);
-             this.edge(length_correction);
-             if (Array.isArray(next_angle)) {
-                 this.corner(next_angle[0], next_angle[1], 1); // tabs=1
-             } else {
-                 this.corner(next_angle, 0, 1);
-             }
-         }
-         
-         // Apply move after drawing
-         this.move(tw, th, move);
+                // For a curved corner, we need to account for the arc's extent
+                // Calculate positions along the arc to get accurate bounds
+                const start_angle = angle;
+                const num_samples = Math.max(3, Math.ceil(Math.abs(curve_angle) / 30)); // Sample every 30° or so
+
+                for (let j = 0; j <= num_samples; j++) {
+                    const t_param = j / num_samples;
+                    const current_angle = start_angle + curve_angle * t_param;
+
+                    // Position along the arc from the center
+                    const arc_x = posx + radius * Math.sin((start_angle + curve_angle * t_param) * Math.PI / 180)
+                        - radius * Math.sin(start_angle * Math.PI / 180);
+                    const arc_y = posy - radius * Math.cos((start_angle + curve_angle * t_param) * Math.PI / 180)
+                        + radius * Math.cos(start_angle * Math.PI / 180);
+
+                    minx = Math.min(minx, arc_x);
+                    miny = Math.min(miny, arc_y);
+                    maxx = Math.max(maxx, arc_x);
+                    maxy = Math.max(maxy, arc_y);
+                }
+
+                // Update position after the curve
+                posx += radius * Math.sin((angle + curve_angle) * Math.PI / 180) - radius * Math.sin(angle * Math.PI / 180);
+                posy += -radius * Math.cos((angle + curve_angle) * Math.PI / 180) + radius * Math.cos(angle * Math.PI / 180);
+
+                angle += curve_angle;
+            } else if (typeof next_angle === 'number') {
+                angle += next_angle;
+            }
+        }
+
+        // Add edge margins to the bounding box on all sides
+        const margin = edges[0].margin() || 0;
+        const tw = maxx - minx + 2 * margin;
+        const th = maxy - miny + 2 * margin;
+
+        // Adjust minx/miny to account for margin offset
+        minx -= margin;
+        miny -= margin;
+
+        // Check if we should skip drawing (move only)
+        if (this.move(tw, th, move, true)) return;
+
+        // Offset to account for bounding box (polygon may have negative coords)
+        this.moveTo(-minx, -miny);
+
+        let length_correction = 0.0;
+
+        for (let i = 0; i < borders.length; i += 2) {
+            this.cc(callback, i / 2);
+            this.edge(length_correction);
+            let l = borders[i] - length_correction;
+            const next_angle = borders[i + 1];
+
+            if (correct_corners && typeof next_angle === 'number' && next_angle < 0) {
+                length_correction = t * Math.tan((-next_angle / 2) * Math.PI / 180);
+            } else {
+                length_correction = 0.0;
+            }
+            l -= length_correction;
+
+            const e = edges[Math.floor(i / 2) % edges.length];
+            e.draw(l);
+            this.edge(length_correction);
+            if (Array.isArray(next_angle)) {
+                this.corner(next_angle[0], next_angle[1], 1); // tabs=1
+            } else {
+                this.corner(next_angle, 0, 1);
+            }
+        }
+
+        // Apply move after drawing
+        this.move(tw, th, move);
     }
 
-    polygonWalls(borders, h, bottom="F", top="F", symmetrical=true) {
+    /**
+     * Draw separate walls for a polygon (e.g. for sides of a polygonal box).
+     * @param {Array} borders - List of lengths and angles.
+     * @param {number} h - Height.
+     * @param {string} [bottom="F"] - Bottom edge.
+     * @param {string} [top="F"] - Top edge.
+     * @param {boolean} [symmetrical=true] - Symmetry (unused?).
+     */
+    polygonWalls(borders, h, bottom = "F", top = "F", symmetrical = true) {
         if (!borders || borders.length === 0) return;
 
         // Close polygon if needed
@@ -1430,25 +1666,25 @@ class Boxes {
             // Draw rectangular wall for this segment
             // Width = l (segment length), Height = h
             this.ctx.save();
-            
+
             // Bottom edge
             bottomEdge.draw(l);
-            
+
             // Right corner and edge
             this.edgeCorner(bottomEdge, rightEdge, 90);
             rightEdge.draw(h);
-            
+
             // Top corner and edge
             this.edgeCorner(rightEdge, topEdge, 90);
             topEdge.draw(l);
-            
+
             // Left corner and edge
             this.edgeCorner(topEdge, leftEdge, 90);
             leftEdge.draw(h);
-            
+
             // Close the wall
             this.edgeCorner(leftEdge, bottomEdge, 90);
-            
+
             this.ctx.stroke();
             this.ctx.restore();
 
@@ -1459,7 +1695,13 @@ class Boxes {
         }
     }
 
-    flex2D(x, y, width=1) {
+    /**
+     * Draw a 2D flex pattern.
+     * @param {number} x - Width.
+     * @param {number} y - Height.
+     * @param {number} [width=1] - Multiplier for thickness determining cell size.
+     */
+    flex2D(x, y, width = 1) {
         width *= this.thickness;
         const cx = Math.floor(x / (5 * width));
         const cy = Math.floor(y / (5 * width));
@@ -1498,24 +1740,48 @@ class Boxes {
         this.ctx.stroke();
     }
 
-    fingerHoleRectangle(dx, dy, x=0., y=0., angle=0., outside=false) {
+    /**
+     * Draw finger holes in a rectangle pattern.
+     * @param {number} dx - Width of the cutout.
+     * @param {number} dy - Height of the cutout.
+     * @param {number} [x=0.] - Center X.
+     * @param {number} [y=0.] - Center Y.
+     * @param {number} [angle=0.] - Angle.
+     * @param {boolean} [outside=false] - Outside.
+     */
+    fingerHoleRectangle(dx, dy, x = 0., y = 0., angle = 0., outside = false) {
         this.restore(() => {
-             this.moveTo(x, y, angle);
-             let d = 0.5 * this.thickness;
-             if (outside) d = -d;
+            this.moveTo(x, y, angle);
+            let d = 0.5 * this.thickness;
+            if (outside) d = -d;
 
-             this.fingerHolesAt(dx/2+d, -dy/2, dy, 90);
-             this.fingerHolesAt(-dx/2-d, -dy/2, dy, 90);
-             this.fingerHolesAt(-dx/2, -dy/2-d, dx, 0);
-             this.fingerHolesAt(-dx/2, dy/2+d, dx, 0);
+            this.fingerHolesAt(dx / 2 + d, -dy / 2, dy, 90);
+            this.fingerHolesAt(-dx / 2 - d, -dy / 2, dy, 90);
+            this.fingerHolesAt(-dx / 2, -dy / 2 - d, dx, 0);
+            this.fingerHolesAt(-dx / 2, dy / 2 + d, dx, 0);
         });
     }
 
-    partsMatrix(n, width, move, part, args, kw={}) {
-         // ...
+    /**
+     * Generate a matrix of parts.
+     * @param {number} n - Number of parts (unused?).
+     * @param {number} width - Width of area(?).
+     * @param {string} move - Move command.
+     * @param {Function} part - Part function.
+     * @param {Array} args - Arguments for part.
+     * @param {Object} [kw={}] - options.
+     */
+    partsMatrix(n, width, move, part, args, kw = {}) {
+        // ... (implementation incomplete in view, just adding doc)
     }
 
-    mirrorX(f, offset=0.0) {
+    /**
+     * Create a mirrored drawing function (X axis).
+     * @param {Function} f - Function to mirror.
+     * @param {number} [offset=0.0] - X offset.
+     * @returns {Function} Mirrored function.
+     */
+    mirrorX(f, offset = 0.0) {
         return () => {
             this.moveTo(offset, 0);
             this.ctx.save();
@@ -1525,8 +1791,14 @@ class Boxes {
         };
     }
 
-    mirrorY(f, offset=0.0) {
-         return () => {
+    /**
+     * Create a mirrored drawing function (Y axis).
+     * @param {Function} f - Function to mirror.
+     * @param {number} [offset=0.0] - Y offset.
+     * @returns {Function} Mirrored function.
+     */
+    mirrorY(f, offset = 0.0) {
+        return () => {
             this.moveTo(0, offset);
             this.ctx.save();
             this.ctx.scale(1, -1);
@@ -1535,7 +1807,14 @@ class Boxes {
         };
     }
 
-    adjustSize(l, e1=true, e2=true) {
+    /**
+     * Adjust size(s) by accounting for wall thickness/edges.
+     * @param {number|number[]} l - Length or array of lengths.
+     * @param {Edge|boolean|string} [e1=true] - First edge.
+     * @param {Edge|boolean|string} [e2=true] - Second edge.
+     * @returns {number|number[]} Adjusted size(s).
+     */
+    adjustSize(l, e1 = true, e2 = true) {
         if (typeof e1 === 'string') e1 = this.edges[e1];
         if (typeof e2 === 'string') e2 = this.edges[e2];
 
@@ -1565,6 +1844,14 @@ class Boxes {
 
     // Hole drawing methods
 
+    // Hole drawing methods
+
+    /**
+     * Draw a circle (cutout).
+     * @param {number} x - Center X.
+     * @param {number} y - Center Y.
+     * @param {number} r - Radius.
+     */
     circle(x, y, r) {
         this.restore(() => {
             r += this.burn;
@@ -1580,63 +1867,92 @@ class Boxes {
         });
     }
 
-    regularPolygonHole(x, y, r=0.0, d=0.0, n=6, a=0.0, tabs=0, corner_radius=0.0) {
+    /**
+     * Draw a regular polygon hole.
+     * @param {number} x - Center X.
+     * @param {number} y - Center Y.
+     * @param {number} [r=0.0] - Radius (inner?).
+     * @param {number} [d=0.0] - Diameter.
+     * @param {number} [n=6] - Number of sides.
+     * @param {number} [a=0.0] - Angle.
+     * @param {number} [tabs=0] - Tabs.
+     * @param {number} [corner_radius=0.0] - Corner radius.
+     */
+    regularPolygonHole(x, y, r = 0.0, d = 0.0, n = 6, a = 0.0, tabs = 0, corner_radius = 0.0) {
         this.restore(() => {
             this.holeCol(() => {
-                 if (!r) r = d / 2.0;
+                if (!r) r = d / 2.0;
 
-                 if (n === 0) {
-                     this.hole(x, y, r, 0, tabs);
-                     return;
-                 }
+                if (n === 0) {
+                    this.hole(x, y, r, 0, tabs);
+                    return;
+                }
 
-                 if (r < this.burn) r = this.burn + 1E-9;
-                 let r_ = r - this.burn;
+                if (r < this.burn) r = this.burn + 1E-9;
+                let r_ = r - this.burn;
 
-                 if (corner_radius < this.burn) corner_radius = this.burn;
-                 let cr_ = corner_radius - this.burn;
+                if (corner_radius < this.burn) corner_radius = this.burn;
+                let cr_ = corner_radius - this.burn;
 
-                 const side_length = 2 * r_ * Math.sin(Math.PI / n);
-                 // const apothem = r_ * Math.cos(Math.PI / n);
+                const side_length = 2 * r_ * Math.sin(Math.PI / n);
+                // const apothem = r_ * Math.cos(Math.PI / n);
 
-                 const s = Math.sqrt(2 * Math.pow(cr_, 2) * (1 - Math.cos(2 * Math.PI / n)));
-                 const b = Math.sin(Math.PI / n) / Math.sin(2 * Math.PI / n) * s;
-                 const flat_side_length = side_length - 2 * b;
+                const s = Math.sqrt(2 * Math.pow(cr_, 2) * (1 - Math.cos(2 * Math.PI / n)));
+                const b = Math.sin(Math.PI / n) / Math.sin(2 * Math.PI / n) * s;
+                const flat_side_length = side_length - 2 * b;
 
-                 this.moveTo(x, y, a);
-                 this.moveTo(r_, 0, 90 + 180 / n);
-                 this.moveTo(b, 0, 0);
+                this.moveTo(x, y, a);
+                this.moveTo(r_, 0, 90 + 180 / n);
+                this.moveTo(b, 0, 0);
 
-                 for (let i = 0; i < n; i++) {
-                     this.edge(flat_side_length);
-                     this.corner(360 / n, cr_);
-                 }
+                for (let i = 0; i < n; i++) {
+                    this.edge(flat_side_length);
+                    this.corner(360 / n, cr_);
+                }
             });
         });
     }
 
-    hole(x, y, r=0.0, d=0.0, tabs=0) {
+    /**
+     * Draw a circular hole.
+     * @param {number} x - Center X.
+     * @param {number} y - Center Y.
+     * @param {number|Object} [r=0.0] - Radius (or options object with r/d).
+     * @param {number} [d=0.0] - Diameter.
+     * @param {number} [tabs=0] - Tabs.
+     */
+    hole(x, y, r = 0.0, d = 0.0, tabs = 0) {
         this.restore(() => {
             this.holeCol(() => {
-                 if (typeof r === 'object' && r !== null) {
-                     d = r.d || d;
-                     r = r.r || 0.0;
-                 }
-                 if (!r) r = d / 2.0;
-                 if (r < this.burn) r = this.burn + 1E-9;
-                 const r_ = r - this.burn;
-                 
+                if (typeof r === 'object' && r !== null) {
+                    d = r.d || d;
+                    r = r.r || 0.0;
+                }
+                if (!r) r = d / 2.0;
+                if (r < this.burn) r = this.burn + 1E-9;
+                const r_ = r - this.burn;
 
-                 this.ctx.arc_full(x, y, r_);
-                 this.ctx.stroke();
+
+                this.ctx.arc_full(x, y, r_);
+                this.ctx.stroke();
             });
         });
     }
 
-    rectangularHole(x, y, dx, dy, r=0, center_x=true, center_y=true) {
-         this.restore(() => {
+    /**
+     * Draw a rectangular hole.
+     * @param {number} x - X coordinate.
+     * @param {number} y - Y coordinate.
+     * @param {number} dx - Width.
+     * @param {number} dy - Height.
+     * @param {number} [r=0] - Corner radius.
+     * @param {boolean} [center_x=true] - Center X alignment.
+     * @param {boolean} [center_y=true] - Center Y alignment.
+     */
+    rectangularHole(x, y, dx, dy, r = 0, center_x = true, center_y = true) {
+        this.restore(() => {
             this.holeCol(() => {
-                r = Math.min(r, dx/2., dy/2.);
+                r = Math.min(r, dx / 2., dy / 2.);
                 // Python: x_start = x - dx / 2.0 if center_x else x
                 // Python: y_start = y - dy / 2.0 if center_y else y
                 const x_start = center_x ? x - dx / 2.0 : x;
@@ -1644,15 +1960,25 @@ class Boxes {
 
                 this.moveTo(x_start + dx / 2.0, y_start + this.burn, 180);
                 this.edge(dx / 2.0 - r);
-                for (const d of [dy, dx, dy, dx/2.0 + r]) {
+                for (const d of [dy, dx, dy, dx / 2.0 + r]) {
                     this.corner(-90, r);
                     this.edge(d - 2 * r);
                 }
             });
-         });
+        });
     }
 
-    dHole(x, y, r=null, d=null, w=null, rel_w=0.75, angle=0) {
+    /**
+     * Draw a D-shaped hole.
+     * @param {number} x - Center X.
+     * @param {number} y - Center Y.
+     * @param {number} [r=null] - Radius.
+     * @param {number} [d=null] - Diameter.
+     * @param {number} [w=null] - Width of flat part?
+     * @param {number} [rel_w=0.75] - Relative width.
+     * @param {number} [angle=0] - Angle.
+     */
+    dHole(x, y, r = null, d = null, w = null, rel_w = 0.75, angle = 0) {
         this.restore(() => {
             this.holeCol(() => {
                 if (r === null) r = d / 2.0;
@@ -1682,7 +2008,17 @@ class Boxes {
         });
     }
 
-    flatHole(x, y, r=null, d=null, w=null, rel_w=0.75, angle=0) {
+    /**
+     * Draw a hole with two flat sides.
+     * @param {number} x - Center X.
+     * @param {number} y - Center Y.
+     * @param {number} [r=null] - Radius.
+     * @param {number} [d=null] - Diameter.
+     * @param {number} [w=null] - Width between flats.
+     * @param {number} [rel_w=0.75] - Relative width.
+     * @param {number} [angle=0] - Angle.
+     */
+    flatHole(x, y, r = null, d = null, w = null, rel_w = 0.75, angle = 0) {
         this.restore(() => {
             this.holeCol(() => {
                 if (r === null) r = d / 2.0;
@@ -1705,13 +2041,22 @@ class Boxes {
         });
     }
 
-    mountingHole(x, y, d_shaft, d_head=0.0, angle=0, tabs=0) {
+    /**
+     * Draw a mounting hole (keyhole style?).
+     * @param {number} x - X coordinate.
+     * @param {number} y - Y coordinate.
+     * @param {number} d_shaft - Shaft diameter.
+     * @param {number} [d_head=0.0] - Head diameter.
+     * @param {number} [angle=0] - Angle.
+     * @param {number} [tabs=0] - Tabs.
+     */
+    mountingHole(x, y, d_shaft, d_head = 0.0, angle = 0, tabs = 0) {
         this.restore(() => {
             this.holeCol(() => {
                 if (d_shaft < (2 * this.burn)) return;
 
                 if (!d_head || d_head < (2 * this.burn)) {
-                    this.hole(x, y, d_shaft/2, 0, tabs);
+                    this.hole(x, y, d_shaft / 2, 0, tabs);
                     return;
                 }
 
@@ -1733,41 +2078,59 @@ class Boxes {
 
     // Text and NEMA
 
-    text(text, x=0, y=0, angle=0, align="", fontsize=10, color=[0.0, 0.0, 0.0], font="Arial") {
+    /**
+     * Draw text.
+     * @param {string} text - Text to draw.
+     * @param {number} [x=0] - X coordinate.
+     * @param {number} [y=0] - Y coordinate.
+     * @param {number} [angle=0] - Angle.
+     * @param {string} [align=""] - Alignment (e.g., "center middle").
+     * @param {number} [fontsize=10] - Font size.
+     * @param {number[]} [color=[0.0, 0.0, 0.0]] - Color RGB array.
+     * @param {string} [font="Arial"] - Font family.
+     */
+    text(text, x = 0, y = 0, angle = 0, align = "", fontsize = 10, color = [0.0, 0.0, 0.0], font = "Arial") {
         this.restore(() => {
-             this.moveTo(x, y, angle);
-             const lines = text.split("\n");
-             const linesCount = lines.length;
-             const height = linesCount * fontsize + (linesCount - 1) * 0.4 * fontsize;
-             const alignParts = align.split(/\s+/);
-             let halign = "left";
-             const moves = {
-                 "top": -height,
-                 "middle": -0.5 * height,
-                 "bottom": 0,
-                 "left": "left",
-                 "center": "middle",
-                 "right": "end"
-             };
+            this.moveTo(x, y, angle);
+            const lines = text.split("\n");
+            const linesCount = lines.length;
+            const height = linesCount * fontsize + (linesCount - 1) * 0.4 * fontsize;
+            const alignParts = align.split(/\s+/);
+            let halign = "left";
+            const moves = {
+                "top": -height,
+                "middle": -0.5 * height,
+                "bottom": 0,
+                "left": "left",
+                "center": "middle",
+                "right": "end"
+            };
 
-             for (const a of alignParts) {
-                 if (moves[a] !== undefined) {
-                     if (typeof moves[a] === 'string') {
-                         halign = moves[a];
-                     } else {
-                         this.moveTo(0, moves[a]);
-                     }
-                 }
-             }
+            for (const a of alignParts) {
+                if (moves[a] !== undefined) {
+                    if (typeof moves[a] === 'string') {
+                        halign = moves[a];
+                    } else {
+                        this.moveTo(0, moves[a]);
+                    }
+                }
+            }
 
-             for (const line of [...lines].reverse()) {
-                 this.ctx.show_text(line, fontsize, halign, color, font);
-                 this.moveTo(0, 1.4 * fontsize);
-             }
+            for (const line of [...lines].reverse()) {
+                this.ctx.show_text(line, fontsize, halign, color, font);
+                this.moveTo(0, 1.4 * fontsize);
+            }
         });
     }
 
-    TX(size, x=0, y=0, angle=0) {
+    /**
+     * Draw a Torx hole pattern (mock).
+     * @param {number} size - Size index.
+     * @param {number} [x=0] - X coordinate.
+     * @param {number} [y=0] - Y coordinate.
+     * @param {number} [angle=0] - Angle.
+     */
+    TX(size, x = 0, y = 0, angle = 0) {
         this.restore(() => {
             this.holeCol(() => {
                 this.moveTo(x, y, angle);
@@ -1785,7 +2148,15 @@ class Boxes {
         });
     }
 
-    NEMA(size, x=0, y=0, angle=0, screwholes=null) {
+    /**
+     * Draw NEMA motor mounting holes.
+     * @param {number} size - NEMA size.
+     * @param {number} [x=0] - X coordinate.
+     * @param {number} [y=0] - Y coordinate.
+     * @param {number} [angle=0] - Angle.
+     * @param {number} [screwholes=null] - Override screw hole size.
+     */
+    NEMA(size, x = 0, y = 0, angle = 0, screwholes = null) {
         this.restore(() => {
             const params = this.nema_sizes[size];
             let [width, flange, holedistance, diameter] = params;
@@ -1794,7 +2165,7 @@ class Boxes {
 
             this.moveTo(x, y, angle);
             if (this.debug) {
-                 this.rectangularHole(0, 0, width, width);
+                this.rectangularHole(0, 0, width, width);
             }
             this.hole(0, 0, 0.5 * flange);
             for (const xh of [-1, 1]) {
@@ -1806,4 +2177,4 @@ class Boxes {
     }
 }
 
-export { Boxes  };
+export { Boxes };

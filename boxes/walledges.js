@@ -1,12 +1,19 @@
 import { Boxes } from './boxes.js';
 import { FingerJointSettings, BaseEdge, Settings } from './edges.js';
 
+/**
+ * Mixin for boxes that can be mounted on a wall.
+ * Adds arguments and logic for various wall mounting systems.
+ */
 class _WallMountedBox extends Boxes {
     constructor() {
         super();
         this.addWallSettingsArgs();
     }
 
+    /**
+     * Add arguments for wall mounting settings.
+     */
     addWallSettingsArgs() {
         this.addSettingsArgs(FingerJointSettings);
         this.addSettingsArgs(WallSettings);
@@ -23,6 +30,9 @@ class _WallMountedBox extends Boxes {
         });
     }
 
+    /**
+     * Generate the wall edges based on the selected wall type.
+     */
     generateWallEdges() {
         let s;
         if (this.walltype.startsWith("plain")) {
@@ -52,7 +62,15 @@ export { _WallMountedBox };
 // ####     Straight Edge / Base class
 // #############################################################################
 
+/**
+ * Base class for wall edges.
+ */
 class WallEdge extends BaseEdge {
+    /**
+     * Create a WallEdge.
+     * @param {Boxes} boxes - The main boxes instance.
+     * @param {Object} settings - Edge settings.
+     */
     constructor(boxes, settings) {
         super(boxes, settings);
         this._reversed = false;
@@ -91,6 +109,9 @@ class WallEdge extends BaseEdge {
 
 export { WallEdge };
 
+/**
+ * Wall edge that joins with another part (finger joint connection).
+ */
 class WallJoinedEdge extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -111,6 +132,9 @@ class WallJoinedEdge extends WallEdge {
 
 export { WallJoinedEdge };
 
+/**
+ * Back edge for wall mounted box.
+ */
 class WallBackEdge extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -134,6 +158,9 @@ class WallBackEdge extends WallEdge {
 
 export { WallBackEdge };
 
+/**
+ * Edge with holes for wall mounting.
+ */
 class WallHoles extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -168,6 +195,9 @@ class WallHoles extends WallEdge {
 
 export { WallHoles };
 
+/**
+ * Edge that includes wall holes.
+ */
 class WallHoleEdge extends WallHoles {
     constructor(boxes, wallHoles, kw = {}) {
         super(boxes, wallHoles.settings);
@@ -200,6 +230,9 @@ class WallHoleEdge extends WallHoles {
 
 export { WallHoleEdge };
 
+/**
+ * Settings for Wall mounting.
+ */
 class WallSettings extends Settings {
     static absolute_params = {};
 
@@ -256,6 +289,14 @@ class WallSettings extends Settings {
 }
 
 // Helper functions to create dynamic classes (simulate Python's type())
+
+/**
+ * Create a reversed version of the base edge class.
+ * @param {class} BaseClass - The base edge class.
+ * @param {Boxes} boxes - The boxes instance.
+ * @param {Object} settings - Edge settings.
+ * @returns {WallEdge} Instance of the reversed edge.
+ */
 function createReversedClass(BaseClass, boxes, settings) {
     class Reversed extends BaseClass {
         constructor() {
@@ -446,6 +487,9 @@ export { WallSettings };
 // ####     Slat wall
 // #############################################################################
 
+/**
+ * Edge for mounting on Slat Wall systems.
+ */
 class SlatWallEdge extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -548,6 +592,9 @@ class SlatWallEdge extends WallEdge {
 
 export { SlatWallEdge };
 
+/**
+ * Settings for Slat Wall edge.
+ */
 class SlatWallSettings extends WallSettings {
     static absolute_params = {
         "bottom_hook": ["hook", "spring", "stud", "none"],
@@ -572,6 +619,9 @@ export { SlatWallSettings };
 // ####     DIN rail
 // #############################################################################
 
+/**
+ * Edge for mounting on DIN rail.
+ */
 class DinRailEdge extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -630,6 +680,9 @@ class DinRailEdge extends WallEdge {
 
 export { DinRailEdge };
 
+/**
+ * Settings for DIN rail edge.
+ */
 class DinRailSettings extends WallSettings {
     static absolute_params = {
         "bottom": ["stud", "none"],
@@ -649,6 +702,9 @@ export { DinRailSettings };
 // ####     French Cleats
 // #############################################################################
 
+/**
+ * Edge for mounting on French Cleat systems.
+ */
 class FrenchCleatEdge extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -714,6 +770,9 @@ class FrenchCleatEdge extends WallEdge {
 
 export { FrenchCleatEdge };
 
+/**
+ * Settings for French Cleat edge.
+ */
 class FrenchCleatSettings extends WallSettings {
     static absolute_params = {
         "bottom": ["stud", "hook", "none"],
@@ -735,6 +794,9 @@ export { FrenchCleatSettings };
 // ####     Skadis
 // #############################################################################
 
+/**
+ * Edge for mounting on IKEA Skadis pegboards.
+ */
 class SkadisEdge extends WallEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -801,14 +863,17 @@ class SkadisEdge extends WallEdge {
 
 export { SkadisEdge };
 
+/**
+ * Settings for Skadis edge.
+ */
 class SkadisSettings extends WallSettings {
     static absolute_params = {
-        "style": ["hooks", "hook+stud", "single"],
-        "board_thickness": 5.1,
+        "style": ["hooks", "hook+stud", "studs"],
     };
 
     static relative_params = {
         "edge_width": 1.0,
+        "board_thickness": 5.0,
     };
 
     static base_class = SkadisEdge;

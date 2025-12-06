@@ -1,6 +1,14 @@
-import { vdiff, vlength  } from './vectors.js';
+import { vdiff, vlength } from './vectors.js';
 
 // Helper math functions
+
+/**
+ * Generate a sequence of linearly spaced numbers.
+ * @param {number} a - Start value.
+ * @param {number} b - End value.
+ * @param {number} n - Number of points.
+ * @returns {number[]} Array of n linearly spaced points.
+ */
 function linspace(a, b, n) {
     if (n < 2) return n === 1 ? [a] : [];
     const step = (b - a) / (n - 1);
@@ -11,48 +19,106 @@ function linspace(a, b, n) {
     return result;
 }
 
+/**
+ * Calculate the angle where the involute intersects a given radius.
+ * @param {number} Rb - Base radius.
+ * @param {number} R - Target radius.
+ * @returns {number} Angle in radians.
+ */
 function involuteIntersectAngle(Rb, R) {
     return (Math.sqrt(Math.pow(R, 2) - Math.pow(Rb, 2)) / Rb) - Math.acos(Rb / R);
 }
 
+/**
+ * Calculate coordinates of a point on a circle.
+ * @param {number} radius - Circle radius.
+ * @param {number} angle - Angle in radians.
+ * @returns {number[]} [x, y] coordinates.
+ */
 function pointOnCircle(radius, angle) {
     return [radius * Math.cos(angle), radius * Math.sin(angle)];
 }
 
+/**
+ * Convert degrees to radians.
+ * @param {number} deg - Angle in degrees.
+ * @returns {number} Angle in radians.
+ */
 function radians(deg) {
     return deg * Math.PI / 180;
 }
 
+/**
+ * Convert radians to degrees.
+ * @param {number} rad - Angle in radians.
+ * @returns {number} Angle in degrees.
+ */
 function degrees(rad) {
     return rad * 180 / Math.PI;
 }
 
 // Undercut support functions
+
+/**
+ * Calculate minimum teeth to avoid undercut.
+ * @param {number} pitchAngle - Pitch angle in degrees.
+ * @param {number} [k=1.0] - Addendum coefficient.
+ * @returns {number} Minimum number of teeth.
+ */
 function undercutMinTeeth(pitchAngle, k = 1.0) {
     const x = Math.max(Math.sin(radians(pitchAngle)), 0.01);
     return 2 * k / (x * x);
 }
 
+/**
+ * Calculate maximum addendum coefficient to avoid undercut.
+ * @param {number} teeth - Number of teeth.
+ * @param {number} [pitchAngle=20.0] - Pitch angle in degrees.
+ * @returns {number} Max addendum coefficient.
+ */
 function undercutMaxK(teeth, pitchAngle = 20.0) {
     const x = Math.max(Math.sin(radians(pitchAngle)), 0.01);
     return 0.5 * teeth * x * x;
 }
 
+/**
+ * Calculate minimum pitch angle to avoid undercut.
+ * @param {number} teeth - Number of teeth.
+ * @param {number} [k=1.0] - Addendum coefficient.
+ * @returns {number} Minimum pitch angle in degrees.
+ */
 function undercutMinAngle(teeth, k = 1.0) {
     return degrees(Math.asin(Math.min(0.856, Math.sqrt(2.0 * k / teeth))));
 }
 
+/**
+ * Check if the gear configuration has undercut.
+ * @param {number} teeth - Number of teeth.
+ * @param {number} [pitchAngle=20.0] - Pitch angle in degrees.
+ * @param {number} [k=1.0] - Addendum coefficient.
+ * @returns {boolean} True if undercut exists.
+ */
 function haveUndercut(teeth, pitchAngle = 20.0, k = 1.0) {
     return teeth < undercutMinTeeth(pitchAngle, k);
 }
 
+/**
+ * Perform basic gear calculations.
+ * @param {number} numTeeth - Number of teeth.
+ * @param {number} circularPitch - Circular pitch.
+ * @param {number} pressureAngle - Pressure angle in degrees.
+ * @param {number} [clearance=0] - Clearance.
+ * @param {boolean} [ringGear=false] - Whether it is a ring gear.
+ * @param {number} [profileShift=0.0] - Profile shift coefficient.
+ * @returns {Object} Gear dimensions and parameters.
+ */
 function gearCalculations(numTeeth, circularPitch, pressureAngle, clearance = 0, ringGear = false, profileShift = 0.0) {
     const diametralPitch = Math.PI / circularPitch;
     const pitchDiameter = numTeeth / diametralPitch;
     const pitchRadius = pitchDiameter / 2.0;
     let addendum = 1 / diametralPitch;
     let dedendum = addendum;
-    
+
     dedendum *= (1 + profileShift);
     addendum *= (1 - profileShift);
 
@@ -79,6 +145,18 @@ function gearCalculations(numTeeth, circularPitch, pressureAngle, clearance = 0,
     };
 }
 
+/**
+ * Generate points for a gear rack.
+ * @param {number} toothCount - Number of teeth.
+ * @param {number} pitch - Circular pitch.
+ * @param {number} addendum - Addendum height.
+ * @param {number} pressureAngle - Pressure angle in degrees.
+ * @param {number} baseHeight - Height of the rack base.
+ * @param {number} tabLength - Length of end tabs.
+ * @param {number} [clearance=0] - Clearance.
+ * @param {boolean} [drawGuides=false] - Whether to include guide points.
+ * @returns {Object} Object containing points and guidePoints.
+ */
 function generateRackPoints(toothCount, pitch, addendum, pressureAngle, baseHeight, tabLength, clearance = 0, drawGuides = false) {
     const spacing = 0.5 * pitch;
 
@@ -92,7 +170,7 @@ function generateRackPoints(toothCount, pitch, addendum, pressureAngle, baseHeig
     const baseBot = addendum + clearance + baseHeight;
 
     const xLhs = -pitch * 0.5 * toothCount - tabLength;
-    
+
     const points = [];
     points.push([xLhs, baseBot]);
     points.push([xLhs, baseTop]);
@@ -119,6 +197,17 @@ function generateRackPoints(toothCount, pitch, addendum, pressureAngle, baseHeig
     return { points, guidePoints };
 }
 
+/**
+ * Generate points for a spur gear profile.
+ * @param {number} teeth - Number of teeth.
+ * @param {number} baseRadius - Base circle radius.
+ * @param {number} pitchRadius - Pitch circle radius.
+ * @param {number} outerRadius - Outer circle radius.
+ * @param {number} rootRadius - Root circle radius.
+ * @param {number} accuracyInvolute - Number of points for involute curve.
+ * @param {number} accuracyCircular - Number of points for circular arcs.
+ * @returns {number[]} Array of points defining the gear profile.
+ */
 function generateSpurPoints(teeth, baseRadius, pitchRadius, outerRadius, rootRadius, accuracyInvolute, accuracyCircular) {
     const twoPi = 2 * Math.PI;
     const halfThickAngle = twoPi / (4.0 * teeth);
@@ -133,7 +222,7 @@ function generateSpurPoints(teeth, baseRadius, pitchRadius, outerRadius, rootRad
     for (let x = 0; x < teeth; x++) {
         centers.push(x * twoPi / teeth);
     }
-    
+
     const points = [];
 
     for (const c of centers) {
@@ -159,7 +248,7 @@ function generateSpurPoints(teeth, baseRadius, pitchRadius, outerRadius, rootRad
             const root2 = pitch2 + pitchToRootAngle;
             const rootAngles = linspace(root2, root1 + (twoPi / teeth), accuracyCircular);
             pointsOnRoot = rootAngles.map(x => pointOnCircle(rootRadius, x));
-            
+
             // p_tmp = points1 + points_on_outer_radius[1:-1] + points2[::-1] + points_on_root[1:-1]
             const pTmp = [
                 ...points1,
@@ -171,9 +260,9 @@ function generateSpurPoints(teeth, baseRadius, pitchRadius, outerRadius, rootRad
         } else {
             const rootAngles = linspace(base2, base1 + (twoPi / teeth), accuracyCircular);
             pointsOnRoot = rootAngles.map(x => pointOnCircle(rootRadius, x));
-            
+
             // p_tmp = points1 + points_on_outer_radius[1:-1] + points2[::-1] + points_on_root
-             const pTmp = [
+            const pTmp = [
                 ...points1,
                 ...pointsOnOuterRadius.slice(1, -1),
                 ...points2.slice().reverse(),
@@ -186,7 +275,15 @@ function generateSpurPoints(teeth, baseRadius, pitchRadius, outerRadius, rootRad
     return points;
 }
 
+/**
+ * Class representing a Gears generator.
+ * Provides methods to configure and draw gears and racks.
+ */
 class Gears {
+    /**
+     * Create a Gears generator.
+     * @param {Boxes} boxes - The main boxes instance.
+     */
     constructor(boxes) {
         this.boxes = boxes;
         // Default options
@@ -218,10 +315,19 @@ class Gears {
         this.options = { ...this.defaults };
     }
 
+    /**
+     * Parse and update gear options.
+     * @param {Object} args - Configuration options.
+     */
     parseArgs(args) {
         this.options = { ...this.defaults, ...args };
     }
 
+    /**
+     * Calculate the circular pitch based on the selected system (MM, CP, DP).
+     * @returns {number} The calculated circular pitch.
+     * @throws {Error} If system is unknown.
+     */
     calcCircularPitch() {
         const dimension = this.options.dimension;
         let circularPitch;
@@ -232,21 +338,32 @@ class Gears {
         } else if (this.options.system === 'MM') {
             circularPitch = Math.PI * dimension;
         } else {
-             throw new Error(`unknown system '${this.options.system}', try CP, DP, MM`);
+            throw new Error(`unknown system '${this.options.system}', try CP, DP, MM`);
         }
         return circularPitch;
     }
 
+    /**
+     * Generate spokes for the gear.
+     * @param {number} rootRadius - Root radius of the gear.
+     * @param {number} spokeWidth - Width of the spokes.
+     * @param {number|number[]} spokes - Number of spokes or array of spoke angles.
+     * @param {number} mountRadius - Radius of the mounting area.
+     * @param {number} mountHole - Diameter of the mount hole.
+     * @param {number} unitFactor - Unit conversion factor.
+     * @param {string} unitLabel - Unit label (e.g., 'mm').
+     * @returns {string[]} List of warning messages (e.g. if spokes don't fit).
+     */
     generateSpokes(rootRadius, spokeWidth, spokes, mountRadius, mountHole, unitFactor, unitLabel) {
         if (!spokes) return [];
-        
+
         const messages = [];
         const rOuter = rootRadius - spokeWidth;
         let collision = false;
-        
+
         let spokeCount;
         let spokeAngles;
-        
+
         if (typeof spokes === 'number') {
             spokeCount = spokes;
             spokeAngles = [];
@@ -257,13 +374,13 @@ class Gears {
             spokeCount = spokes.length;
             spokeAngles = spokes.map(a => radians(a));
         }
-        
+
         // We append the first angle + 2pi to the end to handle the loop wrap-around
         spokeAngles.push(spokeAngles[0] + 2 * Math.PI);
 
         if (mountRadius <= mountHole / 2) {
             const adjFactor = (rOuter - mountHole / 2) / 5;
-             if (adjFactor < 0.1) {
+            if (adjFactor < 0.1) {
                 collision = true;
             } else {
                 mountRadius = mountHole / 2 + adjFactor;
@@ -272,44 +389,44 @@ class Gears {
         }
 
         for (let i = 0; i < spokeCount; i++) {
-             const angle = spokeAngles[i+1] - spokeAngles[i];
-             if (spokeWidth >= angle * mountRadius) {
-                 const adjFactor = 1.2;
-                 mountRadius += adjFactor;
-                 messages.push(`Too many spokes. Increased Mount support by ${(adjFactor / unitFactor).toFixed(3)}${unitLabel}`);
-             }
+            const angle = spokeAngles[i + 1] - spokeAngles[i];
+            if (spokeWidth >= angle * mountRadius) {
+                const adjFactor = 1.2;
+                mountRadius += adjFactor;
+                messages.push(`Too many spokes. Increased Mount support by ${(adjFactor / unitFactor).toFixed(3)}${unitLabel}`);
+            }
         }
-        
+
         if (rOuter <= mountRadius) {
             collision = true;
         }
-        
+
         if (collision) {
             messages.push("Not enough room for Spokes. Decrease Spoke width.");
         } else {
-             for (let i = 0; i < spokeCount; i++) {
-                 this.boxes.ctx.save();
-                 const startA = spokeAngles[i];
-                 const endA = spokeAngles[i+1];
-                 
-                 // inner circle around mount
-                 let asinFactor = spokeWidth / mountRadius / 2;
-                 asinFactor = Math.max(-1.0, Math.min(1.0, asinFactor));
-                 const a = Math.asin(asinFactor);
-                 
-                 // outer circle
-                 let asinFactor2 = spokeWidth / rOuter / 2;
-                 asinFactor2 = Math.max(-1.0, Math.min(1.0, asinFactor2));
-                 const a2 = Math.asin(asinFactor2);
-                 
-                 const p1 = pointOnCircle(mountRadius, startA + a);
-                 const p2 = pointOnCircle(rOuter, startA + a2);
-                 const diff = vdiff(p1, p2);
-                 const l = vlength(diff);
-                 
-                 this.boxes.moveTo(...p1);
-                 
-                 this.boxes.polyline(
+            for (let i = 0; i < spokeCount; i++) {
+                this.boxes.ctx.save();
+                const startA = spokeAngles[i];
+                const endA = spokeAngles[i + 1];
+
+                // inner circle around mount
+                let asinFactor = spokeWidth / mountRadius / 2;
+                asinFactor = Math.max(-1.0, Math.min(1.0, asinFactor));
+                const a = Math.asin(asinFactor);
+
+                // outer circle
+                let asinFactor2 = spokeWidth / rOuter / 2;
+                asinFactor2 = Math.max(-1.0, Math.min(1.0, asinFactor2));
+                const a2 = Math.asin(asinFactor2);
+
+                const p1 = pointOnCircle(mountRadius, startA + a);
+                const p2 = pointOnCircle(rOuter, startA + a2);
+                const diff = vdiff(p1, p2);
+                const l = vlength(diff);
+
+                this.boxes.moveTo(...p1);
+
+                this.boxes.polyline(
                     l,
                     90 + degrees(a2), 0,
                     [degrees(endA - startA - 2 * a2), rOuter], 0,
@@ -318,18 +435,23 @@ class Gears {
                     90 - degrees(a), 0,
                     [-degrees(endA - startA - 2 * a), mountRadius], 0,
                     90 + degrees(a2), 0 // this last 0 is weird in my logic but follows python args structure?
-                 );
-                 // The last part in python:
-                 // 0, 90+degrees(a2), 0
-                 // This seems to be: length 0, turn 90+deg(a2), length 0.
-                 
-                 this.boxes.ctx.restore();
-             }
+                );
+                // The last part in python:
+                // 0, 90+degrees(a2), 0
+                // This seems to be: length 0, turn 90+deg(a2), length 0.
+
+                this.boxes.ctx.restore();
+            }
         }
         return messages;
     }
 
-    draw(options={}, move="") {
+    /**
+     * Draw the gear or rack based on parsed options.
+     * @param {Object} [options={}] - Override options.
+     * @param {string} [move=""] - Move commands.
+     */
+    draw(options = {}, move = "") {
         this.parseArgs(options);
         // ... (Implement full draw logic if needed, but for now just having generateSpokes complete is key)
         // Since I'm refactoring Boxes, I should make sure Gears is usable.

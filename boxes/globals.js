@@ -1,25 +1,46 @@
 
 // Globals to support Python-ported generators
 
-global.boolarg = function(v) {
+/**
+ * Parse a boolean argument from string or other types.
+ * @param {string|boolean} v - Value to parse.
+ * @returns {boolean} True if string is 'true' (case-insensitive) or value is truthy.
+ */
+global.boolarg = function (v) {
     if (typeof v === 'string') {
         return v.toLowerCase() === 'true';
     }
     return !!v;
 };
 
-global.BoolArg = function() {
+/**
+ * Returns the boolarg function.
+ * Used for argument parsing configuration.
+ * @returns {Function} The boolarg function.
+ */
+global.BoolArg = function () {
     return global.boolarg;
 };
 
-global.ArgparseEdgeType = function(chars) {
-    return function(v) {
+/**
+ * Creates a validator for edge type arguments.
+ * @param {string} chars - Allowed characters/types.
+ * @returns {Function} A function that returns the value (validation not implemented).
+ */
+global.ArgparseEdgeType = function (chars) {
+    return function (v) {
         // Validation could go here
         return v;
     };
 };
 
-global.list = function(iterable) {
+/**
+ * Creates an array from an iterable.
+ * Mimics Python's list() constructor.
+ * @param {Iterable|string} iterable - The iterable to convert.
+ * @returns {Array} An array containing the elements.
+ */
+global.list = function (iterable) {
     if (typeof iterable === 'string') {
         return iterable.split('');
     }
@@ -29,7 +50,15 @@ global.list = function(iterable) {
     return [];
 };
 
-global.range = function(start, stop, step) {
+/**
+ * Generates a sequence of numbers.
+ * Mimics Python's range() function.
+ * @param {number} start - Start value (or stop if only one argument provided).
+ * @param {number} [stop] - Stop value.
+ * @param {number} [step=1] - Step value.
+ * @returns {number[]} Array of numbers in the range.
+ */
+global.range = function (start, stop, step) {
     if (typeof stop === 'undefined') {
         stop = start;
         start = 0;
@@ -47,18 +76,38 @@ global.range = function(start, stop, step) {
     return result;
 };
 
-global.enumerate = function*(iterable) {
+/**
+ * Generator that yields pairs of [index, value].
+ * Mimics Python's enumerate().
+ * @param {Iterable} iterable - The iterable to enumerate.
+ * @yields {Array} Pair of [index, value].
+ */
+global.enumerate = function* (iterable) {
     let i = 0;
     for (const item of iterable) {
         yield [i++, item];
     }
 };
 
-global.reversed = function(iterable) {
+/**
+ * Returns a new array with elements in reverse order.
+ * Mimics Python's reversed().
+ * @param {Iterable} iterable - The iterable to reverse.
+ * @returns {Array} Reversed array.
+ */
+global.reversed = function (iterable) {
     return Array.from(iterable).reverse();
 };
 
-global.sorted = function(iterable, key, reverse) {
+/**
+ * Returns a new sorted array.
+ * Mimics Python's sorted().
+ * @param {Iterable} iterable - The iterable to sort.
+ * @param {Function} [key] - Function to extract comparison key.
+ * @param {boolean} [reverse] - Whether to sort in descending order.
+ * @returns {Array} Sorted array.
+ */
+global.sorted = function (iterable, key, reverse) {
     const arr = Array.from(iterable);
     arr.sort((a, b) => {
         const valA = key ? key(a) : a;
@@ -73,7 +122,13 @@ global.sorted = function(iterable, key, reverse) {
     return arr;
 };
 
-global.zip = function(...iterables) {
+/**
+ * Aggregates elements from each of the iterables.
+ * Mimics Python's zip().
+ * @param {...Iterable} iterables - Iterables to zip.
+ * @returns {Array<Array>} Array of tuples.
+ */
+global.zip = function (...iterables) {
     const iterators = iterables.map(i => Array.from(i)[Symbol.iterator]());
     const result = [];
     while (true) {
@@ -84,18 +139,35 @@ global.zip = function(...iterables) {
     return result;
 };
 
-global.argparseSections = function(s) {
+/**
+ * Parses section argument string into numbers.
+ * @param {string} s - Colan-separated number string.
+ * @returns {number[]} Array of numbers.
+ */
+global.argparseSections = function (s) {
     if (!s) return [];
     return s.split(':').map(Number);
 };
 
-global.sum = function(iterable) {
+/**
+ * Sums the items of an iterable.
+ * Mimics Python's sum().
+ * @param {Iterable<number>} iterable - Iterable of numbers.
+ * @returns {number} Sum of elements.
+ */
+global.sum = function (iterable) {
     let s = 0;
     for (const x of iterable) s += x;
     return s;
 };
 
-global.len = function(iterable) {
+/**
+ * Returns the length of an item.
+ * Mimics Python's len().
+ * @param {Object|Array|string} iterable - Item to check length of.
+ * @returns {number} Length or size.
+ */
+global.len = function (iterable) {
     if (Array.isArray(iterable) || typeof iterable === 'string') return iterable.length;
     if (iterable instanceof Set || iterable instanceof Map) return iterable.size;
     return Object.keys(iterable).length;

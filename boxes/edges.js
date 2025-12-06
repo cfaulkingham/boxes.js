@@ -1,9 +1,14 @@
-import { Color  } from './Color.js';
-import { SVGContext  } from './svg_context.js';
-import { Matrix  } from './matrix.js';
-import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf  } from './vectors.js';
-import { Gears  } from './gears.js';
+import { Color } from './Color.js';
+import { SVGContext } from './svg_context.js';
+import { Matrix } from './matrix.js';
+import { normalize, vlength, vclip, vdiff, vadd, vorthogonal, vscalmul, dotproduct, circlepoint, tangent, kerf } from './vectors.js';
+import { Gears } from './gears.js';
 
+/**
+ * Parse a sections string (e.g., "10/3" or "5*2" or "10:20:30").
+ * @param {string} s - Sections string.
+ * @returns {number[]} Array of section lengths.
+ */
 function argparseSections(s) {
     const result = [];
     const parse = s.split(/[\s:]+/);
@@ -36,26 +41,57 @@ function argparseSections(s) {
     return result;
 }
 
+/**
+ * Base policy for bolt distribution.
+ */
 class BoltPolicy {
+    /**
+     * Check if a bolt should be drawn at position.
+     * @param {number} pos - Position index.
+     * @returns {boolean} True if bolt should be drawn.
+     */
     drawBolt(pos) {
         return false;
     }
 
+    /**
+     * Calculate number of fingers based on policy.
+     * @param {number} numFingers - Requested fingers.
+     * @returns {number} Adjusted number of fingers.
+     */
     numFingers(numFingers) {
         return numFingers;
     }
 
+    /**
+     * Helper for even numbers.
+     * @param {number} numFingers - Number.
+     * @returns {number} Even number.
+     * @private
+     */
     _even(numFingers) {
         return Math.floor(numFingers / 2) * 2;
     }
 
+    /**
+     * Helper for odd numbers.
+     * @param {number} numFingers - Number.
+     * @returns {number} Odd number.
+     * @private
+     */
     _odd(numFingers) {
         if (numFingers % 2) return numFingers;
         return numFingers - 1;
     }
 }
 
+/**
+ * Standard bolt policy logic.
+ */
 class Bolts extends BoltPolicy {
+    /**
+     * @param {number} [bolts=1] - Number of bolts.
+     */
     constructor(bolts = 1) {
         super();
         this.bolts = bolts;
@@ -83,25 +119,34 @@ class Bolts extends BoltPolicy {
         }
 
         return (Math.floor((p * (this.bolts + 1) / this.fingers) - 0.01) !==
-                Math.floor(((p + 1) * (this.bolts + 1) / this.fingers) - 0.01));
+            Math.floor(((p + 1) * (this.bolts + 1) / this.fingers) - 0.01));
     }
 }
 
+/**
+ * Base settings class for edges and parts.
+ * mimicking Python's handling of absolute and relative parameters.
+ */
 class Settings {
+    /**
+     * @param {number} thickness - Material thickness.
+     * @param {boolean} [relative=true] - Whether parameters are relative to thickness.
+     * @param {Object} [kwargs={}] - Override parameters.
+     */
     constructor(thickness, relative = true, kwargs = {}) {
         this.values = {};
         this.absolute_params = this.constructor.absolute_params || {};
         this.relative_params = this.constructor.relative_params || {};
 
         for (const [name, value] of Object.entries(this.absolute_params)) {
-             let val = value;
-             if (Array.isArray(value) || (typeof value === 'object' && value !== null && !Array.isArray(value))) {
-                 // In python tuple can be choices. JS doesn't have tuples.
-                 // Assuming tuple in python is array in JS if converted directly or check logic.
-                 // Python: if isinstance(value, tuple): value = value[0]
-                 if (Array.isArray(value)) val = value[0];
-             }
-             this.values[name] = val;
+            let val = value;
+            if (Array.isArray(value) || (typeof value === 'object' && value !== null && !Array.isArray(value))) {
+                // In python tuple can be choices. JS doesn't have tuples.
+                // Assuming tuple in python is array in JS if converted directly or check logic.
+                // Python: if isinstance(value, tuple): value = value[0]
+                if (Array.isArray(value)) val = value[0];
+            }
+            this.values[name] = val;
         }
 
         this.thickness = thickness;
@@ -111,12 +156,18 @@ class Settings {
         }
 
         for (const [name, value] of Object.entries(this.relative_params)) {
-             this.values[name] = value * factor;
+            this.values[name] = value * factor;
         }
 
         this.setValues(thickness, relative, kwargs);
     }
 
+    /**
+     * Update values with new overrides.
+     * @param {number} thickness - Thickness.
+     * @param {boolean} [relative=true] - Relative.
+     * @param {Object} [kwargs={}] - Overrides.
+     */
     setValues(thickness, relative = true, kwargs = {}) {
         let factor = 1.0;
         if (relative) {
@@ -128,13 +179,16 @@ class Settings {
             } else if (name in this.relative_params) {
                 this.values[name] = value * factor;
             } else {
-                 this[name] = value;
+                this[name] = value;
             }
         }
         this.checkValues();
     }
 
-    checkValues() {}
+    /**
+     * Validation hook.
+     */
+    checkValues() { }
 
     // Helper to simulate __getattr__
     get(name) {
@@ -144,7 +198,14 @@ class Settings {
     }
 }
 
+/**
+ * Base class for all Edge types.
+ */
 class BaseEdge {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {Settings|null} settings - Settings instance.
+     */
     constructor(boxes, settings) {
         this.boxes = boxes;
         this.ctx = boxes.ctx;
@@ -158,12 +219,24 @@ class BaseEdge {
     spacing() { return this.startwidth() + this.margin(); }
 
     // __call__ equivalent
+    /**
+     * Draw the edge.
+     * @param {number} length - Length of edge.
+     * @param {Object} [kw={}] - options.
+     */
     draw(length, kw = {}) {
         throw new Error("Not implemented");
     }
 }
 
+/**
+ * Standard edge (straight connection).
+ */
 class Edge extends BaseEdge {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {Settings} settings - Settings.
+     */
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = 'e';
@@ -192,6 +265,9 @@ class Edge extends BaseEdge {
     }
 }
 
+/**
+ * Positive standard edge (outset).
+ */
 class OutSetEdge extends Edge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -204,13 +280,16 @@ class OutSetEdge extends Edge {
     }
 }
 
+/**
+ * Edge that does nothing (invisible).
+ */
 class NoopEdge extends BaseEdge {
-    constructor(boxes, margin=0) {
+    constructor(boxes, margin = 0) {
         super(boxes, null);
         this._margin = margin;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         this.boxes.corner(-90);
     }
 
@@ -219,7 +298,11 @@ class NoopEdge extends BaseEdge {
     }
 }
 
+/**
+ * Settings for MountingEdge.
+ */
 class MountingSettings extends Settings {
+    /** @type {Object} Absolute parameters */
     static absolute_params = {
         "style": ["straight edge, within", "straight edge, extended", "mounting tab"],
         "side": ["back", "left", "right", "front"],
@@ -229,6 +312,13 @@ class MountingSettings extends Settings {
         "d_head": 6.5
     };
 
+    /**
+     * Create edge objects.
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {string} chars - Chars to assign.
+     * @param {boolean} [add=true] - Add to boxes parts.
+     * @returns {MountingEdge[]} Array of edges.
+     */
     edgeObjects(boxes, chars = "G", add = true) {
         const edges = [new MountingEdge(boxes, this)];
         if (edges[0]) edges[0].char = chars[0];
@@ -237,6 +327,9 @@ class MountingSettings extends Settings {
     }
 }
 
+/**
+ * Edge with mounting holes or tabs.
+ */
 class MountingEdge extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -257,7 +350,7 @@ class MountingEdge extends BaseEdge {
         return 0.0;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         if (length === 0.0) return;
 
         const style = this.settings.get('style');
@@ -275,15 +368,15 @@ class MountingEdge extends BaseEdge {
 
         // JS numbers are floats, check if integer
         if (!Number.isInteger(num)) {
-             throw new Error("MountingEdge: num needs to be an integer number");
+            throw new Error("MountingEdge: num needs to be an integer number");
         }
 
         if (margin_val < 0 || margin_val > 0.5) {
-             throw new Error(`MountingEdge: margin needs to be in [0, 0.5] but is ${margin_val}`);
+            throw new Error(`MountingEdge: margin needs to be in [0, 0.5] but is ${margin_val}`);
         }
 
         if (dh !== 0 && dh <= ds) {
-             throw new Error(`MountingEdge: d_head needs to be 0 or > ${ds}, but is ${dh}`);
+            throw new Error(`MountingEdge: d_head needs to be 0 or > ${ds}, but is ${dh}`);
         }
 
         let count = Math.max(1, Math.floor(num));
@@ -311,21 +404,21 @@ class MountingEdge extends BaseEdge {
         }
 
         if (style === "mounting tab") {
-             this.boxes.edge(margin_, 1);
-             for (let i = 0; i < count; i++) {
-                 if (i > 0) this.boxes.edge(gap);
-                 this.boxes.corner(-90, this.settings.thickness / 2);
-                 this.boxes.edge(dh + 1.5 * ds - this.settings.thickness / 4 - dh / 2);
-                 this.boxes.corner(90, this.settings.thickness + dh / 2);
-                 this.boxes.corner(-90);
-                 this.boxes.corner(90);
-                 // mountingHole(x, y, d_shaft, d_head, angle)
-                 this.boxes.mountingHole(0, this.settings.thickness * 1.25 + ds / 2, ds, dh, -90);
-                 this.boxes.corner(90, this.settings.thickness + dh / 2);
-                 this.boxes.edge(dh + 1.5 * ds - this.settings.thickness / 4 - dh / 2);
-                 this.boxes.corner(-90, this.settings.thickness / 2);
-             }
-             this.boxes.edge(margin_, 1);
+            this.boxes.edge(margin_, 1);
+            for (let i = 0; i < count; i++) {
+                if (i > 0) this.boxes.edge(gap);
+                this.boxes.corner(-90, this.settings.thickness / 2);
+                this.boxes.edge(dh + 1.5 * ds - this.settings.thickness / 4 - dh / 2);
+                this.boxes.corner(90, this.settings.thickness + dh / 2);
+                this.boxes.corner(-90);
+                this.boxes.corner(90);
+                // mountingHole(x, y, d_shaft, d_head, angle)
+                this.boxes.mountingHole(0, this.settings.thickness * 1.25 + ds / 2, ds, dh, -90);
+                this.boxes.corner(90, this.settings.thickness + dh / 2);
+                this.boxes.edge(dh + 1.5 * ds - this.settings.thickness / 4 - dh / 2);
+                this.boxes.corner(-90, this.settings.thickness / 2);
+            }
+            this.boxes.edge(margin_, 1);
         } else {
             let x = margin_;
             for (let i = 0; i < count; i++) {
@@ -339,6 +432,9 @@ class MountingEdge extends BaseEdge {
     }
 }
 
+/**
+ * Settings for GroovedEdge.
+ */
 class GroovedSettings extends Settings {
     static absolute_params = {
         "style": ["arc", "flat", "triangle", "softarc"],
@@ -363,6 +459,9 @@ class GroovedSettings extends Settings {
     }
 }
 
+/**
+ * Base class for grooved edges (e.g., for living hinges or decoration).
+ */
 class GroovedEdgeBase extends BaseEdge {
     is_inverse() {
         return this.settings.get('inverse') !== this.inverse;
@@ -393,7 +492,7 @@ class GroovedEdgeBase extends BaseEdge {
         this.boxes.corner(inv * -angle);
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         if (length === 0.0) return;
 
         const style = this.settings.get('style');
@@ -448,6 +547,9 @@ class GroovedEdgeBase extends BaseEdge {
     }
 }
 
+/**
+ * Grooved edge (normal).
+ */
 class GroovedEdge extends GroovedEdgeBase {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -456,6 +558,9 @@ class GroovedEdge extends GroovedEdgeBase {
     }
 }
 
+/**
+ * Grooved edge counterpart.
+ */
 class GroovedEdgeCounterPart extends GroovedEdgeBase {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -464,6 +569,9 @@ class GroovedEdgeCounterPart extends GroovedEdgeBase {
     }
 }
 
+/**
+ * Settings for GrippingEdge.
+ */
 class GripSettings extends Settings {
     static absolute_params = {
         "style": ["wave", "bumps"],
@@ -482,6 +590,9 @@ class GripSettings extends Settings {
     }
 }
 
+/**
+ * Edge with grip pattern (wave or bumps).
+ */
 class GrippingEdge extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -535,38 +646,45 @@ class GrippingEdge extends BaseEdge {
         return 0.0;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         if (length === 0.0) return;
         const style = this.settings.get('style');
         if (typeof this[style] === 'function') {
             this[style](length);
-        } else {
             throw new Error(`Unknown GrippingEdge style: ${style}`);
         }
     }
 }
 
+/**
+ * Edge constructed from multiple other edges.
+ */
 class CompoundEdge extends BaseEdge {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {string|BaseEdge[]} types - String of chars or array of edge objects.
+     * @param {number[]} lengths - Array of lengths corresponding to types.
+     */
     constructor(boxes, types, lengths) {
         super(boxes, null);
-        
+
         // Handle case where types is a string (e.g., "EFE") instead of an array
         if (typeof types === 'string') {
             this.types = types.split('').map(edge => {
                 if (typeof edge === 'string') {
-                     return boxes.edges[edge] || edge;
+                    return boxes.edges[edge] || edge;
                 }
                 return edge;
             });
         } else {
             this.types = types.map(edge => {
                 if (typeof edge === 'string') {
-                     return boxes.edges[edge] || edge;
+                    return boxes.edges[edge] || edge;
                 }
                 return edge;
             });
         }
-        
+
         this.lengths = lengths;
         this.length = lengths.reduce((a, b) => a + b, 0);
     }
@@ -584,29 +702,32 @@ class CompoundEdge extends BaseEdge {
         return Math.max(...margins) - this.types[0].startwidth();
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         if (length && Math.abs(length - this.length) > 1E-5) {
-             throw new Error("Wrong length for CompoundEdge");
+            throw new Error("Wrong length for CompoundEdge");
         }
         let lastwidth = this.types[0].startwidth();
 
         for (let i = 0; i < this.types.length; i++) {
-             const e = this.types[i];
-             const l = this.lengths[i];
-             this.boxes.step(e.startwidth() - lastwidth);
-             e.draw(l);
-             lastwidth = e.endwidth();
+            const e = this.types[i];
+            const l = this.lengths[i];
+            this.boxes.step(e.startwidth() - lastwidth);
+            e.draw(l);
+            lastwidth = e.endwidth();
         }
     }
 }
 
+/**
+ * Slot edge (often used inside SlottedEdge).
+ */
 class Slot extends BaseEdge {
     constructor(boxes, depth) {
         super(boxes, null);
         this.depth = depth;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         if (this.depth) {
             this.boxes.corner(90);
             this.boxes.edge(this.depth);
@@ -621,8 +742,17 @@ class Slot extends BaseEdge {
     }
 }
 
+/**
+ * Edge with slots cut into it.
+ */
 class SlottedEdge extends BaseEdge {
-    constructor(boxes, sections, edge="e", slots=0) {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {number[]} sections - Lengths of sections.
+     * @param {string|BaseEdge} [edge="e"] - Base edge type.
+     * @param {number} [slots=0] - Slot depth (0 for no slot).
+     */
+    constructor(boxes, sections, edge = "e", slots = 0) {
         super(boxes, new Settings(boxes.thickness));
         this.edge = (typeof edge === 'string') ? (boxes.edges[edge] || edge) : edge;
         this.sections = sections;
@@ -641,7 +771,7 @@ class SlottedEdge extends BaseEdge {
         return this.edge.margin();
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         for (let i = 0; i < this.sections.length - 1; i++) {
             const l = this.sections[i];
             this.edge.draw(l);
@@ -671,7 +801,7 @@ class FingerJointSettings extends Settings {
         "bottom_lip": 0.0,
     };
 
-    constructor(thickness, relative=true, kwargs={}) {
+    constructor(thickness, relative = true, kwargs = {}) {
         super(thickness, relative, kwargs);
         this.angle = 90;
     }
@@ -682,7 +812,7 @@ class FingerJointSettings extends Settings {
         }
     }
 
-    edgeObjects(boxes, chars="fFh", add=true) {
+    edgeObjects(boxes, chars = "fFh", add = true) {
         const edges = [
             new FingerJointEdge(boxes, this),
             new FingerJointEdgeCounterPart(boxes, this),
@@ -690,8 +820,8 @@ class FingerJointSettings extends Settings {
         ];
 
         // Assign chars
-        for (let i=0; i<edges.length; i++) {
-             if (i < chars.length) edges[i].char = chars[i];
+        for (let i = 0; i < edges.length; i++) {
+            if (i < chars.length) edges[i].char = chars[i];
         }
 
         if (add) boxes.addParts(edges);
@@ -745,6 +875,9 @@ class FingerJointBase extends BaseEdge {
     }
 }
 
+/**
+ * Finger joint edge (positive/finger side).
+ */
 class FingerJointEdge extends FingerJointBase {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -770,13 +903,13 @@ class FingerJointEdge extends FingerJointBase {
                 const n = Math.floor((h - 0.1 * t) / (0.3 * t));
                 const a = Math.atan(0.5) * 180 / Math.PI;
                 const l = Math.sqrt(5) * 0.1 * t;
-                
+
                 // Build the barb pattern
                 let poly = [h - n * 0.3 * t];
                 for (let i = 0; i < n; i++) {
                     poly.push(-45, 0.1 * Math.sqrt(2) * t, 45 + a, l, -a, 0);
                 }
-                
+
                 // Draw: 0, -90, *poly, 90, f, 90, *reversed(poly), -90
                 this.boxes.polyline(0, -90, ...poly, 90, f, 90, ...poly.slice().reverse(), -90);
             } else if (style === "snap" && f > 1.9 * t) {
@@ -787,13 +920,13 @@ class FingerJointEdge extends FingerJointBase {
                 const d2 = d + 1 * t;
                 const a = Math.atan((0.5 * t) / (h + d2)) * 180 / Math.PI;
                 const l = (h + d2) / Math.cos(a * Math.PI / 180);
-                
+
                 let poly = [
                     0, 90, d, -180, d + h, -90, 0.5 * t, 90 + a12, l12, 90 - a12,
-                    0.5 * t, 90 - a, l, a, 0, [-180, 0.1 * t], h + d2, 90, f - 1.7 * t, 
+                    0.5 * t, 90 - a, l, a, 0, [-180, 0.1 * t], h + d2, 90, f - 1.7 * t,
                     90 - a12, l12, a12, h, -90, 0
                 ];
-                
+
                 if (firsthalf) {
                     poly = poly.slice().reverse();
                 }
@@ -808,7 +941,7 @@ class FingerJointEdge extends FingerJointBase {
         }
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const positive = this.positive;
         const t = this.settings.thickness;
 
@@ -824,8 +957,8 @@ class FingerJointEdge extends FingerJointBase {
         let leftover_val = leftover;
 
         if (fingers === 0 && f && leftover_val > 0.75 * thickness && leftover_val > 4 * play) {
-             // fingers = 1; // logic in python
-             // ...
+            // fingers = 1; // logic in python
+            // ...
         }
 
         if (!positive) {
@@ -843,7 +976,7 @@ class FingerJointEdge extends FingerJointBase {
             if (i !== 0) {
                 this.boxes.edge(s);
             }
-            this.draw_finger(f, h, style, positive, i < Math.floor(fingers/2));
+            this.draw_finger(f, h, style, positive, i < Math.floor(fingers / 2));
         }
 
         this.boxes.edge(leftover_val / 2.0, 1);
@@ -854,7 +987,7 @@ class FingerJointEdge extends FingerJointBase {
         if (this.positive) {
             let baseMargin = widths[0] - widths[1];
             const style = this.settings.get('style');
-            
+
             // Springs style protrudes further - the spring loops extend 0.9 * h sideways
             if (style === "springs") {
                 const h = widths[0] - widths[1]; // finger height
@@ -866,7 +999,7 @@ class FingerJointEdge extends FingerJointBase {
                 const d = 4 * t; // snap feature depth
                 baseMargin += d;
             }
-            
+
             return baseMargin;
         }
         return 0.0;
@@ -900,6 +1033,9 @@ class FingerJointEdge extends FingerJointBase {
     }
 }
 
+/**
+ * Finger joint edge counterpart (negative/hole side).
+ */
 class FingerJointEdgeCounterPart extends FingerJointEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -908,12 +1044,15 @@ class FingerJointEdgeCounterPart extends FingerJointEdge {
     }
 }
 
+/**
+ * Helper class for drawing holes for finger joints.
+ */
 class FingerHoles extends FingerJointBase {
     constructor(boxes, settings) {
         super(boxes, settings);
     }
 
-    draw(x, y, length, angle=90, bedBolts=null, bedBoltSettings=null) {
+    draw(x, y, length, angle = 90, bedBolts = null, bedBoltSettings = null) {
         this.boxes.ctx.save();
         this.boxes.moveTo(x, y, angle);
 
@@ -937,6 +1076,9 @@ class FingerHoles extends FingerJointBase {
     }
 }
 
+/**
+ * Edge with holes for finger joints (often for joining perpendicular plates).
+ */
 class FingerHoleEdge extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -948,7 +1090,7 @@ class FingerHoleEdge extends BaseEdge {
         this.fingerHoles = new FingerHoles(boxes, settings);
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const { bedBolts, bedBoltSettings } = kw;
         const dist = this.settings.get('edge_width');
         this.boxes.ctx.save();
@@ -977,8 +1119,17 @@ class FingerHoleEdge extends BaseEdge {
     }
 }
 
+/**
+ * Edge with finger holes that crosses another part.
+ */
 class CrossingFingerHoleEdge extends Edge {
-    constructor(boxes, height, fingerHoles=null, outset=0.0) {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {number} height - Height.
+     * @param {FingerHoles|function|null} [fingerHoles=null] - FingerHoles instance or function.
+     * @param {number} [outset=0.0] - Outset.
+     */
+    constructor(boxes, height, fingerHoles = null, outset = 0.0) {
         super(boxes, null);
         this.char = '|';
         this.fingerHoles = fingerHoles || boxes.fingerHolesAt.bind(boxes); // Using bind to ensure correct context if it's a method
@@ -986,7 +1137,7 @@ class CrossingFingerHoleEdge extends Edge {
         this.outset = outset;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         // Python: self.fingerHoles(length / 2.0, self.outset + self.burn, self.height)
         // If fingerHoles is a method on boxes, we call it. If it is an object (FingerHoles instance), we call draw?
         // Python says: self.fingerHoles = fingerHoles or boxes.fingerHolesAt
@@ -994,13 +1145,13 @@ class CrossingFingerHoleEdge extends Edge {
         // I'll assume it's a function I can call.
 
         if (typeof this.fingerHoles === 'function') {
-             this.fingerHoles(length / 2.0, this.outset + this.boxes.burn, this.height);
+            this.fingerHoles(length / 2.0, this.outset + this.boxes.burn, this.height);
         } else if (this.fingerHoles.draw) {
-             // FingerHoles instance doesn't have same signature as boxes.fingerHolesAt probably?
-             // boxes.fingerHolesAt(x, y, length, angle=90)
-             // FingerHoles.draw(x, y, length, angle=90)
-             // So it matches.
-             this.fingerHoles.draw(length / 2.0, this.outset + this.boxes.burn, this.height);
+            // FingerHoles instance doesn't have same signature as boxes.fingerHolesAt probably?
+            // boxes.fingerHolesAt(x, y, length, angle=90)
+            // FingerHoles.draw(x, y, length, angle=90)
+            // So it matches.
+            this.fingerHoles.draw(length / 2.0, this.outset + this.boxes.burn, this.height);
         }
 
         super.draw(length, kw);
@@ -1011,6 +1162,9 @@ class CrossingFingerHoleEdge extends Edge {
     }
 }
 
+/**
+ * Settings for Stackable edges.
+ */
 class StackableSettings extends Settings {
     static absolute_params = {
         "angle": 60,
@@ -1038,7 +1192,7 @@ class StackableSettings extends Settings {
         ];
 
         for (let i = 0; i < edges.length; i++) {
-             if (i < chars.length) edges[i].char = chars[i];
+            if (i < chars.length) edges[i].char = chars[i];
         }
 
         if (add) boxes.addParts(edges);
@@ -1046,7 +1200,15 @@ class StackableSettings extends Settings {
     }
 }
 
+/**
+ * Base class for stackable edges.
+ */
 class StackableBaseEdge extends BaseEdge {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {Settings} settings - Stackable settings.
+     * @param {Settings} fingerjointsettings - Finger joint settings.
+     */
     constructor(boxes, settings, fingerjointsettings) {
         super(boxes, settings);
         this.fingerjointsettings = fingerjointsettings;
@@ -1054,7 +1216,7 @@ class StackableBaseEdge extends BaseEdge {
         this.bottom = true;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const s = this.settings;
         const height = s.get('height');
         const angle = s.get('angle');
@@ -1093,7 +1255,7 @@ class StackableBaseEdge extends BaseEdge {
     margin() {
         if (this.bottom) {
             if (this.settings.get('bottom_stabilizers')) {
-                 return this.settings.get('bottom_stabilizers') + this.boxes.spacing;
+                return this.settings.get('bottom_stabilizers') + this.boxes.spacing;
             }
             return 0;
         } else {
@@ -1102,6 +1264,9 @@ class StackableBaseEdge extends BaseEdge {
     }
 }
 
+/**
+ * Stackable edge (bottom).
+ */
 class StackableEdge extends StackableBaseEdge {
     constructor(boxes, settings, fingerjointsettings) {
         super(boxes, settings, fingerjointsettings);
@@ -1109,7 +1274,7 @@ class StackableEdge extends StackableBaseEdge {
         this.bottom = true;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const s = this.settings;
         // boxes.fingerHolesAt(x, y, length, angle)
         this.boxes.fingerHolesAt(
@@ -1121,6 +1286,9 @@ class StackableEdge extends StackableBaseEdge {
     }
 }
 
+/**
+ * Stackable edge (top).
+ */
 class StackableEdgeTop extends StackableBaseEdge {
     constructor(boxes, settings, fingerjointsettings) {
         super(boxes, settings, fingerjointsettings);
@@ -1129,6 +1297,9 @@ class StackableEdgeTop extends StackableBaseEdge {
     }
 }
 
+/**
+ * Stackable feet.
+ */
 class StackableFeet extends StackableBaseEdge {
     constructor(boxes, settings, fingerjointsettings) {
         super(boxes, settings, fingerjointsettings);
@@ -1141,6 +1312,9 @@ class StackableFeet extends StackableBaseEdge {
     }
 }
 
+/**
+ * Stackable edge top with holes.
+ */
 class StackableHoleEdgeTop extends StackableBaseEdge {
     constructor(boxes, settings, fingerjointsettings) {
         super(boxes, settings, fingerjointsettings);
@@ -1152,7 +1326,7 @@ class StackableHoleEdgeTop extends StackableBaseEdge {
         return this.settings.thickness + this.settings.get('holedistance');
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const s = this.settings;
         this.boxes.fingerHolesAt(
             0,
@@ -1163,6 +1337,9 @@ class StackableHoleEdgeTop extends StackableBaseEdge {
     }
 }
 
+/**
+ * Settings for Hinge edges.
+ */
 class HingeSettings extends Settings {
     static absolute_params = {
         "outset": false,
@@ -1175,18 +1352,18 @@ class HingeSettings extends Settings {
         "grip_length": 0,
     };
 
-    constructor(thickness, relative=true, kwargs={}) {
+    constructor(thickness, relative = true, kwargs = {}) {
         super(thickness, relative, kwargs);
         this.style = "outset";
     }
 
     checkValues() {
         if (this.get('axle') / this.thickness < 0.1) {
-             throw new Error("HingeSettings: 'axle' need to be at least 0.1 strong");
+            throw new Error("HingeSettings: 'axle' need to be at least 0.1 strong");
         }
     }
 
-    edgeObjects(boxes, chars="iIjJkK", add=true) {
+    edgeObjects(boxes, chars = "iIjJkK", add = true) {
         const edges = [
             new Hinge(boxes, this, 1),
             new HingePin(boxes, this, 1),
@@ -1197,7 +1374,7 @@ class HingeSettings extends Settings {
         ];
 
         for (let i = 0; i < edges.length; i++) {
-             if (i < chars.length) edges[i].char = chars[i];
+            if (i < chars.length) edges[i].char = chars[i];
         }
 
         if (add) boxes.addParts(edges);
@@ -1205,8 +1382,16 @@ class HingeSettings extends Settings {
     }
 }
 
+/**
+ * Hinge edge (the loop part).
+ */
 class Hinge extends BaseEdge {
-    constructor(boxes, settings, layout=1) {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {HingeSettings} settings - Settings.
+     * @param {number} [layout=1] - Layout type (1, 2, or 3).
+     */
+    constructor(boxes, settings, layout = 1) {
         super(boxes, settings);
         if (layout < 1 || layout > 3) throw new Error(`layout must be 1, 2 or 3 (got ${layout})`);
         this.layout = layout;
@@ -1268,21 +1453,21 @@ class Hinge extends BaseEdge {
         ];
 
         if (_reversed) {
-             // Reversing polyline in Python is tricky because of turn/length/turn/length structure.
-             // But here we need to draw it.
-             // For now assume standard direction. If reversed, we need to reverse the sequence of operations.
-             // Or construct reversed polyline.
-             // Since I don't have a generic reverse function for this polyline format easily available (it depends on semantics),
-             // I will implement reversed logic manually or rely on python logic which just calls reversed().
-             // reversed((l1, a1, l2, a2, l3)) -> (l3, a2, l2, a1, l1).
-             // It reverses the order.
-             // If I reverse the array in JS:
-             const rev_poly = [...hinge_poly].reverse();
-             this.boxes.polyline(...rev_poly);
-             this.boxes.rectangularHole(-pos, -0.5 * t, pinl, this.settings.thickness);
+            // Reversing polyline in Python is tricky because of turn/length/turn/length structure.
+            // But here we need to draw it.
+            // For now assume standard direction. If reversed, we need to reverse the sequence of operations.
+            // Or construct reversed polyline.
+            // Since I don't have a generic reverse function for this polyline format easily available (it depends on semantics),
+            // I will implement reversed logic manually or rely on python logic which just calls reversed().
+            // reversed((l1, a1, l2, a2, l3)) -> (l3, a2, l2, a1, l1).
+            // It reverses the order.
+            // If I reverse the array in JS:
+            const rev_poly = [...hinge_poly].reverse();
+            this.boxes.polyline(...rev_poly);
+            this.boxes.rectangularHole(-pos, -0.5 * t, pinl, this.settings.thickness);
         } else {
-             this.boxes.rectangularHole(pos, -0.5 * t, pinl, this.settings.thickness);
-             this.boxes.polyline(...hinge_poly);
+            this.boxes.rectangularHole(pos, -0.5 * t, pinl, this.settings.thickness);
+            this.boxes.polyline(...hinge_poly);
         }
     }
 
@@ -1321,7 +1506,7 @@ class Hinge extends BaseEdge {
         return this.settings.get('axle') + 2.0 * this.settings.get('hingestrength') + 0.5 * this.settings.thickness;
     }
 
-    draw(l, kw={}) {
+    draw(l, kw = {}) {
         const style = this.settings.style; // "outset" by default in HingeSettings constructor
         const len_method = style + 'len';
         const hlen = this[len_method] ? this[len_method]() : this.flushlen();
@@ -1341,8 +1526,16 @@ class Hinge extends BaseEdge {
     }
 }
 
+/**
+ * Hinge pin edge (the pin part).
+ */
 class HingePin extends BaseEdge {
-    constructor(boxes, settings, layout=1) {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {HingeSettings} settings - Settings.
+     * @param {number} [layout=1] - Layout type (1, 2, or 3).
+     */
+    constructor(boxes, settings, layout = 1) {
         super(boxes, settings);
         if (layout < 1 || layout > 3) throw new Error(`layout must be 1, 2 or 3 (got ${layout})`);
         this.layout = layout;
@@ -1362,7 +1555,7 @@ class HingePin extends BaseEdge {
     margin() {
         if (this.settings.get('outset') && (
             this.settings.get('grip_percentage') > 0.0 ||
-            this.settings.get('grip_length') > 0.0 )) {
+            this.settings.get('grip_length') > 0.0)) {
             // Need to access GrippingEdge margin. Assuming 'g' edge is available or construct one.
             // In python: self.boxes.edges['g'].margin()
             // Here we can create a temporary edge or assume we know margin.
@@ -1400,7 +1593,7 @@ class HingePin extends BaseEdge {
                 0.
             );
         } else {
-             pin.push(pos - 0.5 * pinl);
+            pin.push(pos - 0.5 * pinl);
         }
 
         if (_reversed) {
@@ -1471,7 +1664,7 @@ class HingePin extends BaseEdge {
         return l;
     }
 
-    draw(l, kw={}) {
+    draw(l, kw = {}) {
         const style = this.settings.style;
         const len_method = style + 'len';
         const plen = this[len_method] ? this[len_method]() : this.flushlen();
@@ -1503,6 +1696,9 @@ class HingePin extends BaseEdge {
     }
 }
 
+/**
+ * Settings for ChestHinge.
+ */
 class ChestHingeSettings extends Settings {
     static relative_params = {
         "pin_height": 2.0,
@@ -1516,7 +1712,7 @@ class ChestHingeSettings extends Settings {
 
     checkValues() {
         if (this.get('pin_height') / this.thickness < 1.2) {
-             throw new Error("ChestHingeSettings: 'pin_height' must be >= 1.2");
+            throw new Error("ChestHingeSettings: 'pin_height' must be >= 1.2");
         }
     }
 
@@ -1524,7 +1720,7 @@ class ChestHingeSettings extends Settings {
         return Math.pow(Math.pow(0.9 * this.get('pin_height'), 2) - Math.pow(this.thickness, 2), 0.5);
     }
 
-    edgeObjects(boxes, chars="oOpPqQ", add=true) {
+    edgeObjects(boxes, chars = "oOpPqQ", add = true) {
         const edges = [
             new ChestHinge(boxes, this),
             new ChestHinge(boxes, this, true),
@@ -1535,7 +1731,7 @@ class ChestHingeSettings extends Settings {
         ];
 
         for (let i = 0; i < edges.length; i++) {
-             if (i < chars.length) edges[i].char = chars[i];
+            if (i < chars.length) edges[i].char = chars[i];
         }
 
         if (add) boxes.addParts(edges);
@@ -1543,6 +1739,9 @@ class ChestHingeSettings extends Settings {
     }
 }
 
+/**
+ * Chest hinge (basic).
+ */
 class ChestHinge extends BaseEdge {
     constructor(boxes, settings, reversed = false) {
         super(boxes, settings);
@@ -1550,7 +1749,7 @@ class ChestHinge extends BaseEdge {
         this.char = reversed ? 'O' : 'o';
     }
 
-    draw(l, kw={}) {
+    draw(l, kw = {}) {
         const t = this.settings.thickness;
         const p = this.settings.get('pin_height');
         const s = this.settings.get('hinge_strength');
@@ -1570,7 +1769,7 @@ class ChestHinge extends BaseEdge {
             draw_rest_of_edge = () => this.boxes.edges["F"].draw(l - p);
         } else {
             final_segment = l + t - p - s;
-            draw_rest_of_edge = () => {};
+            draw_rest_of_edge = () => { };
         }
 
         const poly = [0, -180, t, [270, p + s], 0, -90, final_segment];
@@ -1600,102 +1799,117 @@ class ChestHinge extends BaseEdge {
     }
 }
 
-class ChestHingeTop extends ChestHinge {
+/**
+ * Chest hinge (top part).
+ */
+class ChestHingeTop extends BaseEdge {
     constructor(boxes, settings, reversed = false) {
-        super(boxes, settings, reversed);
-        this.char = reversed ? 'O' : 'o';
+        super(boxes, settings);
+        this.reversed = reversed;
+        this.char = reversed ? 'P' : 'p';
     }
 
-    draw(l, kw={}) {
+    draw(l, kw = {}) {
         const t = this.settings.thickness;
         const p = this.settings.get('pin_height');
         const s = this.settings.get('hinge_strength');
         const play = this.settings.get('play');
 
-        let final_segment, draw_rest_of_edge;
+        let first_segment, draw_rest_of_edge;
         if (this.settings.get('finger_joints_on_lid')) {
-            final_segment = t - s - play;
-            draw_rest_of_edge = () => this.boxes.edges["F"].draw(l - p);
+            first_segment = p + s;
+            draw_rest_of_edge = () => {
+                this.boxes.edge(p + s);
+                this.boxes.corner(90);
+                this.boxes.edges["F"].draw(l - p);
+                this.boxes.corner(90);
+            };
         } else {
-            final_segment = l + t - p - s - play;
-            draw_rest_of_edge = () => {};
+            first_segment = l + t;
+            draw_rest_of_edge = () => {
+                this.boxes.edge(l + t);
+            }
         }
 
-        const poly = [0, -180, t, -180, 0, [-90, p + s + play], 0, 90, final_segment];
+        const poly = [0, -90, first_segment, -90, t, -90];
 
         if (this.reversed) {
             draw_rest_of_edge();
-            this.boxes.polyline(...[...poly].reverse());
+            this.boxes.edge(t);
         } else {
             this.boxes.polyline(...poly);
-            draw_rest_of_edge();
+            if (this.settings.get('finger_joints_on_lid')) {
+                this.boxes.edges["F"].draw(l - p);
+                this.boxes.corner(90);
+            }
         }
     }
 
     startwidth() {
-        if (this.reversed) return this.settings.get('play') + this.settings.get('pin_height') + this.settings.get('hinge_strength');
+        if (this.reversed) return this.settings.get('pin_height') + this.settings.get('hinge_strength');
         return 0.0;
     }
 
     endwidth() {
         if (this.reversed) return 0.0;
-        return this.settings.get('play') + this.settings.get('pin_height') + this.settings.get('hinge_strength');
+        return this.settings.get('pin_height') + this.settings.get('hinge_strength');
     }
 
     margin() {
         if (this.reversed) return 0.0;
-        return 1 * (this.settings.get('play') + this.settings.get('pin_height') + this.settings.get('hinge_strength'));
+        return this.settings.get('pin_height') + this.settings.get('hinge_strength');
     }
 }
 
-class ChestHingePin extends BaseEdge {
-    constructor(boxes, settings) {
-        super(boxes, settings);
-        this.char = 'q';
-    }
-
-    draw(l, kw={}) {
-        const t = this.settings.thickness;
-        const p = this.settings.get('pin_height');
-        const s = this.settings.get('hinge_strength');
-        const pinh = this.settings.pinheight();
-
-        let middle_segment, draw_rest_of_edge;
-        if (this.settings.get('finger_joints_on_lid')) {
-            middle_segment = [0];
-            draw_rest_of_edge = () => {
-                this.boxes.edge(t);
-                this.boxes.edges["F"].draw(l);
-                this.boxes.edge(t);
-            };
-        } else {
-            middle_segment = [l + 2 * t];
-            draw_rest_of_edge = () => {};
-        }
-
-        const poly = [0, -90, this.settings.get('play') + s + p - pinh, -90, t, 90, pinh, 90];
-
-        this.boxes.polyline(...poly);
-        draw_rest_of_edge();
-        this.boxes.polyline(...middle_segment.concat([...poly].reverse()));
-    }
-
-    margin() {
-        return this.settings.get('play') + this.settings.get('pin_height') + this.settings.get('hinge_strength');
-    }
-}
-
-class ChestHingeFront extends Edge {
+/**
+ * Chest hinge front.
+ */
+class ChestHingeFront extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = 'Q';
     }
 
-    startwidth() {
-        return this.settings.get('pin_height') + this.settings.get('hinge_strength');
+    draw(l, kw = {}) {
+        const t = this.settings.thickness;
+        const p = this.settings.get('pin_height');
+        const s = this.settings.get('hinge_strength');
+
+        this.boxes.edge(l - p);
+        this.boxes.polyline(0, 90, p + s, [90, t], 0, 90, p);
+    }
+
+    endwidth() {
+        return this.settings.get('pin_height') + this.settings.get('hinge_strength') + this.settings.thickness;
     }
 }
 
+/**
+ * Chest hinge pin.
+ */
+class ChestHingePin extends BaseEdge {
+    constructor(boxes, settings) {
+        super(boxes, settings);
+        this.char = 'q';
+    }
+    draw(l, kw = {}) {
+        const t = this.settings.thickness;
+        const p = this.settings.get('pin_height');
+        const s = this.settings.get('hinge_strength');
+        const pinh = this.settings.pinheight();
+        const play = this.settings.get('play');
+
+        const total_h = p + s + t - play;
+        const total_w = pinh - play;
+
+        this.boxes.moveTo(p + s + 0.5 * t, 0.5 * t);
+        this.boxes.rectangularHole(0, 0, total_h, total_w);
+    }
+}
+
+/**
+ * Settings for CabinetHinge.
+ */
 class CabinetHingeSettings extends Settings {
     static absolute_params = {
         "bore": 3.2,
@@ -1709,7 +1923,7 @@ class CabinetHingeSettings extends Settings {
         "spacing": 2.0,
     };
 
-    edgeObjects(boxes, chars="uUvV", add=true) {
+    edgeObjects(boxes, chars = "uUvV", add = true) {
         const edges = [
             new CabinetHingeEdge(boxes, this),
             new CabinetHingeEdge(boxes, this, true),
@@ -1718,7 +1932,7 @@ class CabinetHingeSettings extends Settings {
         ];
 
         for (let i = 0; i < edges.length; i++) {
-             if (i < chars.length) edges[i].char = chars[i];
+            if (i < chars.length) edges[i].char = chars[i];
         }
 
         if (add) boxes.addParts(edges);
@@ -1726,7 +1940,16 @@ class CabinetHingeSettings extends Settings {
     }
 }
 
+/**
+ * Cabinet hinge edge.
+ */
 class CabinetHingeEdge extends BaseEdge {
+    /**
+     * @param {Boxes} boxes - Boxes instance.
+     * @param {Settings} settings - Settings.
+     * @param {boolean} [top=false] - Is top part.
+     * @param {boolean} [angled=false] - Is angled.
+     */
     constructor(boxes, settings, top = false, angled = false) {
         super(boxes, settings);
         this.top = top;
@@ -1775,17 +1998,17 @@ class CabinetHingeEdge extends BaseEdge {
         }
 
         if ((n % 2 !== 0) ^ this.top) {
-             // stopped with hinge eye
-             poly.push(0, e_val + p, 90, p + spacing);
+            // stopped with hinge eye
+            poly.push(0, e_val + p, 90, p + spacing);
         } else {
-             // stopped with space
-             // poly[-1:] = ... replaces last element?
-             // Python: poly[-1:] = [-90, e + p, 90, 0 + spacing]
-             // Python poly end was ... ?
-             // If stopped with space, the last added was 90.
-             // We replace the last 90 with [-90, e+p, 90, spacing]
-             poly.pop();
-             poly.push(-90, e_val + p, 90, spacing);
+            // stopped with space
+            // poly[-1:] = ... replaces last element?
+            // Python: poly[-1:] = [-90, e + p, 90, 0 + spacing]
+            // Python poly end was ... ?
+            // If stopped with space, the last added was 90.
+            // We replace the last 90 with [-90, e+p, 90, spacing]
+            poly.pop();
+            poly.push(-90, e_val + p, 90, spacing);
         }
 
         const width = (t + p) * n + p + 2 * spacing;
@@ -1793,7 +2016,7 @@ class CabinetHingeEdge extends BaseEdge {
         return { poly, width };
     }
 
-    draw(l, kw={}) {
+    draw(l, kw = {}) {
         const n = this.settings.get('eyes_per_hinge');
         const p = this.settings.get('play');
         const e = this.settings.get('eye');
@@ -1833,6 +2056,9 @@ class CabinetHingeEdge extends BaseEdge {
     }
 }
 
+/**
+ * Settings for SlideOnLid.
+ */
 class SlideOnLidSettings extends FingerJointSettings {
     static relative_params = {
         ...FingerJointSettings.relative_params,
@@ -1847,7 +2073,7 @@ class SlideOnLidSettings extends FingerJointSettings {
         "hole_width": 0
     };
 
-    edgeObjects(boxes, chars=null, add=true) {
+    edgeObjects(boxes, chars = null, add = true) {
         const edges = [
             new LidEdge(boxes, this),
             new LidHoleEdge(boxes, this),
@@ -1861,13 +2087,16 @@ class SlideOnLidSettings extends FingerJointSettings {
     }
 }
 
+/**
+ * Lid edge.
+ */
 class LidEdge extends FingerJointEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = "l";
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const hole_width = this.settings.get('hole_width');
         if (hole_width > 0) {
             super.draw((length - hole_width) / 2, kw);
@@ -1894,13 +2123,16 @@ class LidEdge extends FingerJointEdge {
     }
 }
 
+/**
+ * Lid hole edge.
+ */
 class LidHoleEdge extends FingerHoleEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = "L";
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const hole_width = this.settings.get('hole_width');
         if (hole_width > 0) {
             super.draw((length - hole_width) / 2, kw);
@@ -1912,6 +2144,9 @@ class LidHoleEdge extends FingerHoleEdge {
     }
 }
 
+/**
+ * Lid right edge.
+ */
 class LidRight extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -1919,14 +2154,14 @@ class LidRight extends BaseEdge {
         this.rightside = true;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const t = this.boxes.thickness;
 
         let spring;
         if (this.rightside) {
-             spring = ["right", "both"].includes(this.settings.get('spring'));
+            spring = ["right", "both"].includes(this.settings.get('spring'));
         } else {
-             spring = ["left", "both"].includes(this.settings.get('spring'));
+            spring = ["left", "both"].includes(this.settings.get('spring'));
         }
 
         let p;
@@ -1957,27 +2192,27 @@ class LidRight extends BaseEdge {
         }
 
         if (!this.rightside) {
-             // reverse p
-             // Reversing polyline array manually is tricky because of mix of numbers and arrays.
-             // We need helper or logic.
-             // Logic: elements are (length, angle, length, ...) or (length, [angle, radius], length...)
-             // reversed: reverse the list, then swap angles?
-             // No, standard reverse logic for polyline description.
-             // [l1, a1, l2, a2, l3] -> [l3, a2, l2, a1, l1]
-             // But here we have [..., l_before, corner, l_after, ...]
-             // If we reverse array, we get [t, -90, t, 90, pinl, 90, t, -90, ..., 0]
-             // corner params [angle, radius] should stay as corner params but order reversed?
-             // Actually, if we use boxes.polyline(...reversed(p)), does it work?
-             // Python reversed() iterator. boxes.polyline(*reversed(p)).
-             // My JS polyline implementation accepts args.
-             // Yes, reversing the array should work if structure is symmetric (length, turn, length, turn...).
-             // My p array construction:
-             // [0, 90, 1.5*t+sw, -90, l, [..], l-..., 90, sw, 90-a, sqt, 2*a, sqt, -a, length-t]
-             // Lengths: 0, 1.5*t+sw, l, l-0.2*t, sw, sqt, sqt, length-t
-             // Turns: 90, -90, [..], 90, 90-a, 2*a, -a
-             // It alternates.
-             // So p.reverse() should work.
-             p.reverse();
+            // reverse p
+            // Reversing polyline array manually is tricky because of mix of numbers and arrays.
+            // We need helper or logic.
+            // Logic: elements are (length, angle, length, ...) or (length, [angle, radius], length...)
+            // reversed: reverse the list, then swap angles?
+            // No, standard reverse logic for polyline description.
+            // [l1, a1, l2, a2, l3] -> [l3, a2, l2, a1, l1]
+            // But here we have [..., l_before, corner, l_after, ...]
+            // If we reverse array, we get [t, -90, t, 90, pinl, 90, t, -90, ..., 0]
+            // corner params [angle, radius] should stay as corner params but order reversed?
+            // Actually, if we use boxes.polyline(...reversed(p)), does it work?
+            // Python reversed() iterator. boxes.polyline(*reversed(p)).
+            // My JS polyline implementation accepts args.
+            // Yes, reversing the array should work if structure is symmetric (length, turn, length, turn...).
+            // My p array construction:
+            // [0, 90, 1.5*t+sw, -90, l, [..], l-..., 90, sw, 90-a, sqt, 2*a, sqt, -a, length-t]
+            // Lengths: 0, 1.5*t+sw, l, l-0.2*t, sw, sqt, sqt, length-t
+            // Turns: 90, -90, [..], 90, 90-a, 2*a, -a
+            // It alternates.
+            // So p.reverse() should work.
+            p.reverse();
         }
         this.boxes.polyline(...p);
     }
@@ -1998,6 +2233,9 @@ class LidRight extends BaseEdge {
     }
 }
 
+/**
+ * Lid left edge.
+ */
 class LidLeft extends LidRight {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2006,6 +2244,9 @@ class LidLeft extends LidRight {
     }
 }
 
+/**
+ * Lid side right edge.
+ */
 class LidSideRight extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2013,7 +2254,7 @@ class LidSideRight extends BaseEdge {
         this.rightside = true;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const t = this.boxes.thickness;
         const s = this.settings.get('play');
         const pin = this.settings.get('second_pin');
@@ -2022,9 +2263,9 @@ class LidSideRight extends BaseEdge {
 
         let spring;
         if (this.rightside) {
-             spring = ["right", "both"].includes(this.settings.get('spring'));
+            spring = ["right", "both"].includes(this.settings.get('spring'));
         } else {
-             spring = ["left", "both"].includes(this.settings.get('spring'));
+            spring = ["left", "both"].includes(this.settings.get('spring'));
         }
 
         let p;
@@ -2077,6 +2318,9 @@ class LidSideRight extends BaseEdge {
     }
 }
 
+/**
+ * Lid side left edge.
+ */
 class LidSideLeft extends LidSideRight {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2085,6 +2329,9 @@ class LidSideLeft extends LidSideRight {
     }
 }
 
+/**
+ * Settings for Click connections.
+ */
 class ClickSettings extends Settings {
     static absolute_params = {
         "angle": 5.0,
@@ -2094,7 +2341,7 @@ class ClickSettings extends Settings {
         "bottom_radius": 0.1,
     };
 
-    edgeObjects(boxes, chars="cC", add=true) {
+    edgeObjects(boxes, chars = "cC", add = true) {
         const edges = [
             new ClickConnector(boxes, this),
             new ClickEdge(boxes, this)
@@ -2107,6 +2354,9 @@ class ClickSettings extends Settings {
     }
 }
 
+/**
+ * Click connector edge (male/female parts in one?).
+ */
 class ClickConnector extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2186,7 +2436,7 @@ class ClickConnector extends BaseEdge {
         );
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const t = this.settings.thickness;
         this.boxes.edge(4 * t);
         this.hook();
@@ -2206,6 +2456,9 @@ class ClickConnector extends BaseEdge {
     }
 }
 
+/**
+ * Click edge.
+ */
 class ClickEdge extends ClickConnector {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2220,7 +2473,7 @@ class ClickEdge extends ClickConnector {
         return 0.0;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const t = this.settings.thickness;
         const o = this.hookOffset();
         const w = this.hookWidth();
@@ -2241,6 +2494,9 @@ class ClickEdge extends ClickConnector {
     }
 }
 
+/**
+ * Settings for DoveTail joints.
+ */
 class DoveTailSettings extends Settings {
     static absolute_params = {
         "angle": 50,
@@ -2251,7 +2507,7 @@ class DoveTailSettings extends Settings {
         "radius": 0.2,
     };
 
-    edgeObjects(boxes, chars="dD", add=true) {
+    edgeObjects(boxes, chars = "dD", add = true) {
         const edges = [
             new DoveTailJoint(boxes, this),
             new DoveTailJointCounterPart(boxes, this)
@@ -2264,6 +2520,9 @@ class DoveTailSettings extends Settings {
     }
 }
 
+/**
+ * Dove tail joint edge.
+ */
 class DoveTailJoint extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2271,7 +2530,7 @@ class DoveTailJoint extends BaseEdge {
         this.positive = true;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const s = this.settings;
         const radius = Math.max(s.get('radius'), this.boxes.burn);
         const positive = this.positive;
@@ -2316,6 +2575,9 @@ class DoveTailJoint extends BaseEdge {
     }
 }
 
+/**
+ * Dove tail joint counterpart (negative).
+ */
 class DoveTailJointCounterPart extends DoveTailJoint {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2328,6 +2590,9 @@ class DoveTailJointCounterPart extends DoveTailJoint {
     }
 }
 
+/**
+ * Settings for Flex edge.
+ */
 class FlexSettings extends Settings {
     static absolute_params = {
         "stretch": 1.05,
@@ -2348,13 +2613,16 @@ class FlexSettings extends Settings {
     }
 }
 
+/**
+ * Flex edge.
+ */
 class FlexEdge extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = 'X';
     }
 
-    draw(x, h, kw={}) {
+    draw(x, h, kw = {}) {
         const dist = this.settings.get('distance');
         const connection = this.settings.get('connection');
         const width = this.settings.get('width');
@@ -2397,7 +2665,7 @@ class FlexEdge extends BaseEdge {
                 } else {
                     for (let j = 0; j < Math.floor(sections / 2); j++) {
                         this.boxes.ctx.move_to(pos,
-                                         h_adj - connection - 2 * j * (sheight + connection));
+                            h_adj - connection - 2 * j * (sheight + connection));
                         this.boxes.ctx.line_to(pos, h_adj - 2 * (j + 1) * (sheight + connection));
                     }
                 }
@@ -2412,6 +2680,9 @@ class FlexEdge extends BaseEdge {
     }
 }
 
+/**
+ * Settings for Gear edges.
+ */
 class GearSettings extends Settings {
     static absolute_params = {
         "dimension": 3.0,
@@ -2421,6 +2692,9 @@ class GearSettings extends Settings {
     };
 }
 
+/**
+ * Rack edge (gear rack).
+ */
 class RackEdge extends BaseEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2428,7 +2702,7 @@ class RackEdge extends BaseEdge {
         this.gear = new Gears(boxes);
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         const params = { ...this.settings.values };
         params["draw_rack"] = true;
         params["rack_base_height"] = -1E-36;
@@ -2441,7 +2715,7 @@ class RackEdge extends BaseEdge {
         this.boxes.moveTo(length, 0, 180);
 
         if (this.gear.draw) {
-             this.gear.draw(params, "");
+            this.gear.draw(params, "");
         }
 
         this.boxes.moveTo(0, 0, 180);
@@ -2453,6 +2727,9 @@ class RackEdge extends BaseEdge {
     }
 }
 
+/**
+ * Settings for RoundedTriangleEdge.
+ */
 class RoundedTriangleEdgeSettings extends Settings {
     static absolute_params = {
         "height": 50.,
@@ -2463,7 +2740,7 @@ class RoundedTriangleEdgeSettings extends Settings {
         "outset": 0.,
     };
 
-    edgeObjects(boxes, chars="t", add=true) {
+    edgeObjects(boxes, chars = "t", add = true) {
         const edges = [
             new RoundedTriangleEdge(boxes, this),
             new RoundedTriangleFingerHolesEdge(boxes, this)
@@ -2475,13 +2752,16 @@ class RoundedTriangleEdgeSettings extends Settings {
     }
 }
 
+/**
+ * rounded triangle edge.
+ */
 class RoundedTriangleEdge extends Edge {
     constructor(boxes, settings) {
         super(boxes, settings);
         this.char = "t";
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         let len = length + 2 * this.settings.get('outset');
         let r = this.settings.get('radius');
         if (r > len / 2) r = len / 2;
@@ -2523,6 +2803,9 @@ class RoundedTriangleEdge extends Edge {
     }
 }
 
+/**
+ * Rounded triangle edge with finger holes.
+ */
 class RoundedTriangleFingerHolesEdge extends RoundedTriangleEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2533,12 +2816,15 @@ class RoundedTriangleFingerHolesEdge extends RoundedTriangleEdge {
         return this.settings.thickness;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         this.boxes.fingerHolesAt(0, 0.5 * this.settings.thickness, length, 0);
         super.draw(length, kw);
     }
 }
 
+/**
+ * Settings for HandleEdge.
+ */
 class HandleEdgeSettings extends Settings {
     static absolute_params = {
         "height": 20.,
@@ -2551,7 +2837,7 @@ class HandleEdgeSettings extends Settings {
         "outset": 1.,
     };
 
-    edgeObjects(boxes, chars="yY", add=true) {
+    edgeObjects(boxes, chars = "yY", add = true) {
         const edges = [
             new HandleEdge(boxes, this),
             new HandleHoleEdge(boxes, this)
@@ -2564,6 +2850,9 @@ class HandleEdgeSettings extends Settings {
     }
 }
 
+/**
+ * Handle edge.
+ */
 class HandleEdge extends Edge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2571,7 +2860,7 @@ class HandleEdge extends Edge {
         this.extra_height = 0.0;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         let len = length + 2 * this.settings.get('outset');
         let extra_height = this.extra_height * this.settings.thickness;
 
@@ -2635,6 +2924,9 @@ class HandleEdge extends Edge {
     }
 }
 
+/**
+ * Handle hole edge.
+ */
 class HandleHoleEdge extends HandleEdge {
     constructor(boxes, settings) {
         super(boxes, settings);
@@ -2642,7 +2934,7 @@ class HandleHoleEdge extends HandleEdge {
         this.extra_height = 1.0;
     }
 
-    draw(length, kw={}) {
+    draw(length, kw = {}) {
         this.boxes.fingerHolesAt(0, -0.5 * this.settings.thickness, length, 0);
         super.draw(length, kw);
     }
