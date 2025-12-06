@@ -48,13 +48,23 @@ class Parts {
     /**
      * Draw a disc with an optional hole.
      * @param {number} diameter - Diameter of the disc.
-     * @param {number} [hole=0] - Diameter of center hole.
+     * @param {number|Object} [hole=0] - Diameter of center hole, or options object.
      * @param {number} [dwidth=1.0] - Width factor (scaling).
      * @param {Function} [callback=null] - Callback for drawing on the disc.
      * @param {string} [move=""] - Move commands.
      * @param {string} [label=""] - Label for the part.
      */
     disc(diameter, hole = 0, dwidth = 1.0, callback = null, move = "", label = "") {
+        // Handle options object as second parameter
+        if (typeof hole === 'object' && hole !== null) {
+            const opts = hole;
+            hole = opts.hole || 0;
+            dwidth = opts.dwidth !== undefined ? opts.dwidth : 1.0;
+            callback = opts.callback || null;
+            move = opts.move || "";
+            label = opts.label || "";
+        }
+        
         const size = diameter;
         const r = diameter / 2.0;
 

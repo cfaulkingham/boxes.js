@@ -23,7 +23,7 @@ class FilamentSpool extends BayonetBox {
         let r;
         let h;
         let side;
-        [r, h, side] = this.regularPolygon(this.sides);
+        [r, h, side] = this.regularPolygon(this.sides, this.inner_diameter / 2);
         for (let i = 0; i < this.sides; i += 1) {
             this.fingerHolesAt((-side / 2), (h + (0.5 * this.thickness)), side, 0);
             this.moveTo(0, 0, (360 / this.sides));
@@ -49,13 +49,13 @@ class FilamentSpool extends BayonetBox {
         let r;
         let h;
         let side;
-        [r, h, side] = this.regularPolygon(this.sides);
+        [r, h, side] = this.regularPolygon(this.sides, this.inner_diameter / 2);
         this.diameter = (2 * h);
         this.lugs = this.sides;
-        this.parts.disc(this.outer_diameter, {callback: this.leftsideCB, move: "right"});
-        this.parts.disc(this.outer_diameter, {hole: this.axle_diameter, callback: () => [this.alignmentHoles(true), this.outerHolesCB()], move: "right"});
-        this.regularPolygonWall(this.sides, {r: (this.inner_diameter / 2), edges: "f", callback: [this.upperCB], move: "right"});
-        this.parts.disc(this.diameter, {callback: this.lowerCB, move: "right"});
+        this.parts.disc(this.outer_diameter, {callback: () => this.leftsideCB(), move: "right"});
+        this.parts.disc(this.outer_diameter, {hole: this.axle_diameter, callback: () => { this.alignmentHoles(true); this.outerHolesCB(); }, move: "right"});
+        this.regularPolygonWall(this.sides, {r: (this.inner_diameter / 2), edges: "f", callback: [() => this.upperCB()], move: "right"});
+        this.parts.disc(this.diameter, {callback: () => this.lowerCB(), move: "right"});
         for (let i = 0; i < this.sides; i += 1) {
             this.rectangularWall(side, (this.h - t), "feFe", {callback: [() => this.hole((side / 2), (this.h - (2 * t)))], move: "right"});
         }

@@ -767,6 +767,18 @@ class Boxes {
      * @param {string} [move=null] - Move commands.
      */
     regularPolygonWall(corners = 3, r = null, h = null, side = null, edges = 'e', hole = null, callback = null, move = null) {
+        // Handle options object as second parameter
+        if (typeof r === 'object' && r !== null && !Array.isArray(r)) {
+            const opts = r;
+            r = opts.r !== undefined ? opts.r : null;
+            h = opts.h !== undefined ? opts.h : null;
+            side = opts.side !== undefined ? opts.side : null;
+            edges = opts.edges !== undefined ? opts.edges : 'e';
+            hole = opts.hole !== undefined ? opts.hole : null;
+            callback = opts.callback !== undefined ? opts.callback : null;
+            move = opts.move !== undefined ? opts.move : null;
+        }
+        
         let vals = this.regularPolygon(corners, r, h, side);
         r = vals[0]; h = vals[1]; side = vals[2];
 
@@ -1950,6 +1962,14 @@ class Boxes {
      * @param {boolean} [center_y=true] - Center Y alignment.
      */
     rectangularHole(x, y, dx, dy, r = 0, center_x = true, center_y = true) {
+        // Handle options object as 5th parameter
+        if (typeof r === 'object' && r !== null) {
+            const opts = r;
+            r = opts.r !== undefined ? opts.r : 0;
+            center_x = opts.center_x !== undefined ? opts.center_x : true;
+            center_y = opts.center_y !== undefined ? opts.center_y : true;
+        }
+        
         this.restore(() => {
             this.holeCol(() => {
                 r = Math.min(r, dx / 2., dy / 2.);
