@@ -29,7 +29,7 @@ class Boxes {
         this.spacing = [0.5, 0]; // spacing around parts [multiplier of thickness, extra mm]
         this.format = 'svg';
         this.debug = false;
-        this.labels = true;
+        this.labels = false;
         this.reference = 100.0;
         this.inner_corners = "loop"; // style for inner corners: "loop", "corner", "backarc"
 
@@ -317,10 +317,10 @@ class Boxes {
 
             if (this.reference < 80) {
                 // Text outside box to the right (doesn't fit inside)
-                this.text(refText, this.reference + 5, boxHeight / 2.0 + fontSize / 2.0 + 2, 0, "left middle", fontSize, Color.ANNOTATIONS);
+                this.text(refText, this.reference + 5, boxHeight / 2.0 + fontSize / 2.0+ -2, 0, "left middle", fontSize, Color.ANNOTATIONS);
             } else {
                 // Text centered inside box
-                this.text(refText, this.reference / 2.0, boxHeight / 2.0 + fontSize / 2.0 + 2, 0, "center middle", fontSize, Color.ANNOTATIONS);
+                this.text(refText, this.reference / 2.0, boxHeight / 2.0 + fontSize / 2.0 + -2, 0, "center middle", fontSize, Color.ANNOTATIONS);
             }
             this.move(this.reference, boxHeight, "up");
             this.ctx.stroke();

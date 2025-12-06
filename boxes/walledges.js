@@ -35,16 +35,24 @@ class _WallMountedBox extends Boxes {
      */
     generateWallEdges() {
         let s;
+        // Helper function to safely get edge settings defaults
+        const getEdgeDefaults = (name) => {
+            if (this.edgesettings && this.edgesettings[name]) {
+                return this.edgesettings[name].defaults || {};
+            }
+            return {};
+        };
+
         if (this.walltype.startsWith("plain")) {
-            s = new WallSettings(this.thickness, true, this.edgesettings.get("Wall", {}) || {});
+            s = new WallSettings(this.thickness, true, getEdgeDefaults("Wall"));
         } else if (this.walltype === "slatwall") {
-            s = new SlatWallSettings(this.thickness, true, this.edgesettings.get("SlatWall", {}) || {});
+            s = new SlatWallSettings(this.thickness, true, getEdgeDefaults("SlatWall"));
         } else if (this.walltype === "dinrail") {
-            s = new DinRailSettings(this.thickness, true, this.edgesettings.get("DinRail", {}) || {});
+            s = new DinRailSettings(this.thickness, true, getEdgeDefaults("DinRail"));
         } else if (this.walltype === "french cleat") {
-            s = new FrenchCleatSettings(this.thickness, true, this.edgesettings.get("FrenchCleat", {}) || {});
+            s = new FrenchCleatSettings(this.thickness, true, getEdgeDefaults("FrenchCleat"));
         } else if (this.walltype === "skadis") {
-            s = new SkadisSettings(this.thickness, true, this.edgesettings.get("Skadis", {}) || {});
+            s = new SkadisSettings(this.thickness, true, getEdgeDefaults("Skadis"));
         }
 
         s.edgeObjects(this);

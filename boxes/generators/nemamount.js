@@ -9,7 +9,7 @@ class NemaMount extends Boxes {
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
-        this.argparser.add_argument("--size", {action: "store", type: "int", default: 8, choices: list(sorted(this.nema_sizes.keys())), help: "Nema size of the motor"});
+        this.argparser.add_argument("--size", {action: "store", type: "int", default: 8, choices: Object.keys(this.nema_sizes).map(Number).sort((a, b) => a - b), help: "Nema size of the motor"});
     }
 
     render() {
@@ -17,7 +17,7 @@ class NemaMount extends Boxes {
         let flange;
         let holes;
         let screws;
-        [motor, flange, holes, screws] = this.nema_sizes.get(this.size, this.nema_sizes[8]);
+        [motor, flange, holes, screws] = this.nema_sizes[this.size] || this.nema_sizes[8];
         let t = this.thickness;
         this.rectangularWall(x, y, "ffef", {callback: [() => this.NEMA(this.size, (x / 2), (y / 2))], move: "right"});
         this.rectangularTriangle(x, h, "fFe", {num: 2, move: "right"});

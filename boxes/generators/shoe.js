@@ -71,8 +71,11 @@ class Shoe extends Boxes {
     }
 
     shoeside(y, h, hf, yg, tf, r, move, label) {
-        let tx = (y + (2 * this.edges.get.spacing()));
-        let ty = ((h + this.edges.get.spacing()) + this.edges.get.spacing());
+        const edgeF = this.edges["F"] || this.edges["e"];
+        const edgef = this.edges["f"] || this.edges["e"];
+        const edgee = this.edges["e"];
+        let tx = (y + (2 * edgeF.spacing()));
+        let ty = ((h + edgeF.spacing()) + edgef.spacing());
         if (this.move(tx, ty, move)) {
             return;
         }
@@ -82,19 +85,19 @@ class Shoe extends Boxes {
         let dtemp = Math.sqrt(((((h - hf) - r) ** 2) + (((y - yg) - tf) ** 2)));
         lf = Math.sqrt(((dtemp ** 2) - (r ** 2)));
         af = ((90 - atemp) - (Math.atan((r / lf)) * 180 / Math.PI));
-        this.moveTo(this.edges.get.margin(), this.edges.get.margin());
-        this.edges.get(y);
-        this.edgeCorner(this.edges["f"], this.edges["F"], 90);
-        this.edges.get(hf);
-        this.edgeCorner(this.edges["F"], this.edges["f"], 90);
-        this.edges.get(tf);
+        this.moveTo(edgeF.margin(), edgef.margin());
+        edgeF.draw(y);
+        this.edgeCorner(edgef, edgeF, 90);
+        edgeF.draw(hf);
+        this.edgeCorner(edgeF, edgef, 90);
+        edgef.draw(tf);
         this.corner((af - 90), r);
-        this.edges.get(lf);
-        this.edgeCorner(this.edges["f"], this.edges["e"], (90 - af));
-        this.edges.get(yg);
-        this.edgeCorner(this.edges["e"], this.edges["F"], 90);
-        this.edges.get(h);
-        this.edgeCorner(this.edges["F"], this.edges["f"], 90);
+        edgef.draw(lf);
+        this.edgeCorner(edgef, edgee, (90 - af));
+        edgee.draw(yg);
+        this.edgeCorner(edgee, edgeF, 90);
+        edgeF.draw(h);
+        this.edgeCorner(edgeF, edgef, 90);
         this.move(tx, ty, move, {label: label});
         return [lf, ((90 - af) * Math.PI / 180)];
     }

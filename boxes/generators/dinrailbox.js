@@ -90,8 +90,10 @@ class DinRailBox extends Boxes {
         this.lid_lip((y - (0.1 * t)), {move: "rotated right"});
         this.lid_lip((y - (0.1 * t)), {move: "rotated right"});
         this.rectangularWall(x, y, "ffff", {callback: [() => this.fingerHolesAt(0, (((((y - w) / 2) - (0.5 * t)) + o) - 9), x, 0)], move: "right", label: "Back"});
-        this.edges["f"].settings.setValues(t, false, {edge_width: 8});
-        let dr = DinRailEdge(this, this.edges["f"].settings, w, o);
+        if (this.edges["f"] && this.edges["f"].settings) {
+            this.edges["f"].settings.setValues(this.thickness, false, {edge_width: 8});
+        }
+        let dr = new DinRailEdge(this, this.edges["f"] ? this.edges["f"].settings : null, w, o);
         this.rectangularWall(y, h, [dr, "F", "e", "F"], {ignore_widths: [1, 6], move: "rotated right", label: "Left Side upsidedown"});
         this.rectangularWall(y, h, [dr, "F", "e", "F"], {ignore_widths: [1, 6], move: "rotated mirror right", label: "Right Side"});
         this.rectangularWall(x, h, ["h", "f", "e", "f"], {ignore_widths: [1, 6], callback: [this.spring, null, this.lid_holes], move: "up", label: "Bottom"});

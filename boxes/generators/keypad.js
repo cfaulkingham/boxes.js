@@ -4,8 +4,9 @@ import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
+import { Keyboard  } from './keyboard.js';
 
-class Keypad extends Boxes {
+class Keypad extends Keyboard {
     constructor() {
         super();
         this.argparser.add_argument("--h", {action: "store", type: "int", default: 30, help: "height of the box"});

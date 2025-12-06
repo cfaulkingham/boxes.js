@@ -63,9 +63,13 @@ class HingeBox extends Boxes {
         else {
             this.rectangularWall(x, y, "ffff", {move: "left up"});
         }
-        this.edges["u"].parts({move: "up"});
-        if (s) {
+        if (this.edges["u"] && this.edges["u"].parts) {
             this.edges["u"].parts({move: "up"});
+        }
+        if (s) {
+            if (this.edges["u"] && this.edges["u"].parts) {
+                this.edges["u"].parts({move: "up"});
+            }
         }
     }
 

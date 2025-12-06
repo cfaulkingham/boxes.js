@@ -76,35 +76,36 @@ class PirateChest extends Boxes {
         let hp;
         let side;
         [radius, hp, side] = this.regularPolygon(((n - 1) * 2));
-        let tx = (y + (2 * this.edges.get.spacing()));
+        const edgeG = this.edges["G"] || this.edges["e"];
+        let tx = (y + (2 * edgeG.spacing()));
         let lidheight = ((n % 2) ? hp : radius);
-        let ty = ((lidheight + this.edges.get.spacing()) + this.edges.get.spacing());
+        let ty = ((lidheight + edgeG.spacing()) + edgeG.spacing());
         if (this.move(tx, ty, move)) {
-            return [((side / 2) + this.edges.get.spacing()), side, (side / 2)];
+            return [((side / 2) + edgeG.spacing()), side, (side / 2)];
         }
-        this.moveTo(this.edges.get.margin(), this.edges.get.margin());
-        this.edges.get(y);
+        this.moveTo(edgeG.margin(), edgeG.margin());
+        edgeG.draw(y);
         this.corner(90);
         if (bottom === "p") {
-            this.edges.get(((side / 2) + this.edges.get.spacing()));
+            edgeG.draw(((side / 2) + edgeG.spacing()));
         }
         else {
-            this.edges.get((side / 2));
+            edgeG.draw((side / 2));
         }
         this.corner((180 / (n - 1)));
         for (let _ = 0; _ < (n - 2); _ += 1) {
-            this.edges.get(side);
+            edgeG.draw(side);
             this.corner((180 / (n - 1)));
         }
         if (bottom === "P") {
-            this.edges.get(((side / 2) + this.edges.get.spacing()));
+            edgeG.draw(((side / 2) + edgeG.spacing()));
         }
         else {
-            this.edges.get((side / 2));
+            edgeG.draw((side / 2));
         }
         this.corner(90);
         this.move(tx, ty, move, {label: label});
-        return [((side / 2) + this.edges.get.spacing()), side, (side / 2)];
+        return [((side / 2) + edgeG.spacing()), side, (side / 2)];
     }
 
 }

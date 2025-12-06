@@ -33,6 +33,23 @@ class ArgParser {
     add_argument_group(name) {
         return this; // Mock: return self so we can call add_argument on it
     }
+
+    /**
+     * Set default values for arguments.
+     * @param {Object} defaults - Object with argument names (without --) as keys and default values.
+     */
+    set_defaults(defaults) {
+        for (const [key, value] of Object.entries(defaults)) {
+            // Find existing argument and update its default, or add a new one
+            const argName = key.startsWith('--') ? key : `--${key}`;
+            const existing = this.arguments.find(arg => arg.name === argName);
+            if (existing) {
+                existing.default = value;
+            } else {
+                this.arguments.push({ name: argName, default: value });
+            }
+        }
+    }
 }
 
 export { ArgParser };
