@@ -37,7 +37,7 @@ class Shadowbox extends _TopEdge {
             this.rectangularWall((y - (frameheight * 2)), framewidth, "eded", {move: "up"});
         }
         let hypotenuse = Math.sqrt((((frameheight + t) ** 2) + ((framewidth + t) ** 2)));
-        let angle = (Math.acos(((framewidth + t) / hypotenuse)) * 180 / Math.PI);
+        let angle = (Math.cos(((framewidth + t) / hypotenuse)) * 180 / Math.PI);
         let edgetypes = (casejoinery ? "eFeeee" : "eeeeee");
         let vframe_poly = [t, 0, y, 0, t, (90 + angle), hypotenuse, (90 - angle), (y - (frameheight * 2)), (90 - angle), hypotenuse, (90 + angle)];
         let hframe_poly = [t, 0, x, 0, t, (180 - angle), hypotenuse, angle, (x - (framewidth * 2)), angle, hypotenuse, (180 - angle)];

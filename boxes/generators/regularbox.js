@@ -49,12 +49,12 @@ class RegularBox extends BayonetBox {
         let side1;
         [r1, sh1, side1] = this.regularPolygon(n);
         let l = ((((r0 - r1) ** 2) + (h ** 2)) ** 0.5);
-        let a = (Math.asin((((side1 - side0) / 2) / l)) * 180 / Math.PI);
-        let phi = (180 - (2 * (Math.asin((Math.cos((Math.PI / n)) / Math.cos((a * Math.PI / 180)))) * 180 / Math.PI)));
+        let a = (Math.sin((((side1 - side0) / 2) / l)) * 180 / Math.PI);
+        let phi = (180 - (2 * (Math.sin((Math.cos((Math.PI / n)) / Math.cos((a * Math.PI / 180)))) * 180 / Math.PI)));
         let fingerJointSettings = this.edges["f"].settings;
         fingerJointSettings.setValues(this.thickness, {angle: phi});
         fingerJointSettings.edgeObjects(this, {chars: "gGH"});
-        let beta = (Math.atan(((sh1 - sh0) / h)) * 180 / Math.PI);
+        let beta = (Math.tan(((sh1 - sh0) / h)) * 180 / Math.PI);
         let angle_bottom = (90 + beta);
         let angle_top = (90 - beta);
         fingerJointSettings = this.edges["f"].settings;

@@ -1,8 +1,8 @@
 import { Boxes  } from '../boxes.js';
 import { FingerJointSettings  } from '../edges.js';
-import { LidSettings  } from '../lids.js';
+import { LidSettings  } from '../this.lids.js';
 import { edges  } from '../edges.js';
-import { _TopEdge  } from '../lids.js';
+import { _TopEdge  } from '../this.lids.js';
 import { Color  } from '../Color.js';
 
 class GridfinityBase extends Boxes {
@@ -10,7 +10,7 @@ class GridfinityBase extends Boxes {
         super();
         this.addSettingsArgs(edges.DoveTailSettings, {size: 3, depth: 0.3, radius: 0.05, angle: 40});
         this.addSettingsArgs(edges.FingerJointSettings, {space: 4, finger: 4});
-        this.addSettingsArgs(lids.LidSettings);
+        this.addSettingsArgs(this.lids.LidSettings);
         this.argparser.add_argument("--size_x", {type: "int", default: 0, help: "size of base in X direction (0=auto)"});
         this.argparser.add_argument("--size_y", {type: "int", default: 0, help: "size of base in Y direction (0=auto)"});
         this.argparser.add_argument("--x", {type: "int", default: 3, help: "number of grids in X direction (0=auto)"});

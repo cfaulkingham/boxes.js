@@ -131,11 +131,11 @@ class SmallPartsTray2 extends _TopEdge {
         floors.append((hi - t2));
         let be = (b !== "e" ? "f" : "e");
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            let e = [edges.SlottedEdge(this, this.sx, be), "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"];
+            let e = [new edges.SlottedEdge(this, this.sx, be), "f", new edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"];
             this.rectangularWall(x, (hi - t2), e, {move: "up", label: `inner wall ${i}`});
         }
         for (let i of this.sy) {
-            this.rectangularWall(x, ((hi * (2 ** 0.5)) + (t / 2)), [edges.SlottedEdge(this, this.sx, "e"), "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"], {move: "up", label: "slope"});
+            this.rectangularWall(x, ((hi * (2 ** 0.5)) + (t / 2)), [new edges.SlottedEdge(this, this.sx, "e"), "f", new edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"], {move: "up", label: "slope"});
         }
         this.ctx.restore();
         this.rectangularWall(x, hi, "ffff", {move: "right only"});

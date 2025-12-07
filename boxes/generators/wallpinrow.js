@@ -124,7 +124,7 @@ class WallPinRow extends _WallMountedBox {
 
     render() {
         this.generateWallEdges();
-        let p = PinEdge(this, this);
+        let p = new PinEdge(this, this);
         let n = this.pins;
         let t = this.thickness;
         if (this.h < (7 * t)) {

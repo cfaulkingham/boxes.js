@@ -156,7 +156,7 @@ class Rotary extends Boxes {
         [bw, bh] = [this.beamwidth, this.beamheight];
         this.edges["f"].settings.setValues(this.thickness, {space: 2, finger: 2, surroundingspaces: 1});
         if (this.knifethickness) {
-            this.addPart(HangerEdge(this, this.knifethickness));
+            this.addPart(new HangerEdge(this, this.knifethickness));
         }
         else {
         }
@@ -192,11 +192,11 @@ class Rotary extends Boxes {
         this.ctx.restore();
         this.rectangularWall(((hw - (2 * t)) - 4), 60, {edges: "efef", move: "up only"});
         this.ctx.save();
-        let slot = edges.SlottedEdge(this, [((30 - t) / 2), ((30 - t) / 2)]);
+        let slot = new edges.SlottedEdge(this, [((30 - t) / 2), ((30 - t) / 2)]);
         this.rectangularWall(30, 30, {edges: ["e", "e", slot, "e"], callback: [() => this.hole(7, 23, (this.axle / 2))], move: "right"});
         this.rectangularWall(30, 30, {edges: ["e", "e", slot, "e"], callback: [() => this.hole(7, 23, (this.axle / 2))], move: "right"});
         let leftover = ((((hw - (6 * t)) - 6) - 20) / 2.0);
-        slot = edges.SlottedEdge(this, [leftover, 20, leftover]);
+        slot = new edges.SlottedEdge(this, [leftover, 20, leftover]);
         this.rectangularWall(((hw - (4 * t)) - 6), 30, {edges: [slot, "e", "e", "e"], callback: [() => this.hole((((hw - (4 * t)) - 6) / 2.0), 15, 4)], move: "right"});
         for (let i = 0; i < 3; i += 1) {
             this.rectangularWall(20, 30, {callback: [() => this.nutHole("M8", 10, 15)], move: "right"});

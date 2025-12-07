@@ -77,7 +77,7 @@ class CoffeeCapsulesHolder extends Boxes {
     }
 
     render_front_hole() {
-        let radians = Math.acos(this.body_size / this.lid_size_with_margin);
+        let radians = Math.cos(this.body_size / this.lid_size_with_margin);
         let height_difference = (this.lid_size / 2) * Math.sin(radians);
         let degrees = radians * 180 / Math.PI;
         let half = [

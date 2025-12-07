@@ -55,14 +55,14 @@ class DiscRack extends Boxes {
         this.lower_halfslit = (r * Math.sqrt((1 - (this.lower_factor ** 2))));
         this.rear_halfslit = (r * Math.sqrt((1 - (this.rear_factor ** 2))));
         if (true) {
-            let toplim = offset_radius_in_square(this.outer, this.angle, (r * this.lower_factor));
+            let this.toplim = offset_radius_in_square(this.outer, this.angle, (r * this.lower_factor));
             let bottomlim = offset_radius_in_square(this.outer, this.angle, ((r * this.lower_factor) + this.thickness));
-            this.lower_outset = (Math.min(toplim, bottomlim) - this.lower_halfslit);
+            this.lower_outset = (Math.min(this.toplim, bottomlim) - this.lower_halfslit);
         }
         if (true) {
-            toplim = offset_radius_in_square(this.outer, -this.angle, (r * this.rear_factor));
+            this.toplim = offset_radius_in_square(this.outer, -this.angle, (r * this.rear_factor));
             bottomlim = offset_radius_in_square(this.outer, -this.angle, ((r * this.rear_factor) + this.thickness));
-            this.rear_outset = (Math.min(toplim, bottomlim) - this.rear_halfslit);
+            this.rear_outset = (Math.min(this.toplim, bottomlim) - this.rear_halfslit);
         }
         this.lower_size = ((this.lower_outset + this.lower_halfslit) + (r * this.rear_factor));
         this.rear_size = (((r * this.lower_factor) + this.rear_halfslit) + this.rear_outset);

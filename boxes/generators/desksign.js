@@ -16,8 +16,7 @@ class Desksign extends Boxes {
         this.argparser.add_argument("--width", {action: "store", type: "float", default: 150, help: "plate width in mm (excluding holes)"});
         this.argparser.add_argument("--height", {action: "store", type: "float", default: 80, help: "plate height in mm"});
         this.argparser.add_argument("--angle", {action: "store", type: "float", default: 60, help: "plate angle in degrees (90 is vertical)"});
-        this.argparser.add_argument("--label", {action: "store", type: "str", default: "DeskSign
-Boxes.py", help: "optional text to engrave (leave blank to omit)"});
+        this.argparser.add_argument("--label", {action: "store", type: "str", default: "DeskSign\nBoxes.py", help: "optional text to engrave (leave blank to omit)"});
         this.argparser.add_argument("--fontsize", {action: "store", type: "float", default: 20, help: "height of text"});
         this.argparser.add_argument("--feet", {action: "store", type: boolarg, default: false, help: "add raised feet"});
         this.argparser.add_argument("--mirror", {action: "store", type: boolarg, default: true, help: "mirrors one of the stand so the same side of the material can be placed on the outside"});

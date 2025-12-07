@@ -28,8 +28,7 @@ class GridfinityTrayLayout extends TrayLayout {
         this.argparser.add_argument("--cut_pads_mag_diameter", {type: "float", default: 6.5, help: "if pads are cut add holes for magnets. Typical is 6.5, zero to disable,"});
         this.argparser.add_argument("--cut_pads_mag_offset", {type: "float", default: 7.75, help: "if magnet hole offset from pitch corners.  Typical is 7.75."});
         this.argparser.add_argument("--base_thickness", {type: "float", default: 0.0, help: "the thickness of base the box will sit upon.  0 to use the material thickness, 4.65 for a standard Gridfinity 3D printed base"});
-        this.argparser.add_argument("--layout", {type: "str", help: "You can hand edit this before generating", default: "
-"});
+        this.argparser.add_argument("--layout", {type: "str", help: "You can hand edit this before generating", default: "\n"});
         if (this.UI !== "web") {
             this.argparser.add_argument("--input", {action: "store", type: "str", default: "traylayout.txt", help: "layout file"});
         }

@@ -34,7 +34,7 @@ class CoinBankSafe extends Boxes {
         let base_width = t;
         let total_length = (base_length + barb_length);
         let total_width = (base_width + (cutout_width * 0.5));
-        let cutout_angle = (Math.atan((cutout_width / base_length)) * 180 / Math.PI);
+        let cutout_angle = (Math.tan((cutout_width / base_length)) * 180 / Math.PI);
         let cutout_length = Math.sqrt(((cutout_width ** 2) + (base_length ** 2)));
         if (this.move(total_length, total_width, move, true)) {
             return;

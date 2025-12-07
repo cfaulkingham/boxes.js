@@ -23,9 +23,9 @@ class LaptopStand extends Boxes {
     perform_calculations() {
         let angle_rads_a = (this.angle * Math.PI / 180);
         let height = (this.l_depth * Math.sin(angle_rads_a));
-        let base = ((sqrt(2) * this.l_depth) * Math.cos(angle_rads_a));
-        let hyp = (this.l_depth * sqrt((Math.pow(Math.cos(angle_rads_a), 2) + 1)));
-        let angle_rads_b = Math.atan((Math.tan(angle_rads_a) / Math.sqrt(2)));
+        let base = ((Math.sqrt(2) * this.l_depth) * Math.cos(angle_rads_a));
+        let hyp = (this.l_depth * Math.sqrt((Math.pow(Math.cos(angle_rads_a), 2) + 1)));
+        let angle_rads_b = Math.tan((Math.tan(angle_rads_a) / Math.sqrt(2)));
         let base_extra = ((1 / Math.cos(angle_rads_b)) * (this.nub_size - (this.ground_offset * Math.sin(angle_rads_b))));
         let lip_outer = (((this.ground_offset / Math.cos(angle_rads_b)) + this.l_thickness) - (this.nub_size * Math.tan(angle_rads_b)));
         let bottom_slot_depth = ((height / 4) + (this.ground_offset / 2));

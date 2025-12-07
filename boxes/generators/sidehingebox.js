@@ -95,7 +95,7 @@ class SideHingeBox extends Boxes {
     }
 
     inner_side(x, h, hinge_center, hinge_radius, fingered_h, latches, reverse) {
-        let sides = Inner2SidesEdge(this, x, h, hinge_center, hinge_radius, fingered_h, reverse);
+        let sides = new Inner2SidesEdge(this, x, h, hinge_center, hinge_radius, fingered_h, reverse);
         let noop_edge = edges.NoopEdge(this);
         this.rectangularWall(x, h, (reverse ? ["f", "f", sides, noop_edge] : ["f", sides, noop_edge, "f"]), {move: "right", label: ("inner - hinge side " + (reverse ? "A" : "C")), callback: (((latches && reverse) || latches > 1) ? [() => this.inner_side_cb(x, reverse)] : null)});
     }
@@ -143,7 +143,7 @@ class Inner2SidesEdge extends Boxes {
         let hinge_to_lid = ((this.height + this.boxes.thickness) - this.hinge_center);
         let hinge_to_side = (this.hinge_center - this.boxes.thickness);
         let corner_height = (hinge_to_lid - Math.sqrt((Math.pow(hinge_to_lid, 2) - Math.pow(hinge_to_side, 2))));
-        let angle = (Math.asin((hinge_to_side / hinge_to_lid)) * 180 / Math.PI);
+        let angle = (Math.sin((hinge_to_side / hinge_to_lid)) * 180 / Math.PI);
         let path = [((this.height - this.fingered_h) - corner_height), [(90 - angle), 0], 0, [angle, hinge_to_lid], ((this.boxes.thickness + this.length) - this.hinge_center)];
         path = (this.reverse ? list(reversed(path)) : path);
         this.polyline(...path);

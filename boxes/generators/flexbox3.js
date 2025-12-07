@@ -96,7 +96,7 @@ class FlexBox3 extends Boxes {
             this.edge(((r - r2) + (1 * t)));
         }
         else {
-            let a = Math.acos(((r - h) / (r + t)));
+            let a = Math.cos(((r - h) / (r + t)));
             let ang = (a * 180 / Math.PI);
             base_l = (((x + ((r + t) * Math.sin(a))) - r) + t);
             if (this.move((h + t), (base_l + t), move, true)) {

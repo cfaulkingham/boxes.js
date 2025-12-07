@@ -117,7 +117,7 @@ class SpicesRack extends Boxes {
         this.base_angle = 10;
         this.base_r = ((this.diameter / 2) * Math.cos((this.base_angle * Math.PI / 180)));
         this.base_h = ((this.diameter / 2) * (1 - Math.sin((this.base_angle * Math.PI / 180))));
-        this.angle = (Math.atan((this.base_r / this.height)) * 180 / Math.PI);
+        this.angle = (Math.tan((this.base_r / this.height)) * 180 / Math.PI);
         this.hole_length = (((this.base_h ** 2) + (this.height ** 2)) ** 0.5);
         this.hole_distance = ((this.diameter - this.base_r) * Math.sin((this.angle * Math.PI / 180)));
         this.h = ((this.space + d) / Math.cos((this.angle * Math.PI / 180)));

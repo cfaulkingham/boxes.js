@@ -83,7 +83,7 @@ class StorageShelf extends _TopEdge {
         }
         let be = (b !== "e" ? "f" : "e");
         for (let i = 0; i < (this.sh.length - 1); i += 1) {
-            e = ["f", edges.SlottedEdge(this, this.sy.slice(0,  /* step -1 ignored */), "f"), "f", "e"];
+            e = ["f", new edges.SlottedEdge(this, this.sy.slice(0,  /* step -1 ignored */), "f"), "f", "e"];
             if (this.retainer) {
             }
             this.rectangularWall(x, y, e, {move: "up", label: ("inner horizontal " + str((i + 1)))});
@@ -99,9 +99,9 @@ class StorageShelf extends _TopEdge {
         this.rectangularWall(x, h, "ffff", {move: "right only", label: "invisible"});
         this.rectangularWall(y, h, [b, "f", t2, "f"], {callback: [this.ySlots, this.hSlots], move: "up", label: "back"});
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            e = [be, edges.SlottedEdge(this, this.sh, "e"), "e", "f"];
+            e = [be, new edges.SlottedEdge(this, this.sh, "e"), "e", "f"];
             if (this.closedtop) {
-                e = [be, edges.SlottedEdge(this, this.sh, "e"), "f", "f"];
+                e = [be, new edges.SlottedEdge(this, this.sh, "e"), "f", "f"];
             }
             this.rectangularWall(x, h, e, {move: "up", label: ("inner vertical " + str((i + 1)))});
         }

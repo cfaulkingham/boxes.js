@@ -102,7 +102,7 @@ class DrillStand extends Boxes {
         let tw;
         let th;
         [tw, th] = [(x + (2 * t)), ((sh[nr] + eh) + t)];
-        let a = (Math.atan((eh / x)) * 180 / Math.PI);
+        let a = (Math.tan((eh / x)) * 180 / Math.PI);
         let fa = (1 / Math.cos((a * Math.PI / 180)));
         if (this.move(tw, th, move, true)) {
             return;
@@ -136,7 +136,7 @@ class DrillStand extends Boxes {
         let eh = this.extra_height;
         let tw = ((x + edges[1].spacing()) + edges[3].spacing());
         let th = (((h + eh) + edges[0].spacing()) + edges[2].spacing());
-        let a = (Math.atan((eh / x)) * 180 / Math.PI);
+        let a = (Math.tan((eh / x)) * 180 / Math.PI);
         let fa = (1 / Math.cos((a * Math.PI / 180)));
         if (this.move(tw, th, move, true)) {
             return;
@@ -188,7 +188,7 @@ class DrillStand extends Boxes {
         let sh;
         [x, sx, y, sy, sh] = [this.x, this.sx, this.y, this.sy, this.sh];
         let eh = this.extra_height;
-        let a = (Math.atan((eh / x)) * 180 / Math.PI);
+        let a = (Math.tan((eh / x)) * 180 / Math.PI);
         let fa = (1 / Math.cos((a * Math.PI / 180)));
         let posy = (-0.5 * t);
         for (let i = 0; i < (sy.length - 1); i += 1) {
@@ -209,7 +209,7 @@ class DrillStand extends Boxes {
         [sx, sy, sh] = [this.sx, this.sy, this.sh];
         let x = this.x;
         let y = this.y;
-        let bottom_angle = Math.atan((this.extra_height / x));
+        let bottom_angle = Math.tan((this.extra_height / x));
         this.xOutsideWall(sh[0], "hFeF", {move: "up"});
         for (let i = 1; i < sy.length; i += 1) {
             this.xWall(i, {move: "up"});

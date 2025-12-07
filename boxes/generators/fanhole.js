@@ -28,10 +28,10 @@ class FanHole extends Boxes {
         let ri = (ri_rel * r);
         let ai = 90;
         let ao = ((360 / n) * 0.8);
-        let a1 = (Math.atan(((ri * Math.sin((ai * Math.PI / 180))) / (r - (ri * Math.cos((ai * Math.PI / 180)))))) * 180 / Math.PI);
+        let a1 = (Math.tan(((ri * Math.sin((ai * Math.PI / 180))) / (r - (ri * Math.cos((ai * Math.PI / 180)))))) * 180 / Math.PI);
         let d1 = (((ri * (Math.sin((ai * Math.PI / 180)) ** 2)) + ((r - (ri * Math.cos((ai * Math.PI / 180)))) ** 2)) ** 0.5);
         let d2 = (((ri * (Math.sin(((ai - ao) * Math.PI / 180)) ** 2)) + ((r - (ri * Math.cos(((ai - ao) * Math.PI / 180)))) ** 2)) ** 0.5);
-        let a_i2 = (Math.atan((((r * Math.sin((ao * Math.PI / 180))) - (ri * Math.sin((ai * Math.PI / 180)))) / ((r * Math.cos((ao * Math.PI / 180))) - (ri * Math.cos((ai * Math.PI / 180)))))) * 180 / Math.PI);
+        let a_i2 = (Math.tan((((r * Math.sin((ao * Math.PI / 180))) - (ri * Math.sin((ai * Math.PI / 180)))) / ((r * Math.cos((ao * Math.PI / 180))) - (ri * Math.cos((ai * Math.PI / 180)))))) * 180 / Math.PI);
         let a3 = (a1 + a_i2);
         let a2 = ((90 + a_i2) - ao);
         this.moveTo(0, -r, 180);

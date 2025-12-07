@@ -42,7 +42,7 @@ class DividerTray extends Boxes {
     render() {
         let side_walls_number = ((this.sx.length - 1) + [this.left_wall, this.right_wall].reduce((a, b) => a + b, 0));
         if (side_walls_number === 0) {
-            ValueError("You need at least one side wall to generate this tray")
+            throw new Error("You need at least one side wall to generate this tray");
         }
         if (this.outside) {
             if (this.bottom) {
@@ -62,26 +62,27 @@ class DividerTray extends Boxes {
         let facing_wall_length = (this.sx.reduce((a, b) => a + b, 0) + (this.thickness * (this.sx.length - 1)));
         let side_edge = (with_wall) => (with_wall ? "F" : "e");
         let bottom_edge = (with_wall, with_handle) => (with_wall ? (with_handle ? "f" : "F") : "e");
-        let upper_edge = (this.notches_in_wall ? DividerNotchesEdge(this, list(reversed(this.sx))) : "e");
+        let upper_edge = (this.notches_in_wall ? new DividerNotchesEdge(this, list(reversed(this.sx))) : "e");
         for (let _ = 0; _ < 2; _ += 1) {
-            this.rectangularWall(facing_wall_length, this.h, [bottom_edge(this.bottom, (_ && this.handle)), side_edge(this.right_wall), upper_edge, side_edge(this.left_wall)], {callback: [partial(this.generate_finger_holes, this.h)], move: "up", label: (_ ? "Front" : "Back")});
+            this.rectangularWall(facing_wall_length, this.h, [bottom_edge(this.bottom, (_ && this.handle)), side_edge(this.right_wall), upper_edge, side_edge(this.left_wall)], {callback: [() => this.generate_finger_holes(this.h)], move: "up", label: (_ ? "Front" : "Back")});
         }
         let side_wall_length = slot_descriptions.total_length();
         for (let _ = 0; _ < side_walls_number; _ += 1) {
+            let be;
             if (_ < (side_walls_number - (this.sx.length - 1))) {
-                let be = (this.bottom ? "F" : "e");
+                be = (this.bottom ? "F" : "e");
             }
             else {
                 be = (this.bottom ? "f" : "e");
             }
-            let se = DividerSlotsEdge(this, slot_descriptions.descriptions);
-            this.rectangularWall(side_wall_length, this.h, [be, "f", se, "f"], {move: "up", label: ("Sidepiece " + str((_ + 1)))});
+            let se = new DividerSlotsEdge(this, slot_descriptions.descriptions);
+            this.rectangularWall(side_wall_length, this.h, [be, "f", se, "f"], {move: "up", label: ("Sidepiece " + (_ + 1))});
         }
         this.lid(facing_wall_length, side_wall_length);
         this.ctx.restore();
         this.rectangularWall(Math.max(facing_wall_length, side_wall_length), this.h, "ffff", {move: "right only", label: "invisible"});
         if (this.bottom) {
-            this.rectangularWall(facing_wall_length, side_wall_length, ["f", (this.right_wall ? "f" : "e"), (this.handle ? "Y" : "f"), (this.left_wall ? "f" : "e")], {callback: [partial(this.generate_finger_holes, side_wall_length)], move: "up", label: "Bottom"});
+            this.rectangularWall(facing_wall_length, side_wall_length, ["f", (this.right_wall ? "f" : "e"), (this.handle ? "Y" : "f"), (this.left_wall ? "f" : "e")], {callback: [() => this.generate_finger_holes(side_wall_length)], move: "up", label: "Bottom"});
         }
         let divider_height = (((this.h / Math.cos((this.Slot_angle * Math.PI / 180))) - (this.thickness * Math.tan((this.Slot_angle * Math.PI / 180)))) - this.Divider_bottom_margin);
         this.generate_divider(this.sx, divider_height, "up", {first_tab_width: (this.left_wall ? this.thickness : 0), second_tab_width: (this.right_wall ? this.thickness : 0)});
@@ -113,17 +114,31 @@ class DividerTray extends Boxes {
         }
     }
 
-    generate_divider(widths, height, move, first_tab_width, second_tab_width, asymmetric_tabs) {
+    generate_divider(widths, height, move, options = {}) {
+        // Extract options with defaults
+        let first_tab_width = options.first_tab_width || 0;
+        let second_tab_width = options.second_tab_width || 0;
+        let asymmetric_tabs = options.asymmetric_tabs || null;
+        
+        // Ensure widths is an array
+        if (!Array.isArray(widths)) {
+            throw new Error("widths must be an array");
+        }
+        
         let total_width = (((widths.reduce((a, b) => a + b, 0) + ((widths.length - 1) * this.thickness)) + first_tab_width) + second_tab_width);
         if (this.move(total_width, height, move, true)) {
             return;
         }
-        let play = this.Divider_play;
-        if (asymmetric_tabs) {
-            let left_tab_height = ((left_tab_height * asymmetric_tabs) - play);
-            let right_tab_height = (right_tab_height * (1 - asymmetric_tabs));
+        let play = this.Divider_play || 0;
+        let left_tab_height = height;
+        let right_tab_height = height;
+        
+        if (asymmetric_tabs !== null) {
+            left_tab_height = ((height * asymmetric_tabs) - play);
+            right_tab_height = (height * (1 - asymmetric_tabs));
         }
-        if (asymmetric_tabs) {
+        
+        if (asymmetric_tabs !== null) {
             this.moveTo((first_tab_width - play));
         }
         else {
@@ -133,14 +148,32 @@ class DividerTray extends Boxes {
             if (nr > 0) {
                 this.edge(this.thickness);
             }
-            DividerNotchesEdge(width);
+            // Draw notches directly
+            let upper_third = (((width - (2 * 1)) - (2 * 1)) / 3); // Using default notch radii
+            if (upper_third > 0) {
+                let straightHeight = ((5 - 1) - 1); // Using default notch depth
+                this.polyline(
+                    upper_third,
+                    [90, 1],
+                    straightHeight,
+                    [-90, 1],
+                    upper_third,
+                    [-90, 1],
+                    straightHeight,
+                    [90, 1],
+                    upper_third
+                );
+            }
+            else {
+                this.edge(width);
+            }
         }
         this.polyline((second_tab_width - play), 90, left_tab_height, 90, second_tab_width, -90, (height - left_tab_height), 90);
         for (let width of reversed(widths.slice(1))) {
             this.polyline((width - (2 * play)), 90, (height - this.Slot_depth), -90, (this.thickness + (2 * play)), -90, (height - this.Slot_depth), 90);
         }
         this.polyline((widths[0] - (2 * play)), 90, (height - this.Slot_depth), -90, first_tab_width, 90, right_tab_height, 90);
-        if (asymmetric_tabs) {
+        if (asymmetric_tabs !== null) {
             this.polyline((first_tab_width - play), -90, (this.Slot_depth - right_tab_height), 90);
         }
         this.move(total_width, height, move, {label: "Divider"});
@@ -335,7 +368,7 @@ class DividerNotchesEdge extends BaseEdge {
             else {
                 this.boxes.edge(this.boxes.thickness);
             }
-            this.edge_with_notch(width);
+            this.edge_with_notch.call(this, width);
         }
     }
 
@@ -343,7 +376,17 @@ class DividerNotchesEdge extends BaseEdge {
         let upper_third = (((width - (2 * this.Notch_upper_radius)) - (2 * this.Notch_lower_radius)) / 3);
         if (upper_third > 0) {
             let straightHeight = ((this.Notch_depth - this.Notch_upper_radius) - this.Notch_lower_radius);
-            this.boxes.polyline(upper_third, [90, this.Notch_upper_radius], straightHeight, [-90, this.Notch_lower_radius], upper_third, [-90, this.Notch_lower_radius], straightHeight, [90, this.Notch_upper_radius], upper_third);
+            this.boxes.polyline(
+                upper_third,
+                [90, this.Notch_upper_radius],
+                straightHeight,
+                [-90, this.Notch_lower_radius],
+                upper_third,
+                [-90, this.Notch_lower_radius],
+                straightHeight,
+                [90, this.Notch_upper_radius],
+                upper_third
+            );
         }
         else {
             this.boxes.edge(width);
@@ -379,7 +422,16 @@ class DividerSlotsEdge extends BaseEdge {
 
     do_slot(slot) {
         this.boxes.ctx.save();
-        this.boxes.polyline(0, [(90 - slot.angle), slot.start_radius], slot.corrected_start_depth(), -90, slot.width, -90, slot.corrected_end_depth(), [(90 + slot.angle), slot.end_radius]);
+        this.boxes.polyline(
+            0,
+            [(90 - slot.angle), slot.start_radius],
+            slot.corrected_start_depth(),
+            -90,
+            slot.width,
+            -90,
+            slot.corrected_end_depth(),
+            [(90 + slot.angle), slot.end_radius]
+        );
         this.boxes.ctx.restore();
         this.boxes.moveTo(slot.tracing_length());
     }

@@ -80,11 +80,11 @@ class Shoe extends Boxes {
             return;
         }
         let lf = Math.sqrt((((h - hf) ** 2) + (((y - yg) - tf) ** 2)));
-        let af = (90 - (Math.atan(((h - hf) / ((y - yg) - tf))) * 180 / Math.PI));
-        let atemp = (Math.atan((((h - hf) - r) / ((y - yg) - tf))) * 180 / Math.PI);
+        let af = (90 - (Math.tan(((h - hf) / ((y - yg) - tf))) * 180 / Math.PI));
+        let atemp = (Math.tan((((h - hf) - r) / ((y - yg) - tf))) * 180 / Math.PI);
         let dtemp = Math.sqrt(((((h - hf) - r) ** 2) + (((y - yg) - tf) ** 2)));
         lf = Math.sqrt(((dtemp ** 2) - (r ** 2)));
-        af = ((90 - atemp) - (Math.atan((r / lf)) * 180 / Math.PI));
+        af = ((90 - atemp) - (Math.tan((r / lf)) * 180 / Math.PI));
         this.moveTo(edgeF.margin(), edgef.margin());
         edgeF.draw(y);
         this.edgeCorner(edgef, edgeF, 90);

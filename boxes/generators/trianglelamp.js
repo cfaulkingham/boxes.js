@@ -55,7 +55,7 @@ class TriangleLamp extends Boxes {
         let t = this.thickness;
         let r1 = (this.screwholesize / 2);
         let r2 = (this.screenholesize / 2);
-        this.addPart(CornerEdge(this, null));
+        this.addPart(new CornerEdge(this, null));
         this.rectangularTriangle(x, x, {num: 2, move: "up", callback: [() => this.hole(((2 / 3.0) * c), ((1 / 4.0) * c), r2), () => [this.hole(((1 / 3.0) * c), ((1 / 3.0) * c), r2), this.hole((x - ((2 / 3.0) * c)), ((1 / 4.0) * c), r2)]]});
         this.rectangularTriangle(x, x, "fff", {num: 2, move: "up"});
         let C = "e";

@@ -19,7 +19,7 @@ class StackableBinEdge extends Boxes {
         let w = ((h * f) * Math.tan((a * Math.PI / 180)));
         let hyp1 = ((h * f) / Math.cos((a * Math.PI / 180)));
         let hyp2 = Math.sqrt(((w ** 2) + (((1 - (l + f)) * h) ** 2)));
-        let b = (Math.atan((w / (((1 - l) - f) * h))) * 180 / Math.PI);
+        let b = (Math.tan((w / (((1 - l) - f) * h))) * 180 / Math.PI);
         this.corner(-b);
         this.edges["e"](hyp2);
         this.corner(b);
@@ -69,7 +69,7 @@ class WallStackableBin extends _WallMountedBox {
 
     render() {
         this.generateWallEdges();
-        this.addPart(StackableBinEdge(this, this));
+        this.addPart(new StackableBinEdge(this, this));
         let angledsettings = this.edges["f"].settings;
         angledsettings.setValues(this.thickness, true, {angle: (90 - this.angle)});
         angledsettings.edgeObjects(this, {chars: "gG"});

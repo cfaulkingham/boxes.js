@@ -24,10 +24,10 @@ class Stachel extends Boxes {
             return;
         }
         this.moveTo(ro, r, 90);
-        let a1 = (Math.asin((w / ro)) * 180 / Math.PI);
-        let a2 = (Math.asin((wp / ro)) * 180 / Math.PI);
+        let a1 = (Math.sin((w / ro)) * 180 / Math.PI);
+        let a2 = (Math.sin((wp / ro)) * 180 / Math.PI);
         let l1 = (ro * (1 - Math.cos((a1 * Math.PI / 180))));
-        let a3 = (Math.asin((1.0 / rp)) * 180 / Math.PI);
+        let a3 = (Math.sin((1.0 / rp)) * 180 / Math.PI);
         this.polyline((((ro - ri) + l) - r), 90, 0, [-355, ri], 0, 90, (((ro - ri) + l) - r), [90, r], (w - (2 * r)), [90, r]);
         if (holes) {
             let poly1 = [((((l + l1) - 2) / 2) - r), 90, (w - 2), -90, 2, -90, (w - 2), 90, (((l + l1) - 2) / 2)];

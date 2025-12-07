@@ -22,7 +22,7 @@ class WallDrillBox extends DrillStand {
         let sy;
         let sh;
         [sx, sy, sh] = [this.sx, this.sy, this.sh];
-        let bottom_angle = Math.atan((this.extra_height / x));
+        let bottom_angle = Math.tan((this.extra_height / x));
         this.xOutsideWall(sh[0], "hFeF", {move: "up"});
         for (let i = 1; i < sy.length; i += 1) {
             this.xWall(i, {move: "up"});

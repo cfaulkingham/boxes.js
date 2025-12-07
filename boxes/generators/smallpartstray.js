@@ -1,8 +1,8 @@
 import { Boxes  } from '../boxes.js';
 import { FingerJointSettings  } from '../edges.js';
-import { LidSettings  } from '../lids.js';
+import { LidSettings  } from '../this.lids.js';
 import { edges  } from '../edges.js';
-import { _TopEdge  } from '../lids.js';
+import { _TopEdge  } from '../this.lids.js';
 import { Color  } from '../Color.js';
 import { CompoundEdge  } from '../edges.js';
 
@@ -10,7 +10,7 @@ class SmallPartsTray extends Boxes {
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings);
-        this.addSettingsArgs(lids.LidSettings);
+        this.addSettingsArgs(this.lids.LidSettings);
         // this.buildArgParser();
         this.argparser.add_argument("--angle", {action: "store", type: "float", default: 45.0, help: "angle of the ramps"});
         this.argparser.add_argument("--rampheight", {action: "store", type: "float", default: 0.5, help: "height of the ramps relative to to total height"});
@@ -19,7 +19,7 @@ class SmallPartsTray extends Boxes {
     }
 
     innerWall(h, y, ramp_h, ramp_y, two_ramps, front, move) {
-        let a = (Math.atan((ramp_h / ramp_y)) * 180 / Math.PI);
+        let a = (Math.tan((ramp_h / ramp_y)) * 180 / Math.PI);
         let l = (((ramp_h ** 2) + (ramp_y ** 2)) ** 0.5);
         if (two_ramps) {
             this.polygonWall([(y - (2 * ramp_y)), a, l, (90 - a), (h - ramp_h), 90, y, 90, (h - ramp_h), (90 - a), l, a], (front ? "fffeff" : "ffeeef"), {move: move});
@@ -30,7 +30,7 @@ class SmallPartsTray extends Boxes {
     }
 
     outerWall(h, y, ramp_h, ramp_y, two_ramps, front, move) {
-        let a = (Math.atan((ramp_h / ramp_y)) * 180 / Math.PI);
+        let a = (Math.tan((ramp_h / ramp_y)) * 180 / Math.PI);
         let l = (((ramp_h ** 2) + (ramp_y ** 2)) ** 0.5);
         let t = this.thickness;
         const cb = () => {

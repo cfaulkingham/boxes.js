@@ -49,7 +49,7 @@ class WallHopper extends _WallMountedBox {
         let x = (this.sx.reduce((a, b) => a + b, 0) + (this.thickness * (this.sx.length - 1)));
         let h = this.h;
         let minsa = 0;
-        let maxsa = (Math.atan((dd / (dh * sr))) * 180 / Math.PI);
+        let maxsa = (Math.tan((dd / (dh * sr))) * 180 / Math.PI);
         if (a < minsa) {
             a = minsa;
         }
@@ -67,7 +67,7 @@ class WallHopper extends _WallMountedBox {
             sr = ((sr / total) * 0.95);
             lr = ((lr / total) * 0.95);
         }
-        let b = (Math.atan((dd / ((1 - (lr + sr)) * dh))) * 180 / Math.PI);
+        let b = (Math.tan((dd / ((1 - (lr + sr)) * dh))) * 180 / Math.PI);
         let df = (dd - ((dh * sr) * Math.tan((a * Math.PI / 180))));
         let sl = ((dh * sr) / Math.cos((a * Math.PI / 180)));
         let tl = (((dd ** 2) + (((1 - (lr + sr)) * dh) ** 2)) ** 0.5);

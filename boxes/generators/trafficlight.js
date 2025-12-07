@@ -9,7 +9,7 @@ class ShadyEdge extends Boxes {
     __call__(length) {
         let s = this.shades;
         let h = this.h;
-        let a = Math.atan((s / h));
+        let a = Math.tan((s / h));
         let angle = (a * 180 / Math.PI);
         for (let i = 0; i < this.n; i += 1) {
             this.polyline(0, -angle, (h / Math.cos(a)), (angle + 90));
@@ -78,7 +78,7 @@ class TrafficLight extends Boxes {
         if (this.move(overallwidth, overallheight, move)) {
             return;
         }
-        let a = Math.atan(((h2 - h1) / float(w)));
+        let a = Math.tan(((h2 - h1) / float(w)));
         let angle = (a * 180 / Math.PI);
         this.moveTo(edges[-1].spacing(), edges[0].margin());
         for (let [i, l] of [[0, w], [1, h2]]) {
@@ -142,7 +142,7 @@ class TrafficLight extends Boxes {
         let s = this.shades;
         let t = this.thickness;
         let th = ((n * (h + t)) - t);
-        this.addPart(ShadyEdge(this, null));
+        this.addPart(new ShadyEdge(this, null));
         if (this.upright) {
             this.rectangularWall(th, h, "FFFF", {callback: [this.backCB, this.addMountV(th, h)], move: "up", label: "back"});
         }

@@ -60,8 +60,7 @@ class TrayLayout extends Boxes {
         this.addSettingsArgs(FingerJointSettings);
         this.addSettingsArgs(lids.LidSettings);
         // this.buildArgParser("h", "hi", "outside", "sx", "sy");
-        this.argparser.add_argument("--layout", {action: "store", type: "str", default: "
-", help: "* Set **sx** and **sy** before editing this!
+        this.argparser.add_argument("--layout", {action: "store", type: "str", default: "\n", help: "* Set **sx** and **sy** before editing this!
 * You can still change measurements afterwards
 * You can replace the hyphens and vertical bars representing the walls
 with a space character to remove the walls.

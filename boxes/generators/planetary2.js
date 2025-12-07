@@ -53,7 +53,7 @@ class Planetary2 extends Boxes {
         let pitch3;
         let size3;
         [pitch3, size3, xxx] = this.gears.sizes();
-        let planets = parseInt((Math.PI / Math.asin((float((this.planetteeth + 2)) / (this.planetteeth + this.sunteeth)))));
+        planets = parseInt((Math.PI / Math.sin((float((this.planetteeth + 2)) / (this.planetteeth + this.sunteeth)))));
         if (this.maxplanets) {
             planets = Math.min(this.maxplanets, planets);
         }

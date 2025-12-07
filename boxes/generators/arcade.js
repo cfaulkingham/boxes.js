@@ -34,13 +34,13 @@ class Arcade extends Boxes {
     //     y, h = self.y, self.h
     //     t = self.thickness
     //     r = 10
-    //     d_30 = 2* r * math.tan(math.radians(15))
+    //     d_30 = 2* r * math.Math.tan(math.radians(15))
 
-    //     tw, th = y+2*r+(self.front+t) * math.sin(math.radians(15)), h+2*r+(self.topback+t)/2**0.5
+    //     tw, th = y+2*r+(self.front+t) * math.Math.sin(math.radians(15)), h+2*r+(self.topback+t)/2**0.5
     //     if self.move(tw, th, move, True):
     //         return
 
-    //     self.moveTo(r+(self.front+t) * math.sin(math.radians(15)), 0)
+    //     self.moveTo(r+(self.front+t) * math.Math.sin(math.radians(15)), 0)
 
     //     with self.saved_context():
     //         self.moveTo(0, r)

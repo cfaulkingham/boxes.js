@@ -15,7 +15,7 @@ class PaperBox extends Boxes {
         this.argparser.add_argument("--lid_sides", {type: "float", default: 20, help: "Width of the two sides upon which goes the lid"});
         this.argparser.add_argument("--margin", {type: "float", default: 0, help: "Margin for the glued sides"});
         this.argparser.add_argument("--mark_length", {type: "float", default: 1.5, help: "Length of the folding outside mark"});
-        this.argparser.add_argument("--tab_angle_rad", {type: "float", default: Math.atan((2 / 25)), help: "Angle (in radian) of the sides which are to be glued inside the box"});
+        this.argparser.add_argument("--tab_angle_rad", {type: "float", default: Math.tan((2 / 25)), help: "Angle (in radian) of the sides which are to be glued inside the box"});
         this.argparser.add_argument("--finger_hole_diameter", {type: "float", default: 15, help: "Diameter of the hole to help catch the lid"});
     }
 

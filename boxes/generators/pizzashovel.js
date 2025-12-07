@@ -59,7 +59,7 @@ class PizzaShovel extends Boxes {
         this.rectangularWall(x, 40, "efef", {callback: [this.gripCB()], move: "up"});
         this.rectangularWall(x, 80, "efef", {callback: [this.gripCB()], move: "up"});
         for (let i = 0; i < 2; i += 1) {
-            let a = Math.atan(((h + (2 * t)) / ((y / 2) - 30)));
+            let a = Math.tan(((h + (2 * t)) / ((y / 2) - 30)));
             let l = (((y / 2) - 30) / Math.cos(a));
             a = (a * 180 / Math.PI);
             this.polygonWall([((y / 2) + 40), [90, t], (h + (2 * t)), [90, t], 70, a, l, -a, 0, [180, t]], "e", {callback: [() => [this.fingerHolesAt(0, (1.5 * t), (y / 2), 0), this.fingerHolesAt(((y / 2) + t), (1.5 * t), 40, 0)], null, () => this.fingerHolesAt(-t, (1.5 * t), 80, 0)], move: "up"});

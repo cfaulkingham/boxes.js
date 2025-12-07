@@ -14,8 +14,7 @@ class FrontPanel extends Boxes {
         super();
         this.argparser.add_argument("--layout", {action: "store", type: "str", default: "
 outline 100 100
-rect 50 60 80 30 3 True False
-text 50 91 7 "Super Front Panel With Buttons!" 0 bottom|center
+rect 50 60 80 30 3 True False\ntext 50 91 7 "Super Front Panel With Buttons!" 0 bottom|center
 circle 10 45 3.5
 circle 30 45 3.5
 circle 50 45 3.5

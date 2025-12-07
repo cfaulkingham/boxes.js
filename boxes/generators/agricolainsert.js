@@ -54,7 +54,7 @@ class AgricolaInsert extends Boxes {
         let tray_inner_length = (card_tray_length - this.thickness);
         let margin_for_score_sheet = 0;
         let sleeved_cards_width = (62 + margin_for_score_sheet);
-        let rad = Math.acos((card_tray_height / sleeved_cards_width));
+        let rad = Math.cos((card_tray_height / sleeved_cards_width));
         let angle = (rad * 180 / Math.PI);
         let cos = Math.cos(rad);
         let tan = Math.tan(rad);

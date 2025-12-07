@@ -49,8 +49,8 @@ class WallWrenchHolder extends _WallMountedBox {
         let h = (((((this.min_strength + this.max_strength) * this.number) * (2 ** 0.5)) + (this.extra_distance * (this.number - 1))) + this.max_width);
         let t = this.thickness;
         let x = (this.x - (2 * t));
-        this.rectangularWall(this.depth, h, ["e", "B", "e", SlottedEdge(this, null)], {move: "right"});
-        this.rectangularWall(this.depth, h, ["e", "B", "e", SlottedEdge(this, null)], {move: "right"});
+        this.rectangularWall(this.depth, h, ["e", "B", "e", new SlottedEdge(this, null)], {move: "right"});
+        this.rectangularWall(this.depth, h, ["e", "B", "e", new SlottedEdge(this, null)], {move: "right"});
         this.rectangularWall(x, h, "eDed", {move: "right"});
     }
 

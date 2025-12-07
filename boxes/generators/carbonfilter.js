@@ -177,7 +177,7 @@ class CarbonFilter extends Boxes {
         this.y = y = this.adjustSize(y);
         let t = this.thickness;
         this.w = ((x - (2 * t)) / this.pockets);
-        this.a = (Math.atan((((this.w - 100) / 2) / (h - (4 * t)))) * 180 / Math.PI);
+        this.a = (Math.tan((((this.w - 100) / 2) / (h - (4 * t)))) * 180 / Math.PI);
         for (let i = 0; i < 2; i += 1) {
             this.rectangularWall(x, h, "eeee", {callback: [this.sideCB.bind(this)], move: "up"});
         }

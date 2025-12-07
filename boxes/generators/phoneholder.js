@@ -40,14 +40,14 @@ class PhoneHolder extends Boxes {
         if (!support_fingers_length) {
             support_fingers_length = tab_length;
         }
-        let be = BottomEdge(this, tab_start, support_spacing);
+        let be = new BottomEdge(this, tab_start, support_spacing);
         let se1 = SideEdge(this, tab_start, tab_length);
         let se2 = SideEdge(this, tab_start, tab_length);
         this.rectangularWall(this.phone_width, this.h, [be, se1, "e", se2], {move: move, callback: [partial(() => this.front_plate_holes(tab_start, support_fingers_length, support_spacing))]});
     }
 
     render_back_plate(move) {
-        let be = BottomEdge(this, 0, 0);
+        let be = new BottomEdge(this, 0, 0);
         this.rectangularWall(this.phone_width, this.stand_height, [be, "F", "e", "F"], {move: move});
     }
 

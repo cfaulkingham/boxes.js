@@ -68,11 +68,11 @@ class TrayInsert extends Boxes {
             y = this.y;
         }
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            let e = [edges.SlottedEdge(this, this.sy), r, "e", l];
+            let e = [new edges.SlottedEdge(this, this.sy), r, "e", l];
             this.rectangularWall(y, h, e, {move: "up"});
         }
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            e = ["e", r, edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), l];
+            e = ["e", r, new edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), l];
             this.rectangularWall(x, h, e, {move: "up"});
         }
     }

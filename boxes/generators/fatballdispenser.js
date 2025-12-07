@@ -14,19 +14,14 @@ class FatBallDispenser extends Boxes {
         this.argparser.add_argument("--ball_diameter", {action: "store", type: "float", default: 75.0, help: "The diameter of the fat balls. Give some extra mm to make it a loose fit"});
         this.argparser.add_argument("--balcony_width", {action: "store", type: "float", default: 15.0, help: "The width of the area outside of the poles."});
         this.argparser.add_argument("--balcony_height", {action: "store", type: "float", default: 20.0, help: "The height of the balcony in mm. Set to 0 if no walls are needed."});
-        this.argparser.add_argument("--drain_hole_diameter", {action: "store", type: "float", default: 5.0, help: "The diameter of the hole of the floor (to drain rainwater)
-                    in mm. Set to 0 if you don't need it."});
-        this.argparser.add_argument("--pole_clearance", {action: "store", type: "float", default: 9.0, help: "The minimum distance between a pole and the central
-                    refill hole in the ceiling in mm."});
-        this.argparser.add_argument("--slide_clearance", {action: "store", type: "float", default: 1.0, help: "The gap between the parts that slide into each other
-                    in the locking mechanism in mm."});
+        this.argparser.add_argument("--drain_hole_diameter", {action: "store", type: "float", default: 5.0, help: "The diameter of the hole of the floor (to drain rainwater) in mm. Set to 0 if you don't need it."});
+        this.argparser.add_argument("--pole_clearance", {action: "store", type: "float", default: 9.0, help: "The minimum distance between a pole and the centralrefill hole in the ceiling in mm."});
+        this.argparser.add_argument("--slide_clearance", {action: "store", type: "float", default: 1.0, help: "The gap between the parts that slide into each otherin the locking mechanism in mm."});
         this.argparser.add_argument("--spacer_width", {action: "store", type: "float", default: 15.0, help: "The width of the spacer (part of the locking mechanism) in mm."});
-        this.argparser.add_argument("--pole_clearance_factor", {action: "store", type: "float", default: 0.9, help: "The fraction of the pole clearance which is being used for
-                    the locking mechanism."});
+        this.argparser.add_argument("--pole_clearance_factor", {action: "store", type: "float", default: 0.9, help: "The fraction of the pole clearance which is being used forthe locking mechanism."});
         this.argparser.add_argument("--roof_overhang", {action: "store", type: "float", default: 20.0, help: "Defines how much wider than the bottom floor the roof is."});
         this.argparser.add_argument("--roof_height", {action: "store", type: "float", default: 50.0, help: "The height of the roof in mm."});
-        this.argparser.add_argument("--roof_hole_diameter", {action: "store", type: "float", default: 5.0, help: "The diameter of the hole of the roof in mm.
-                    Set to 0 if you don't want to attach a hanger."});
+        this.argparser.add_argument("--roof_hole_diameter", {action: "store", type: "float", default: 5.0, help: "The diameter of the hole of the roof in mm.Set to 0 if you don't want to attach a hanger."});
         this.argparser.add_argument("--roof_maintenance_clearance", {action: "store", type: "float", default: 20.0, help: "The distance from on bottom corner of the roof to the maintenance hole in mm."});
         this.argparser.add_argument("--roof_support_fraction", {action: "store", type: "float", default: 0.3, help: "The radius of the roof support part as a fraction of the roof radius."});
     }
@@ -60,7 +55,7 @@ class FatBallDispenser extends Boxes {
         let n1 = cross(pq, po);
         let n2 = cross(po, pb);
         let cos_e = (scalar(n1, n2) / (norm(n1) * norm(n2)));
-        let e = (Math.acos(cos_e) * 180 / Math.PI);
+        let e = (Math.cos(cos_e) * 180 / Math.PI);
         return e;
     }
 
@@ -173,9 +168,9 @@ class FatBallDispenser extends Boxes {
         let r_roof_hole = (this.roof_hole_diameter / 2);
         let h_roof_floor = (r_roof * Math.sin(ar_base));
         let h_roof_tile = Math.sqrt(((h_roof_floor ** 2) + (h_roof ** 2)));
-        let a_roof = (Math.atan((h_roof / h_roof_floor)) * 180 / Math.PI);
+        let a_roof = (Math.tan((h_roof / h_roof_floor)) * 180 / Math.PI);
         let ar_roof = (a_roof * Math.PI / 180);
-        let ar_tile_base = Math.atan((h_roof_tile / (l_roof / 2)));
+        let ar_tile_base = Math.tan((h_roof_tile / (l_roof / 2)));
         let a_tile_base = (ar_tile_base * 180 / Math.PI);
         let roofEdges = "eee".split('').map(e => this.edges[e] || e);
         let overallwidth = (l_roof + (2 * (roofEdges[0].spacing ? roofEdges[0].spacing() : 0)));
@@ -311,7 +306,7 @@ class FatBallDispenser extends Boxes {
         let l_floor = ((2 * r_floor) * Math.sin((((360.0 / this.sides) / 2) * Math.PI / 180)));
         let h_roof = this.roof_height;
         let h_roof_floor = (r_roof * Math.sin(ar_base));
-        let a_roof = (Math.atan((h_roof / h_roof_floor)) * 180 / Math.PI);
+        let a_roof = (Math.tan((h_roof / h_roof_floor)) * 180 / Math.PI);
         let ar_roof = (a_roof * Math.PI / 180);
         let r_support = (this.roof_support_fraction * r_roof);
         this.regularPolygonWall({corners: this.sides, r: r_ceiling, edges: "e", callback: this.get_pole_callback((r_ceiling - r_poles), d_pole, r_ceiling), move: "up"});
@@ -329,7 +324,7 @@ class FatBallDispenser extends Boxes {
         if (this.roof_hole_diameter > 0) {
             let h_poly;
             [_, h_poly, _] = this.regularPolygon();
-            let new_height = (h_poly - (this.thickness / Math.atan(ar_roof)));
+            let new_height = (h_poly - (this.thickness / Math.tan(ar_roof)));
             let r_polygon = ((r_support * new_height) / h_poly);
             r_hole = (this.roof_hole_diameter / 2);
             this.regularPolygonWall({corners: this.sides, r: r_support, edges: "e", callback: this.get_roof_callback(), move: "up"});

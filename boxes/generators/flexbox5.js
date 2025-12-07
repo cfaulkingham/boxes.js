@@ -88,7 +88,7 @@ class FlexBox5 extends Boxes {
         [d_t, d_b] = [this.top_diameter, this.bottom_diameter];
         this.x = Math.max(this.x, ((this.latchsize + (2 * t)) + ((d_t + d_b) / 2)));
         let d_c = ((this.x - (d_t / 2.0)) - (d_b / 2.0));
-        this.a = (Math.asin((((d_t - d_b) / 2) / d_c)) * 180 / Math.PI);
+        this.a = (Math.sin((((d_t - d_b) / 2) / d_c)) * 180 / Math.PI);
         this.l = (d_c * Math.cos((this.a * Math.PI / 180)));
         this.surroundingWall({move: "up"});
         this.flexBoxSide({move: "right"});

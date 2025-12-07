@@ -12,7 +12,7 @@ class FrontEdge extends Boxes {
         let rh = (this.holediameter / 2.0);
         let r = this.radius;
         let sw = this.slot_width;
-        let a = (Math.asin(((r + (sw / 2)) / (r + rh))) * 180 / Math.PI);
+        let a = (Math.sin(((r + (sw / 2)) / (r + rh))) * 180 / Math.PI);
         let l = (((td - sw) - (2 * r)) / 2);
         for (let i = 0; i < this.number; i += 1) {
             this.polyline(l, [(180 - a), r], 0, [(-360 + (2 * a)), rh], 0, [(180 - a), r], l);

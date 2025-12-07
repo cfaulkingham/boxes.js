@@ -80,7 +80,7 @@ class WallTypeTray extends _WallMountedBox {
         }
         let be = (b !== "e" ? "f" : "e");
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            let e = [edges.SlottedEdge(this, this.sx, be), "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"];
+            let e = [new edges.SlottedEdge(this, this.sx, be), "f", new edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"];
             this.rectangularWall(x, hi, e, {move: "up"});
         }
         this.trapezoidSideWall(y, h, (h + bh), [b, "B", "e", "h"], {radius: this.radius, callback: [this.yHoles], move: "up"});
@@ -88,7 +88,7 @@ class WallTypeTray extends _WallMountedBox {
         this.trapezoidSideWall(y, (h + bh), h, [b, "h", "e", "b"], {radius: this.radius, callback: [this.mirrorX(this.yHoles, y)], move: "up"});
         this.moveTo(0, 8);
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            e = [edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
+            e = [new edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
             this.rectangularWall(y, hi, e, {move: "up"});
         }
     }

@@ -29,7 +29,7 @@ class CompartmentBox extends TypeTray {
         let stackable = b === "s";
         let tside;
         let tback;
-        [tside, tback] = (stackable ? ["Š", "S"] : ["F", "E"]);
+        [tside, tback] = (stackable ? ["\u0160", "S"] : ["F", "E"]);
         let margin_side = this.margin_side;
         let margin_vertical = (this.margin_vertical * t);
         if (margin_vertical < 0) {
@@ -63,7 +63,7 @@ class CompartmentBox extends TypeTray {
         }
         let be = (b !== "e" ? "f" : "e");
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            let e = [edges.SlottedEdge(this, this.sx, be), "f", edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "e"), "f"];
+            let e = [new edges.SlottedEdge(this, this.sx, be), "f", new edges.SlottedEdge(this, this.sx.slice().reverse(), "e"), "f"];
             this.rectangularWall(x, h, e, {move: "up", label: `inner x wall ${i}`});
         }
         let handle = this.handle;
@@ -91,7 +91,7 @@ class CompartmentBox extends TypeTray {
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "up", label: "left side"});
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "mirror up", label: "right side"});
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            e = [edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
+            e = [new edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
             this.rectangularWall(y, h, e, {move: "up", label: `inner y wall ${i}`});
         }
         let lip_front_edge = (this.handle === "lip" ? "e" : "E");
@@ -100,14 +100,14 @@ class CompartmentBox extends TypeTray {
             this.rectangularWall(y, t, ("eef" + lip_front_edge), {move: "mirror up", label: "Lip Right"});
         }
         else {
-            let tx = ((y + this.edges.get.spacing()) + this.edges.get.spacing());
-            let ty = (x + (2 * this.edges.get.spacing()));
+            let tx = ((y + this.edges.get('f').spacing()) + this.edges.get('f').spacing());
+            let ty = (x + (2 * this.edges.get('f').spacing()));
             let r = k;
             this.move(tx, ty, "up", {before: true});
-            this.moveTo(this.edges.get.margin(), this.edges.get.margin());
-            this.edges.get(y);
+            this.moveTo(this.edges.get('f').margin(), this.edges.get('f').margin());
+            this.edges.get('f')(y);
             this.edgeCorner("f", lip_front_edge);
-            this.edges.get(t);
+            this.edges.get('f')(t);
             this.edgeCorner(lip_front_edge, "e");
             this.edge(((y - t) - r));
             this.corner(-90, {radius: r});
@@ -115,11 +115,11 @@ class CompartmentBox extends TypeTray {
             this.corner(-90, {radius: r});
             this.edge(((y - t) - r));
             this.edgeCorner("e", lip_front_edge);
-            this.edges.get(t);
+            this.edges.get('f')(t);
             this.edgeCorner(lip_front_edge, "f");
-            this.edges.get(y);
+            this.edges.get('f')(y);
             this.corner(90);
-            this.edges.get(x);
+            this.edges.get('f')(x);
             this.corner(90);
             this.move(tx, ty, "up", {label: "Lip"});
         }
@@ -133,9 +133,10 @@ class CompartmentBox extends TypeTray {
         let t = this.thickness;
         let widths = argparseSections(this.holes);
         let x = (this.sx.reduce((a, b) => a + b, 0) + (this.thickness * (this.sx.length - 1)));
+        let slot_offset;
         if (widths.reduce((a, b) => a + b, 0) > 0) {
             if (widths.reduce((a, b) => a + b, 0) < 100) {
-                let slot_offset = (((1 - (widths.reduce((a, b) => a + b, 0) / 100)) * (x - ((widths.length + 1) * this.thickness))) / (widths.length * 2));
+                slot_offset = (((1 - (widths.reduce((a, b) => a + b, 0) / 100)) * (x - ((widths.length + 1) * this.thickness))) / (widths.length * 2));
             }
             else {
                 slot_offset = 0;
@@ -143,8 +144,9 @@ class CompartmentBox extends TypeTray {
             let slot_height = (2 * radius);
             let slot_x = (this.thickness + slot_offset);
             for (let w of widths) {
+                let slotwidth;
                 if (widths.reduce((a, b) => a + b, 0) > 100) {
-                    let slotwidth = ((w / widths.reduce((a, b) => a + b, 0)) * (x - ((widths.length + 1) * this.thickness)));
+                    slotwidth = ((w / widths.reduce((a, b) => a + b, 0)) * (x - ((widths.length + 1) * this.thickness)));
                 }
                 else {
                     slotwidth = ((w / 100) * (x - ((widths.length + 1) * this.thickness)));

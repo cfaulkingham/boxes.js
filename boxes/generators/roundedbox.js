@@ -1,4 +1,4 @@
-import { Boxes  } from '../boxes.js';
+import { Boxes  } from '../this.boxes.js';
 import { FingerJointSettings, DoveTailSettings, FlexSettings  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
@@ -14,7 +14,7 @@ class RoundedBox extends Boxes {
         // this.buildArgParser("x", "y", "outside");
         this.argparser.add_argument("--radius", {action: "store", type: "float", default: 15, help: "Radius of the corners in mm"});
         this.argparser.add_argument("--wallpieces", {action: "store", type: "int", default: 1, choices: [1, 2, 3, 4], help: "number of pieces for outer wall"});
-        this.argparser.add_argument("--edge_style", {action: "store", type: boxes.ArgparseEdgeType("fFh"), choices: list("fFh"), default: "f", help: "edge type for top and bottom edges"});
+        this.argparser.add_argument("--edge_style", {action: "store", type: this.boxes.ArgparseEdgeType("fFh"), choices: list("fFh"), default: "f", help: "edge type for top and bottom edges"});
         this.argparser.add_argument("--top", {action: "store", type: "str", default: "hole", choices: ["hole", "lid", "closed"], help: "style of the top and lid"});
     }
 

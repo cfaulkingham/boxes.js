@@ -64,7 +64,7 @@ class Lamp extends Boxes {
         let r;
         let w;
         [r, w] = [this.radius, this.width];
-        let s = RoundedTriangleSettings(this.thickness);
+        let s = new RoundedTriangleSettings(this.thickness);
         this.addPart(RoundedTriangle(this, s));
         this.flexSettings = [3, 5.0, 20.0];
         this.edges["f"].settings.setValues(this.thickness, {finger: 5, space: 5, relative: false});

@@ -59,8 +59,8 @@ class HalfBox extends Boxes {
         let d = this.ClampingSize;
         let t = this.thickness;
         let l = Math.sqrt(((x * x) + (h * h)));
-        let b = (Math.asin((x / l)) * 180 / Math.PI);
-        let c = (Math.asin((h / l)) * 180 / Math.PI);
+        let b = (Math.sin((x / l)) * 180 / Math.PI);
+        let c = (Math.sin((h / l)) * 180 / Math.PI);
         if (x > h) {
             if (((90 + b) + c) < 179) {
                 b = (180 - b);

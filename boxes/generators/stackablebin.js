@@ -8,7 +8,7 @@ import { Color  } from '../Color.js';
 class StackableBinEdge extends Boxes {
     __call__(length) {
         let f = this.settings.front;
-        let a1 = (Math.atan((f / (1 - f))) * 180 / Math.PI);
+        let a1 = (Math.tan((f / (1 - f))) * 180 / Math.PI);
         let a2 = (45 + a1);
         this.corner(-a1);
         this.edges["e"]((this.settings.h * (((f ** 2) + ((1 - f) ** 2)) ** 0.5)));
@@ -54,7 +54,7 @@ class StackableBin extends Boxes {
 
     render() {
         this.front = Math.min(this.front, 0.999);
-        this.addPart(StackableBinEdge(this, this));
+        this.addPart(new StackableBinEdge(this, this));
         this.addPart(StackableBinSideEdge(this, this));
         let angledsettings = this.edges["f"].settings;
         angledsettings.setValues(this.thickness, true, {angle: 45});

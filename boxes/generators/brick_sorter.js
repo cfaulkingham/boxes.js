@@ -154,4 +154,4 @@ class brick_sorter extends Boxes {
 
 }
 
-export { brick_sorter};
+export { brick_sorter };

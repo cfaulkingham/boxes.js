@@ -111,11 +111,11 @@ class Sphere extends Boxes {
     }
 
     calculateUpperUOfGore(x) {
-        return ((Math.PI - Math.asin((x / this.halfBellyLens))) * this.sphere_radius);
+        return ((Math.PI - Math.sin((x / this.halfBellyLens))) * this.sphere_radius);
     }
 
     calculateUOfBottomHole() {
-        let theta = Math.asin((this.bottom_hole_radius / this.sphere_radius));
+        let theta = Math.sin((this.bottom_hole_radius / this.sphere_radius));
         return ((theta / Math.PI) * this.gore_heigth);
     }
 
@@ -139,7 +139,7 @@ class Sphere extends Boxes {
         let points = [];
         for (let i = 0; i < (N + 1); i += 1) {
             let x = ((((x_stop - x_start) / N) * i) + x_start);
-            let u = ((Math.PI - Math.asin((Math.sqrt(((this.top_hole_radius ** 2) - (x ** 2))) / this.sphere_radius))) * this.sphere_radius);
+            let u = ((Math.PI - Math.sin((Math.sqrt(((this.top_hole_radius ** 2) - (x ** 2))) / this.sphere_radius))) * this.sphere_radius);
             points.append([x, u]);
         }
         return points;

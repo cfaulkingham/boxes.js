@@ -28,7 +28,7 @@ export { FingerHoleEdge };
 class TypeTray extends _TopEdge {
     constructor() {
         super();
-        this.addTopEdgeSettings({fingerjoint: /* unknown node Dict */, roundedtriangle: /* unknown node Dict */});
+        this.addTopEdgeSettings({fingerjoint: {}, roundedtriangle: {}});
         this.addSettingsArgs(LidSettings);
         // this.buildArgParser("sx", "sy", "h", "hi", "outside", "bottom_edge", "top_edge");
         this.argparser.add_argument("--back_height", {action: "store", type: "float", default: 0.0, help: "additional height of the back wall - e top edge only"});
@@ -44,11 +44,10 @@ class TypeTray extends _TopEdge {
         label_group.add_argument("--text_distance_y", {action: "store", type: "float", default: 2.0, help: "Distance in Y from edge of tray in mm."});
         label_group.add_argument("--text_at_front", {action: "store", type: boolarg, default: false, help: "Start compartement labels on the front"});
         if (this.UI === "web") {
-            label_group.add_argument("--label_text", {action: "store", type: "str", default: "
-", help: "Every line is the text for one compartment. Beginning with front left"});
+            label_group.add_argument("--label_text", {action: "store", type: "str", default: "\n", help: "Every line is the text for one compartment. Beginning with front left"});
         }
         else {
-            label_group.add_argument("--label_file", {action: "store", type: argparse.FileType("r"), help: "file with compartment labels. One line per compartment"});
+            label_group.add_argument("--label_file", {action: "store", type: "str", help: "file with compartment labels. One line per compartment"});
         }
         this.addSettingsArgs(FingerHoleEdgeSettings);
     }
@@ -153,7 +152,7 @@ class TypeTray extends _TopEdge {
                     }
                 }
             }
-            this.text(("%s" % this.textcontent[this.textnumber]), textx, texty, 0, {align: this.text_alignment, fontsize: textsize, color: Color.ETCHING});
+            this.text(this.textcontent[this.textnumber], textx, texty, 0, {align: this.text_alignment, fontsize: textsize, color: Color.ETCHING});
             this.textnumber += 1;
         }
     }
@@ -182,7 +181,7 @@ class TypeTray extends _TopEdge {
         let tr;
         let tf;
         [tl, tb, tr, tf] = this.topEdges(this.top_edge);
-        this.closedtop = "fFhŠ".includes(this.top_edge);
+        this.closedtop = "fFh\u0160".includes(this.top_edge);
         let ignore_widths = [1, 6];
         if ("ik".includes(this.top_edge)) {
             this.edges[this.top_edge].settings.style = "flush_inset";
@@ -191,8 +190,7 @@ class TypeTray extends _TopEdge {
         let bh = (this.top_edge === "e" ? this.back_height : 0.0);
         this.textcontent = [];
         if (hasattr(this, "label_text")) {
-            this.textcontent = this.label_text.split("
-");
+            this.textcontent = this.label_text.split("\\n");
         }
         else {
             if (this.label_file) {
@@ -218,7 +216,7 @@ class TypeTray extends _TopEdge {
             frontCBs = [this.mirrorX(this.xHoles, x), null, this.gripHole];
         }
         if ((!this.closedtop && ["front", "front-and-back"].includes(this.fingerholes))) {
-            tf = edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "A");
+            tf = new edges.SlottedEdge(this, this.sx.slice().reverse(), "A");
         }
         if (bh) {
             this.rectangularWall(x, h, [(this.handle ? "f" : b), "f", tf, "f"], {callback: frontCBs, move: "up", label: "front"});
@@ -230,14 +228,14 @@ class TypeTray extends _TopEdge {
         let le = (this.hi <= this.h ? "f" : new edges.CompoundEdge(this, "ef", [(this.hi - this.h), this.h]));
         let re = (this.hi <= this.h ? "f" : new edges.CompoundEdge(this, "fe", [this.h, (this.hi - this.h)]));
         for (let i = 0; i < (this.sy.length - 1); i += 1) {
-            let e = [edges.SlottedEdge(this, this.sx, be), re, edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "A"), le];
+            let e = [new edges.SlottedEdge(this, this.sx, be), re, new edges.SlottedEdge(this, this.sx.slice().reverse(), "A"), le];
             if ((this.closedtop && sameh)) {
-                e = [edges.SlottedEdge(this, this.sx, be), re, edges.SlottedEdge(this, this.sx.slice(0,  /* step -1 ignored */), "f"), le];
+                e = [new edges.SlottedEdge(this, this.sx, be), re, new edges.SlottedEdge(this, this.sx.slice().reverse(), "f"), le];
             }
-            this.rectangularWall(x, hi, e, {move: "up", callback: [this.textCB], label: /* unknown node JoinedStr */});
+            this.rectangularWall(x, hi, e, {move: "up", callback: [this.textCB], label: `inner x ${i + 1}`});
         }
         if ((!this.closedtop && ["back", "front-and-back"].includes(this.fingerholes))) {
-            tb = edges.SlottedEdge(this, this.sx, "A");
+            tb = new edges.SlottedEdge(this, this.sx, "A");
         }
         if (bh) {
             this.rectangularWall(x, (h + bh), [b, "f", tb, "f"], {callback: [this.xHoles], ignore_widths: [], move: "up", label: "back"});
@@ -264,11 +262,11 @@ class TypeTray extends _TopEdge {
             this.rectangularWall(y, h, [b, "f", tr, "f"], {callback: [this.mirrorX(this.yHoles, y)], ignore_widths: (this.handle ? [1] : [1, 6]), move: "up", label: "right side"});
         }
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            e = [edges.SlottedEdge(this, this.sy, be), re, "e", le];
+            e = [new edges.SlottedEdge(this, this.sy, be), re, "e", le];
             if ((this.closedtop && sameh)) {
-                e = [edges.SlottedEdge(this, this.sy, be), re, edges.SlottedEdge(this, this.sy.slice(0,  /* step -1 ignored */), "f"), le];
+                e = [new edges.SlottedEdge(this, this.sy, be), re, new edges.SlottedEdge(this, this.sy.slice().reverse(), "f"), le];
             }
-            this.rectangularWall(y, hi, e, {move: "up", label: /* unknown node JoinedStr */});
+            this.rectangularWall(y, hi, e, {move: "up", label: `inner y ${i + 1}`});
         }
     }
 
