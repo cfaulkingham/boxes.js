@@ -7,7 +7,8 @@ import { Color  } from '../Color.js';
 
 class Keyboard extends Boxes {
     static STANDARD_KEY_SPACING = 19.05;
-    static SWITCH_CASE_SIZE = 14;
+    static SWITCH_CASE_SIZE = 15.6;
+    static FRAME_CUTOUT = 14;
     
     constructor() {
         super();
@@ -93,10 +94,11 @@ class Keyboard extends Boxes {
                 cb();
                 this.moveTo(0, spacing);
             }
-            this.moveTo(spacing, -(nb_keys * spacing + offset));
+            this.moveTo(spacing, -nb_keys * spacing);
+            this.moveTo(0, -offset);
         }
         let total_width = columns_definition.length * spacing;
-        this.moveTo(-total_width, 0);
+        this.moveTo(-total_width);
     }
 
     outer_hole(radius, centered) {;

@@ -202,8 +202,8 @@ class Boxes {
         if (this.argparser && this.argparser.arguments) {
             for (const arg of this.argparser.arguments) {
                 if (arg.name && arg.default !== undefined) {
-                    // Remove -- prefix from argument name
-                    const paramName = arg.name.replace(/^--/, '');
+                    // Use dest if provided, otherwise use the argument name without --
+                    const paramName = arg.dest || arg.name.replace(/^--/, '');
                     this[paramName] = arg.default;
                 }
             }
@@ -1355,14 +1355,26 @@ class Boxes {
      * @param {number} x - Width (base).
      * @param {number} y - Height.
      * @param {string|Array} [edges="eee"] - Edges.
-     * @param {number} [r=0.0] - Corner radius.
+     * @param {number|Object} [r=0.0] - Corner radius, or options object.
      * @param {number} [num=1] - Number of triangles to draw (pairs).
      * @param {Object} [kw={}] - options: bedBolts, bedBoltSettings, callback, move, label.
      */
     rectangularTriangle(x, y, edges = "eee", r = 0.0, num = 1, kw = {}) {
-        // Extract num from kw if it's passed as an object
-        if (kw.num !== undefined) {
-            num = kw.num;
+        // Handle case where 4th parameter is an options object (common in translated code)
+        if (typeof r === 'object' && r !== null) {
+            kw = r;
+            r = kw.r !== undefined ? kw.r : 0.0;
+            if (kw.num !== undefined) {
+                num = kw.num;
+            }
+        } else if (typeof num === 'object' && num !== null) {
+            // Handle case where 5th parameter is an options object
+            kw = num;
+            if (kw.num !== undefined) {
+                num = kw.num;
+            } else {
+                num = 1;
+            }
         }
 
         const {

@@ -117,10 +117,10 @@ class Atreus21 extends Boxes {
     }
 
     half(hole_cb = null, { reverse = false } = {}) {
-        this.ctx.save();
         if (hole_cb === null) {
             hole_cb = this.key.bind(this);
         }
+        this.ctx.save();
         this.moveTo(this.half_btn, this.half_btn);
         this.apply_callback_on_columns(hole_cb, this.columns_definition, { reverse: reverse });
         this.ctx.restore();
