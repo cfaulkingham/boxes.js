@@ -13,13 +13,16 @@ class CompartmentBox extends TypeTray {
     constructor() {
         super();
         this.addSettingsArgs(edges.StackableSettings);
-        // this.buildArgParser("sx", "sy", "h", "outside", "bottom_edge");
+        this.buildArgParser({sx: "100*3", sy: "100*2", h: 100, outside: true});
         this.argparser.add_argument("--handle", {action: "store", type: "str", default: "lip", choices: ["lip", "hole", "none"], help: "how to grab the lid to remove"});
         this.argparser.add_argument("--radius", {action: "store", type: "float", default: 10, dest: "radius", help: "radius of the grip hole in mm"});
         this.argparser.add_argument("--holes", {action: "store", type: "str", default: "70", help: "width of hole(s) in percentage of maximum hole width"});
         this.argparser.add_argument("--margin_t", {action: "store", type: "float", default: 0.1, dest: "margin_vertical", help: "vertical margin for sliding lid (multiples of thickness)"});
         this.argparser.add_argument("--margin_s", {action: "store", type: "float", default: 0.05, dest: "margin_side", help: "margin to add at both sides of sliding lid (multiples of thickness)"});
         this.argparser.add_argument("--split_lip", {action: "store", type: boolarg, default: true, help: "create two strips to reduce waste material"});
+        
+        // Bind the overridden gripHole method
+        this.gripHole = this.gripHole.bind(this);
     }
 
     render() {
@@ -91,7 +94,7 @@ class CompartmentBox extends TypeTray {
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "up", label: "left side"});
         this.rectangularWall(y, ((h + t) + margin_vertical), [b, f, tside, "f"], {callback: [this.yHoles], ignore_widths: [1, 5, 6], move: "mirror up", label: "right side"});
         for (let i = 0; i < (this.sx.length - 1); i += 1) {
-            e = [new edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
+            let e = [new edges.SlottedEdge(this, this.sy, be), "f", "e", "f"];
             this.rectangularWall(y, h, e, {move: "up", label: `inner y wall ${i}`});
         }
         let lip_front_edge = (this.handle === "lip" ? "e" : "E");

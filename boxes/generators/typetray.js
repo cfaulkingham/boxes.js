@@ -31,6 +31,14 @@ class TypeTray extends _TopEdge {
         this.addTopEdgeSettings({fingerjoint: {}, roundedtriangle: {}});
         this.addSettingsArgs(LidSettings);
         // this.buildArgParser("sx", "sy", "h", "hi", "outside", "bottom_edge", "top_edge");
+        
+        // Bind callback methods to preserve 'this' context
+        this.xSlots = this.xSlots.bind(this);
+        this.ySlots = this.ySlots.bind(this);
+        this.xHoles = this.xHoles.bind(this);
+        this.yHoles = this.yHoles.bind(this);
+        this.gripHole = this.gripHole.bind(this);
+        this.textCB = this.textCB.bind(this);
         this.argparser.add_argument("--back_height", {action: "store", type: "float", default: 0.0, help: "additional height of the back wall - e top edge only"});
         this.argparser.add_argument("--radius", {action: "store", type: "float", default: 0.0, help: "radius for strengthening side walls with back_height"});
         this.argparser.add_argument("--gripheight", {action: "store", type: "float", default: 30, dest: "gh", help: "height of the grip hole in mm"});
@@ -232,7 +240,7 @@ class TypeTray extends _TopEdge {
             if ((this.closedtop && sameh)) {
                 e = [new edges.SlottedEdge(this, this.sx, be), re, new edges.SlottedEdge(this, this.sx.slice().reverse(), "f"), le];
             }
-            this.rectangularWall(x, hi, e, {move: "up", callback: [this.textCB], label: `inner x ${i + 1}`});
+            this.rectangularWall(x, this.hi, e, {move: "up", callback: [this.textCB], label: `inner x ${i + 1}`});
         }
         if ((!this.closedtop && ["back", "front-and-back"].includes(this.fingerholes))) {
             tb = new edges.SlottedEdge(this, this.sx, "A");
@@ -252,7 +260,7 @@ class TypeTray extends _TopEdge {
         }
         this.lid(x, y, this.top_edge);
         this.ctx.restore();
-        this.rectangularWall(x, hi, "ffff", {move: "right only"});
+        this.rectangularWall(x, this.hi, "ffff", {move: "right only"});
         if (bh) {
             this.trapezoidSideWall(y, h, (h + bh), [b, "h", "e", "h"], {radius: this.radius, callback: [this.yHoles], move: "up", label: "left side"});
             this.trapezoidSideWall(y, (h + bh), h, [b, "h", "e", "h"], {radius: this.radius, callback: [this.mirrorX(this.yHoles, y)], move: "up", label: "right side"});
@@ -266,7 +274,7 @@ class TypeTray extends _TopEdge {
             if ((this.closedtop && sameh)) {
                 e = [new edges.SlottedEdge(this, this.sy, be), re, new edges.SlottedEdge(this, this.sy.slice().reverse(), "f"), le];
             }
-            this.rectangularWall(y, hi, e, {move: "up", label: `inner y ${i + 1}`});
+            this.rectangularWall(y, this.hi, e, {move: "up", label: `inner y ${i + 1}`});
         }
     }
 

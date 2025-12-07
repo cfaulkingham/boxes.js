@@ -93,11 +93,10 @@ class Keyboard extends Boxes {
                 cb();
                 this.moveTo(0, spacing);
             }
-            this.moveTo(spacing, -nb_keys * spacing);
-            this.moveTo(0, -offset);
+            this.moveTo(spacing, -(nb_keys * spacing + offset));
         }
         let total_width = columns_definition.length * spacing;
-        this.moveTo(-total_width);
+        this.moveTo(-total_width, 0);
     }
 
     outer_hole(radius, centered) {;

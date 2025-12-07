@@ -18,7 +18,7 @@ class BinFrontEdge extends edges.BaseEdge {
         let hi = this.settings.hi || 30;
         let thickness = this.boxes.thickness;
         
-        let a1 = (Math.tan((f / (1 - f))) * 180 / Math.PI);
+        let a1 = (Math.atan((f / (1 - f))) * 180 / Math.PI);
         let a2 = (45 + a1);
         this.boxes.corner(-a1);
         for (let i = 0; i < sy.length; i++) {
