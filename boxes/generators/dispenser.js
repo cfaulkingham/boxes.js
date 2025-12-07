@@ -1,5 +1,5 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, BaseEdge  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
@@ -8,7 +8,7 @@ import '../globals.js';
 
 const { boolarg, ArgparseEdgeType, list } = global;
 
-class FrontEdge extends Boxes {
+class FrontEdge extends BaseEdge {
     __call__(length) {
         let depth = ((this.settings.y * 2) / 3);
         let t = this.settings.thickness;

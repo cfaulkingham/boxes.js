@@ -1,13 +1,13 @@
 import { Boxes  } from '../boxes.js';
-import { FingerJointSettings  } from '../edges.js';
+import { FingerJointSettings, FingerHoleEdge  } from '../edges.js';
 import { LidSettings  } from '../lids.js';
 import { edges  } from '../edges.js';
 import { _TopEdge  } from '../lids.js';
 import { Color  } from '../Color.js';
 
-class DinRailEdge extends Boxes {
+class DinRailEdge extends FingerHoleEdge {
     constructor(boxes, settings, width, offset) {
-        super();
+        super(boxes, settings);
         this.width = width;
         this.offset = offset;
     }
@@ -16,14 +16,15 @@ class DinRailEdge extends Boxes {
         return (8 + this.settings.thickness);
     }
 
-    __call__(length, bedBolts, bedBoltSettings) {
-        this.ctx.save();
-        this.fingerHoles(0, ((this.burn + 8) + (this.settings.thickness / 2)), length, 0, {bedBolts: bedBolts, bedBoltSettings: bedBoltSettings});
-        this.ctx.restore();
+    draw(length, kw = {}) {
+        const { bedBolts, bedBoltSettings } = kw;
+        this.boxes.ctx.save();
+        this.fingerHoles.draw(0, ((this.boxes.burn + 8) + (this.settings.thickness / 2)), length, 0, bedBolts, bedBoltSettings);
+        this.boxes.ctx.restore();
         let w = this.width;
         let o = this.offset;
         let l = length;
-        this.polyline((((l - w) / 2) - o), 45, (2.75 * (2 ** 0.5)), 90, (2.75 * (2 ** 0.5)), -45, 0.5, -90, (w + 0.25), -90, 1, 30, ((5 * 2) * (3 ** -0.5)), 60, ((((l - w) / 2) + o) - 3.25));
+        this.boxes.polyline((((l - w) / 2) - o), 45, (2.75 * (2 ** 0.5)), 90, (2.75 * (2 ** 0.5)), -45, 0.5, -90, (w + 0.25), -90, 1, 30, ((5 * 2) * (3 ** -0.5)), 60, ((((l - w) / 2) + o) - 3.25));
     }
 
 }
@@ -66,7 +67,7 @@ class DinRailBox extends Boxes {
             return;
         }
         this.moveTo(1, t);
-        this.edges.get("f").call(this, l);
+        this.edges.get("f").draw(l);
         let poly = [0, 90, 6, -60, 0, [120, (2 * (3 ** -0.5))], 0, 30, 2, 90, 5, [-180, 0.5], 5, 90];
         this.polyline(...((poly + [(l - (2 * 3))]) + list(reversed(poly))));
         this.move(tw, th, move);

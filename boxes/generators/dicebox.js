@@ -7,17 +7,35 @@ import { Color  } from '../Color.js';
 import '../globals.js';
 
 class DiceBox extends Boxes {
+    // Default configuration for test runner and standalone usage
+    static get defaultConfig() {
+        return {
+            x: 100.0,
+            y: 100.0,
+            h: 18.0,
+            outside: true,
+            lidheight: 18.0,
+            hex_hole_corner_radius: 5.0,
+            magnet_diameter: 6.0
+        };
+    }
+
     constructor() {
         super();
         this.addSettingsArgs(edges.FingerJointSettings, {surroundingspaces: 2.0});
         this.addSettingsArgs(edges.ChestHingeSettings, {finger_joints_on_box: true, finger_joints_on_lid: true});
-        // this.buildArgParser();
-        this.argparser.add_argument("--lidheight", {action: "store", type: "float", default: 18, help: "height of lid in mm"});
-        this.argparser.add_argument("--hex_hole_corner_radius", {action: "store", type: "float", default: 5, help: "The corner radius of the hexagonal dice holes, in mm"});
-        this.argparser.add_argument("--magnet_diameter", {action: "store", type: "float", default: 6, help: "The diameter of magnets for holding the box closed, in mm"});
+        
+        // Add standard box arguments
+        this.argparser.add_argument("--x", {action: "store", type: "float", default: 100.0, help: "inner width in mm (unless outside selected)"});
+        this.argparser.add_argument("--y", {action: "store", type: "float", default: 100.0, help: "inner depth in mm (unless outside selected)"});
+        this.argparser.add_argument("--h", {action: "store", type: "float", default: 18.0, help: "inner height in mm (unless outside selected)"});
+        this.argparser.add_argument("--outside", {action: "store", type: "BoolArg", default: true, help: "treat sizes as outside measurements"});
+        this.argparser.add_argument("--lidheight", {action: "store", type: "float", default: 18.0, help: "height of lid in mm"});
+        this.argparser.add_argument("--hex_hole_corner_radius", {action: "store", type: "float", default: 5.0, help: "The corner radius of the hexagonal dice holes, in mm"});
+        this.argparser.add_argument("--magnet_diameter", {action: "store", type: "float", default: 6.0, help: "The diameter of magnets for holding the box closed, in mm"});
     }
 
-    diceCB() {
+    diceCB = () => {
         let t = this.thickness;
         let xi = (this.x - (2 * t));
         let yi = (this.y - (2 * t));
@@ -30,7 +48,7 @@ class DiceBox extends Boxes {
         let polar_r = ((2 * apothem) + t);
         for (let i = 0; i < 6; i += 1) {
             let theta = ((i * Math.PI) / 3);
-            centers.append([(xc + (polar_r * Math.cos(theta))), (yc + (polar_r * Math.sin(theta)))]);
+            centers.push([(xc + (polar_r * Math.cos(theta))), (yc + (polar_r * Math.sin(theta)))]);
         }
         for (let center of centers) {
             this.regularPolygonHole({x: center[0], y: center[1], n: 6, r: r, corner_radius: cr, a: 30});

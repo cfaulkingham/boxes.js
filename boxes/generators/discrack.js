@@ -55,13 +55,13 @@ class DiscRack extends Boxes {
         this.lower_halfslit = (r * Math.sqrt((1 - (this.lower_factor ** 2))));
         this.rear_halfslit = (r * Math.sqrt((1 - (this.rear_factor ** 2))));
         if (true) {
-            let this.toplim = offset_radius_in_square(this.outer, this.angle, (r * this.lower_factor));
+            this.toplim = offset_radius_in_square(this.outer, this.angle, (r * this.lower_factor));
             let bottomlim = offset_radius_in_square(this.outer, this.angle, ((r * this.lower_factor) + this.thickness));
             this.lower_outset = (Math.min(this.toplim, bottomlim) - this.lower_halfslit);
         }
         if (true) {
             this.toplim = offset_radius_in_square(this.outer, -this.angle, (r * this.rear_factor));
-            bottomlim = offset_radius_in_square(this.outer, -this.angle, ((r * this.rear_factor) + this.thickness));
+            let bottomlim = offset_radius_in_square(this.outer, -this.angle, ((r * this.rear_factor) + this.thickness));
             this.rear_outset = (Math.min(this.toplim, bottomlim) - this.rear_halfslit);
         }
         this.lower_size = ((this.lower_outset + this.lower_halfslit) + (r * this.rear_factor));
@@ -97,8 +97,8 @@ class DiscRack extends Boxes {
         if (slitlengthplush > max_slitlengthplush) {
             warnings.append("Joint would protrude from lower box edge. Consider increasing the disc outset parameter, or move the angle away from 45°.");
         }
-        if (warnings) {
-            this.argparser.error(unknown.join(warnings));
+        if (warnings.length > 0) {
+            this.argparser.error(warnings.join('\n'));
         }
     }
 
@@ -146,10 +146,10 @@ class DiscRack extends Boxes {
         let o = this.outer;
         this.lower_factor = Math.min(this.lower_factor, 0.99);
         this.rear_factor = Math.min(this.rear_factor, 0.99);
-        this.rectangularWall(o, o, "eeee", {move: "right", callback: [this.sidewall_holes]});
-        this.rectangularWall(o, o, "eeee", {move: "right mirror", callback: [this.sidewall_holes]});
-        this.rectangularWall(this.lower_size, this.sx.reduce((a, b) => a + b, 0), "fffe", {move: "right", callback: [this.lower_holes]});
-        this.rectangularWall(this.rear_size, this.sx.reduce((a, b) => a + b, 0), "fefh", {move: "right", callback: [this.rear_holes]});
+        this.rectangularWall(o, o, "eeee", {move: "right", callback: [this.sidewall_holes.bind(this)]});
+        this.rectangularWall(o, o, "eeee", {move: "right mirror", callback: [this.sidewall_holes.bind(this)]});
+        this.rectangularWall(this.lower_size, this.sx.reduce((a, b) => a + b, 0), "fffe", {move: "right", callback: [this.lower_holes.bind(this)]});
+        this.rectangularWall(this.rear_size, this.sx.reduce((a, b) => a + b, 0), "fefh", {move: "right", callback: [this.rear_holes.bind(this)]});
     }
 
 }
